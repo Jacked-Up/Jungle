@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using Jungle;
 using UnityEngine;
 
 namespace Jungle.Nodes
 {
+    [Node(ViewName = "Wait For Seconds", Category = "Time", PortNames = new []{"Elapsed"})]
     public class WaitForSecondsNode : BaseNode
     {
         #region Variables
@@ -37,15 +37,5 @@ namespace Jungle.Nodes
             }
             return new Verdict(false);
         }
-        
-#if UNITY_EDITOR
-
-        public override string ViewName() => "Wait For Seconds";
-
-        public override string Category() => "Time";
-        
-        public override List<string> PortNames => new() { "Elapsed" };
-        
-#endif
     }
 }

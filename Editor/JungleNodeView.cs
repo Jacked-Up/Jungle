@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Jungle.Nodes;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
@@ -21,10 +22,10 @@ namespace Jungle.Editor
         public JungleNodeView(BaseNode node) : base(AssetDatabase.GetAssetPath(Resources.Load("JungleNodeView")))
         {
             Node = node;
-            title = node.ViewName();
+            title = node.ViewName;
             viewDataKey = node.nodeProperties.guid;
 
-            var graphPosition = node.nodeProperties.graphPosition;
+            var graphPosition = node.nodeProperties.position;
             style.left = graphPosition.x;
             style.top = graphPosition.y;
 
@@ -60,7 +61,8 @@ namespace Jungle.Editor
 
         private void CreateOutputPorts()
         {
-            foreach (var portName in Node.PortNames)
+            var portNames = Node.PortNames.ToList();
+            foreach (var portName in portNames)
             {
                 var port = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Multi, typeof(bool));
                 port.portName = portName;
@@ -76,7 +78,7 @@ namespace Jungle.Editor
             var nodeProperties = new NodeProperties
             {
                 guid = Node.nodeProperties.guid,
-                graphPosition = new Vector2(position.xMin, position.yMin)
+                position = new Vector2(position.xMin, position.yMin)
             };
             Node.nodeProperties = nodeProperties;
             EditorUtility.SetDirty(Node);

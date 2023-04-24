@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using Jungle;
 using UnityEngine;
 
 namespace Jungle.Nodes
 {
+    [Node(ViewName = "Play Animation", Category = "Animation", PortNames = new []{"Playing"})]
     public class PlayAnimationNode : BaseNode
     {
         #region Variables
@@ -42,13 +42,5 @@ namespace Jungle.Nodes
         {
             return new Verdict(true, new List<int> {0});
         }
-
-#if UNITY_EDITOR
-        public override string ViewName() => "Play Animation";
-
-        public override string Category() => "Animation";
-        
-        public override List<string> PortNames => new() {"Playing"};
-#endif
     }
 }

@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Jungle;
 using UnityEngine;
 
 namespace Jungle.Nodes
 {
+    [Node(ViewName = "While Loop", Category = "Special", PortNames = new []{"Invoke", "Finished"})]
     public class WhileLoopNode : BaseNode
     {
         #region Variables
@@ -24,13 +24,5 @@ namespace Jungle.Nodes
             }
             return new Verdict(true, new List<int>{1});
         }
-        
-#if UNITY_EDITOR
-        public override string ViewName() => "While Loop";
-
-        public override string Category() => "Special";
-
-        public override List<string> PortNames => new() {"Invoke", "Finished"};
-#endif
     }
 }

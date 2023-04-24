@@ -101,10 +101,10 @@ namespace Jungle.Editor
             // Creates edges
             _tree.nodes.ForEach(node =>
             {
-                if (node.ports == null || node.ports.Count != node.PortNames.Count)
+                if (node.ports == null || node.ports.Count != node.PortNames.Length)
                 {
                     node.ports = new List<NodePort>();
-                    node.PortNames.ForEach(_ =>
+                    node.PortNames.ToList().ForEach(_ =>
                     {
                         node.ports.Add(new NodePort(new List<BaseNode>()));
                     });
@@ -187,7 +187,7 @@ namespace Jungle.Editor
             if (reference.Node is RootNode) return;
             
             var nodeOriginal = reference.Node;
-            var nodePosition = reference.Node.nodeProperties.graphPosition + new Vector2(25f, 25f);
+            var nodePosition = reference.Node.nodeProperties.position + new Vector2(25f, 25f);
             var node = _tree.DuplicateNode(nodeOriginal, nodePosition);
             CreateNodeView(node);
         }

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using Jungle;
 using UnityEngine;
 
 namespace Jungle.Nodes
 {
+    [Node(ViewName = "For Loop", Category = "Special", PortNames = new []{"Invoke", "Finished"})]
     public class ForLoopNode : BaseNode
     {
         #region Variables
@@ -43,13 +43,5 @@ namespace Jungle.Nodes
             }
             return new Verdict(true, new List<int>{1});
         }
-        
-#if UNITY_EDITOR
-        public override string ViewName() => "For Loop";
-
-        public override string Category() => "Special";
-
-        public override List<string> PortNames => new() {"Invoke", "Finished"};
-#endif
     }
 }

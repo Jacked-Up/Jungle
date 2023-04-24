@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Jungle
 {
     [Serializable]
+    [Node(ViewName = "Node", Category = "", PortNames = new []{"Next"})]
     public abstract class BaseNode : ScriptableObject, INode
     {
         #region Variables
-
+        
         [HideInInspector]
         public NodeTree tree;
         
@@ -17,29 +19,40 @@ namespace Jungle
         
         [NonSerialized]
         public bool Initialized;
+        
+        public string ViewName { get; set; }
+        public string Category { get; set; }
+        public string[] PortNames { get; set; }
 
+        public NodeAttribute NodeInfo 
+            => (NodeAttribute)GetType().GetCustomAttributes(typeof(NodeAttribute), true)[0];
+
+#if UNITY_EDITOR
+        [HideInInspector]
+        public NodeProperties nodeProperties;
+#endif
+        
         #endregion
 
+        private void Awake()
+        {
+            var nodeInfo = NodeInfo;
+            ViewName = nodeInfo.ViewName;
+            Category = nodeInfo.Category;
+            PortNames = nodeInfo.PortNames;
+        }
+        
         public abstract void Initialize();
 
         public abstract Verdict Execute();
 
 #if UNITY_EDITOR
-        [HideInInspector]
-        public NodeProperties nodeProperties;
-
-        public virtual string ViewName() => "Node";
-
-        public virtual string Category() => string.Empty;
-        
-        public abstract List<string> PortNames { get; }
-        
         public void AddChild(BaseNode node, int i)
         {
-            if (ports == null || ports.Count != PortNames.Count)
+            if (ports == null || ports.Count != PortNames.Length)
             {
                 ports = new List<NodePort>();
-                PortNames.ForEach(_ =>
+                PortNames.ToList().ForEach(_ =>
                 {
                     ports.Add(new NodePort(new List<BaseNode>()));
                 });
@@ -67,22 +80,6 @@ namespace Jungle
 #endif
     }
 
-#if UNITY_EDITOR
-    [Serializable]
-    public struct NodeProperties
-    {
-        public string guid;
-        public Vector2 graphPosition;
-
-        public NodeProperties(string guid, Vector2 graphPosition)
-        {
-            this.guid = guid;
-            this.graphPosition = graphPosition;
-        }
-    }
-
-#endif
-    
     [Serializable]
     public struct NodePort
     {
@@ -105,4 +102,27 @@ namespace Jungle
             AlivePorts = alivePorts;
         }
     }
+    
+    [AttributeUsage(AttributeTargets.Class)]
+    public class NodeAttribute : Attribute
+    {
+        public string ViewName { get; set; }
+        public string Category { get; set; }
+        public string[] PortNames { get; set; }
+    }
+    
+#if UNITY_EDITOR
+    [Serializable]
+    public struct NodeProperties
+    {
+        public string guid;
+        public Vector2 position;
+
+        public NodeProperties(string guid, Vector2 position)
+        {
+            this.guid = guid;
+            this.position = position;
+        }
+    }
+#endif
 }

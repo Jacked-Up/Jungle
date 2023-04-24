@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Jungle;
 using Jungle.Nodes;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
@@ -42,7 +41,7 @@ namespace Jungle.Editor
             {
                 var typeObject = CreateInstance(nodeType) as BaseNode;
                 if (typeObject == null || typeObject is RootNode) return;
-                var typeCategory = typeObject.Category();
+                var typeCategory = typeObject.Category;
                 if (categories.All(category => category.CategoryName != typeCategory))
                 {
                     categories.Add(new CategoryCache(typeCategory, typeObject));
@@ -77,7 +76,7 @@ namespace Jungle.Editor
                     });
                     category.Nodes.ForEach(node =>
                     {
-                        searchTree.Add(new SearchTreeEntry(new GUIContent(node.ViewName()))
+                        searchTree.Add(new SearchTreeEntry(new GUIContent(node.ViewName))
                         {
                             userData = node,
                             level = 2
@@ -89,7 +88,7 @@ namespace Jungle.Editor
             {
                 category.Nodes.ForEach(node =>
                 {
-                    searchTree.Add(new SearchTreeEntry(new GUIContent(node.ViewName()))
+                    searchTree.Add(new SearchTreeEntry(new GUIContent(node.ViewName))
                     {
                         userData = node,
                         level = 1

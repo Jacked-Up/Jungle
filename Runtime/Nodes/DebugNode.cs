@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace Jungle.Nodes
 {
+    [Node(ViewName = "Debug", Category = "Editor", PortNames = new []{"Next"})]
     public class DebugNode : BaseNode
     {
         #region Variables
@@ -43,13 +44,5 @@ namespace Jungle.Nodes
 #endif
             return new Verdict(true, new List<int> { 0 });
         }
-
-#if UNITY_EDITOR
-        public override string ViewName() => "Debug";
-
-        public override string Category() => "Editor";
-        
-        public override List<string> PortNames => new() { "Next" };
-#endif
     }
 }

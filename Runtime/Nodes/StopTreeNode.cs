@@ -1,8 +1,6 @@
-﻿using System.Collections.Generic;
-using Jungle;
-
-namespace Jungle.Nodes
+﻿namespace Jungle.Nodes
 {
+    [Node(ViewName = "Stop Tree", Category = "Special", PortNames = new string[0])]
     public class StopTreeNode : BaseNode
     {
         #region Variables
@@ -18,13 +16,5 @@ namespace Jungle.Nodes
             tree.Stop();
             return new Verdict(true);
         }
-        
-#if UNITY_EDITOR
-        public override string ViewName() => "Stop Tree";
-
-        public override string Category() => "Special";
-
-        public override List<string> PortNames => new();
-#endif
     }
 }

@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
-using Jungle;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Jungle.Nodes
 {
+    [Node(ViewName = "Stop Node", Category = "Special", PortNames = new string[0])]
     public class StopNodeNode : BaseNode
     {
         #region Variables
@@ -23,13 +22,5 @@ namespace Jungle.Nodes
             }
             return new Verdict(true);
         }
-        
-#if UNITY_EDITOR
-        public override string ViewName() => "Stop Node";
-
-        public override string Category() => "Special";
-        
-        public override List<string> PortNames => new();
-#endif
     }
 }
