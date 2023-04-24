@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
 
 namespace Jungle
@@ -28,8 +29,17 @@ namespace Jungle
             => (NodeAttribute)GetType().GetCustomAttributes(typeof(NodeAttribute), true)[0];
 
 #if UNITY_EDITOR
-        [HideInInspector]
-        public NodeProperties nodeProperties;
+        [SerializeField] [HideInInspector]
+        private NodeProperties nodeProperties;
+        public NodeProperties NodeProperties
+        {
+            get => nodeProperties;
+            set
+            {
+                nodeProperties = value;
+                EditorUtility.SetDirty(this);
+            }
+        }
 #endif
         
         #endregion

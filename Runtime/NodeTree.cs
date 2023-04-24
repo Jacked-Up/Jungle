@@ -7,7 +7,8 @@ using UnityEditor;
 
 namespace Jungle
 {
-    [CreateAssetMenu(fileName = "Node Tree", menuName = "Jungle/Create Tree")]
+    [Serializable]
+    [CreateAssetMenu(fileName = "Node Tree", menuName = "Jungle Node Tree")]
     public class NodeTree : ScriptableObject
     {
         #region Variables
@@ -21,15 +22,13 @@ namespace Jungle
         [NonSerialized]
         public NodeTreeState State = NodeTreeState.Unexecuted;
 
-        public List<BaseNode> ExecutingNodes
-        {
-            get;
-            private set;
-        } = new();
+        public List<BaseNode> ExecutingNodes { get; private set; } = new();
 
+        public List<Delegate> RevertDelegates { get; private set; } = new();
+        
         #endregion
 
-        public bool Begin()
+        public bool Start()
         {
             if (State == NodeTreeState.Executing)
             {
@@ -91,7 +90,7 @@ namespace Jungle
             {
                 node.name = $"({name}) {nodeType.Name}";
                 node.tree = this;
-                node.nodeProperties = new NodeProperties(GUID.Generate().ToString(), position);
+                node.NodeProperties = new NodeProperties(GUID.Generate().ToString(), position);
             }
             else return null;
             
@@ -113,7 +112,7 @@ namespace Jungle
             {
                 node.name = node.name[..^7];
                 node.tree = this;
-                node.nodeProperties = new NodeProperties(GUID.Generate().ToString(), position);
+                node.NodeProperties = new NodeProperties(GUID.Generate().ToString(), position);
             }
             else return null;
             

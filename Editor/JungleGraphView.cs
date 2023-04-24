@@ -77,7 +77,7 @@ namespace Jungle.Editor
 
         private JungleNodeView FindNodeView(BaseNode baseNode)
         {
-            return GetNodeByGuid(baseNode.nodeProperties.guid) as JungleNodeView;
+            return GetNodeByGuid(baseNode.NodeProperties.guid) as JungleNodeView;
         }
 
         public void PopulateView(NodeTree nodeTree)
@@ -187,7 +187,7 @@ namespace Jungle.Editor
             if (reference.Node is RootNode) return;
             
             var nodeOriginal = reference.Node;
-            var nodePosition = reference.Node.nodeProperties.position + new Vector2(25f, 25f);
+            var nodePosition = reference.Node.NodeProperties.position + new Vector2(25f, 25f);
             var node = _tree.DuplicateNode(nodeOriginal, nodePosition);
             CreateNodeView(node);
         }

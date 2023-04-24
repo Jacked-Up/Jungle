@@ -23,9 +23,9 @@ namespace Jungle.Editor
         {
             Node = node;
             title = node.ViewName;
-            viewDataKey = node.nodeProperties.guid;
+            viewDataKey = node.NodeProperties.guid;
 
-            var graphPosition = node.nodeProperties.position;
+            var graphPosition = node.NodeProperties.position;
             style.left = graphPosition.x;
             style.top = graphPosition.y;
 
@@ -77,11 +77,10 @@ namespace Jungle.Editor
             Undo.RecordObject(Node, $"Set {Node.name} position");
             var nodeProperties = new NodeProperties
             {
-                guid = Node.nodeProperties.guid,
+                guid = Node.NodeProperties.guid,
                 position = new Vector2(position.xMin, position.yMin)
             };
-            Node.nodeProperties = nodeProperties;
-            EditorUtility.SetDirty(Node);
+            Node.NodeProperties = nodeProperties;
         }
 
         public override void OnSelected()
