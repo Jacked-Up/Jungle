@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Jungle.Nodes;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -61,24 +60,20 @@ namespace Jungle.Editor
         
         private void OnExecuteCommand(ExecuteCommandEvent evt)
         {
-            if (panel.GetCapturingElement(PointerId.mousePointerId) != null || _selectedNodeView == null)
-                return;
+            if (panel.GetCapturingElement(PointerId.mousePointerId) != null || _selectedNodeView == null) return;
             if (evt.commandName == "Duplicate")
             {
                 DuplicateNode(_selectedNodeView);
                 evt.StopPropagation();
             }
-            if (!evt.isPropagationStopped || evt.imguiEvent == null)
-                return;
+            if (!evt.isPropagationStopped || evt.imguiEvent == null) return;
             evt.imguiEvent.Use();
         }
 
         public new class UxmlFactory : UxmlFactory<JungleGraphView, UxmlTraits> {}
 
         private JungleNodeView FindNodeView(BaseNode baseNode)
-        {
-            return GetNodeByGuid(baseNode.NodeProperties.guid) as JungleNodeView;
-        }
+            => GetNodeByGuid(baseNode.NodeProperties.guid) as JungleNodeView;
 
         public void PopulateView(NodeTree nodeTree)
         {
@@ -101,10 +96,10 @@ namespace Jungle.Editor
             // Creates edges
             _tree.nodes.ForEach(node =>
             {
-                if (node.ports == null || node.ports.Count != node.PortNames.Length)
+                if (node.ports == null || node.ports.Count != node.OutputPortNames.Length)
                 {
                     node.ports = new List<NodePort>();
-                    node.PortNames.ToList().ForEach(_ =>
+                    node.OutputPortNames.ToList().ForEach(_ =>
                     {
                         node.ports.Add(new NodePort(new List<BaseNode>()));
                     });

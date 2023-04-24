@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Jungle.Nodes;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -28,20 +27,35 @@ namespace Jungle.Editor
             var graphPosition = node.NodeProperties.position;
             style.left = graphPosition.x;
             style.top = graphPosition.y;
-
-            if (Node is RootNode)
-            {
-                AddToClassList("root");
-            }
-            else if (Node is StopTreeNode or StopNodeNode)
-            {
-                AddToClassList("stop");
-            }
-            else if (Node is WhileLoopNode or ForLoopNode)
-            {
-                AddToClassList("special");
-            }
             
+            switch (node.NodeColor)
+            {
+                case NodeColor.Red:
+                    AddToClassList("red");
+                    break;
+                case NodeColor.Orange:
+                    AddToClassList("orange");
+                    break;
+                case NodeColor.Yellow:
+                    AddToClassList("yellow");
+                    break;
+                case NodeColor.Green:
+                    AddToClassList("green");
+                    break;
+                case NodeColor.Blue:
+                    AddToClassList("blue");
+                    break;
+                case NodeColor.Purple:
+                    AddToClassList("purple");
+                    break;
+                case NodeColor.Violet:
+                    AddToClassList("violet");
+                    break;
+                case NodeColor.Grey:
+                    AddToClassList("grey");
+                    break;
+            }
+
             CreateInputPort();
             CreateOutputPorts();
         }
@@ -53,7 +67,7 @@ namespace Jungle.Editor
                 InputPorts = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Multi, typeof(bool));
                 if (InputPorts != null)
                 {
-                    InputPorts.portName = "Perform";
+                    InputPorts.portName = Node.InputPortName;
                     inputContainer.Add(InputPorts);
                 }
             }
@@ -61,8 +75,8 @@ namespace Jungle.Editor
 
         private void CreateOutputPorts()
         {
-            var portNames = Node.PortNames.ToList();
-            foreach (var portName in portNames)
+            var outputPortNamesList = Node.OutputPortNames.ToList();
+            foreach (var portName in Node.OutputPortNames)
             {
                 var port = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Multi, typeof(bool));
                 port.portName = portName;

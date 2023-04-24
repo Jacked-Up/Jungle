@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor;
 using UnityEngine;
 
 namespace Jungle
 {
-    [Serializable]
-    [Node(ViewName = "Node", Category = "", PortNames = new []{"Next"})]
+    [Serializable] [Node]
     public abstract class BaseNode : ScriptableObject, INode
     {
         #region Variables
@@ -20,10 +18,12 @@ namespace Jungle
         
         [NonSerialized]
         public bool Initialized;
-        
-        public string ViewName { get; set; }
-        public string Category { get; set; }
-        public string[] PortNames { get; set; }
+
+        public string ViewName => NodeInfo.ViewName;
+        public string Category => NodeInfo.Category;
+        public NodeColor NodeColor => NodeInfo.NodeColor;
+        public string InputPortName => NodeInfo.InputPortName;
+        public string[] OutputPortNames => NodeInfo.OutputPortNames;
 
         public NodeAttribute NodeInfo 
             => (NodeAttribute)GetType().GetCustomAttributes(typeof(NodeAttribute), true)[0];
@@ -37,21 +37,13 @@ namespace Jungle
             set
             {
                 nodeProperties = value;
-                EditorUtility.SetDirty(this);
+                UnityEditor.EditorUtility.SetDirty(this);
             }
         }
 #endif
         
         #endregion
 
-        private void Awake()
-        {
-            var nodeInfo = NodeInfo;
-            ViewName = nodeInfo.ViewName;
-            Category = nodeInfo.Category;
-            PortNames = nodeInfo.PortNames;
-        }
-        
         public abstract void Initialize();
 
         public abstract Verdict Execute();
@@ -59,10 +51,10 @@ namespace Jungle
 #if UNITY_EDITOR
         public void AddChild(BaseNode node, int i)
         {
-            if (ports == null || ports.Count != PortNames.Length)
+            if (ports == null || ports.Count != OutputPortNames.Length)
             {
                 ports = new List<NodePort>();
-                PortNames.ToList().ForEach(_ =>
+                OutputPortNames.ToList().ForEach(_ =>
                 {
                     ports.Add(new NodePort(new List<BaseNode>()));
                 });
@@ -116,9 +108,23 @@ namespace Jungle
     [AttributeUsage(AttributeTargets.Class)]
     public class NodeAttribute : Attribute
     {
-        public string ViewName { get; set; }
-        public string Category { get; set; }
-        public string[] PortNames { get; set; }
+        public string ViewName { get; set; } = "Node";
+        public string Category { get; set; } = string.Empty;
+        public NodeColor NodeColor { get; set; } = NodeColor.Blue;
+        public string InputPortName { get; set; } = "Execute";
+        public string[] OutputPortNames { get; set; } = Array.Empty<string>();
+    }
+    
+    public enum NodeColor
+    {
+        Red,
+        Orange,
+        Yellow,
+        Green,
+        Blue,
+        Purple,
+        Violet,
+        Grey
     }
     
 #if UNITY_EDITOR

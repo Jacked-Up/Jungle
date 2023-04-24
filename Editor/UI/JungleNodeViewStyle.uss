@@ -55,22 +55,15 @@
 }
 
 .node {
-    min-width: 100px;
+    min-width: 125px;
     margin-left: 0;
     margin-right: 0;
     margin-top: 0;
     margin-bottom: 0;
+    min-height: 0;
 }
 
-.root #node-border {
-    background-color: rgb(0, 108, 70);
-    border-left-color: rgb(0, 204, 74);
-    border-right-color: rgb(0, 204, 74);
-    border-top-color: rgb(0, 204, 74);
-    border-bottom-color: rgb(0, 204, 74);
-}
-
-.stop #node-border {
+.red #node-border {
     background-color: rgb(171, 0, 0);
     border-left-color: rgb(217, 57, 0);
     border-right-color: rgb(217, 57, 0);
@@ -78,10 +71,58 @@
     border-bottom-color: rgb(217, 57, 0);
 }
 
-.special #node-border {
+.orange #node-border {
+    background-color: rgb(173, 73, 0);
+    border-left-color: rgb(255, 133, 0);
+    border-right-color: rgb(255, 133, 0);
+    border-top-color: rgb(255, 133, 0);
+    border-bottom-color: rgb(255, 133, 0);
+}
+
+.yellow #node-border {
+    background-color: rgb(161, 134, 0);
+    border-left-color: rgb(207, 204, 0);
+    border-right-color: rgb(207, 204, 0);
+    border-top-color: rgb(207, 204, 0);
+    border-bottom-color: rgb(207, 204, 0);
+}
+
+.green #node-border {
+    background-color: rgb(0, 108, 70);
+    border-left-color: rgb(0, 204, 74);
+    border-right-color: rgb(0, 204, 74);
+    border-top-color: rgb(0, 204, 74);
+    border-bottom-color: rgb(0, 204, 74);
+}
+
+.blue #node-border {
+    background-color: rgb(6, 57, 120);
+    border-left-color: rgb(0, 105, 255);
+    border-right-color: rgb(0, 105, 255);
+    border-top-color: rgb(0, 105, 255);
+    border-bottom-color: rgb(0, 105, 255);
+}
+
+.purple #node-border {
     background-color: rgb(97, 0, 180);
     border-left-color: rgb(179, 0, 255);
     border-right-color: rgb(179, 0, 255);
     border-top-color: rgb(179, 0, 255);
     border-bottom-color: rgb(179, 0, 255);
+}
+
+.violet #node-border {
+    background-color: rgb(154, 0, 96);
+    border-left-color: rgb(111, 0, 55);
+    border-right-color: rgb(111, 0, 55);
+    border-top-color: rgb(111, 0, 55);
+    border-bottom-color: rgb(111, 0, 55);
+}
+
+.grey #node-border {
+    background-color: rgb(94, 94, 94);
+    border-left-color: rgb(53, 53, 53);
+    border-right-color: rgb(53, 53, 53);
+    border-top-color: rgb(53, 53, 53);
+    border-bottom-color: rgb(53, 53, 53);
 }

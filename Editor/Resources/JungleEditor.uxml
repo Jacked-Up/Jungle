@@ -5,7 +5,6 @@
             <ui:ScrollView name="scroll-view" horizontal-scroller-visibility="Hidden" style="flex-grow: 1; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0;">
                 <Jungle.Editor.JungleInspectorView name="inspector-view" style="flex-grow: 1; margin-left: 5px; margin-right: 5px; margin-top: 5px; margin-bottom: 5px;" />
             </ui:ScrollView>
-            <ui:Label tabindex="-1" text="Jacked Up Studios LLC © " display-tooltip-when-elided="true" name="copyright-label" style="-unity-font-style: bold; font-size: 10px; height: 15px; margin-left: 4px; -unity-text-align: middle-center;" />
         </ui:VisualElement>
         <ui:VisualElement name="right-panel" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0);">
             <Jungle.Editor.JungleGraphView focusable="true" name="graph-view" style="flex-grow: 1;" />
