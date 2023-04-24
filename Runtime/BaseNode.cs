@@ -21,7 +21,7 @@ namespace Jungle
 
         public string ViewName => NodeInfo.ViewName;
         public string Category => NodeInfo.Category;
-        public NodeColor NodeColor => NodeInfo.NodeColor;
+        public NodeColor NodeColor => NodeInfo.Color;
         public string InputPortName => NodeInfo.InputPortName;
         public string[] OutputPortNames => NodeInfo.OutputPortNames;
 
@@ -110,7 +110,7 @@ namespace Jungle
     {
         public string ViewName { get; set; } = "Node";
         public string Category { get; set; } = string.Empty;
-        public NodeColor NodeColor { get; set; } = NodeColor.Blue;
+        public NodeColor Color { get; set; } = NodeColor.Blue;
         public string InputPortName { get; set; } = "Execute";
         public string[] OutputPortNames { get; set; } = Array.Empty<string>();
     }

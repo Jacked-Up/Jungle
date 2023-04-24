@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Jungle.Nodes.Stop
 {
-    [Node(ViewName = "Stop Tree(s)", Category = "Stop", NodeColor = NodeColor.Red, OutputPortNames = new string[0])]
+    [Node(ViewName = "Stop Tree(s)", Category = "Stop", Color = NodeColor.Red, OutputPortNames = new string[0])]
     public class StopTreeNode : BaseNode
     {
         #region Variables

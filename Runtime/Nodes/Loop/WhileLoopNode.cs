@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Jungle.Nodes.Loop
 {
-    [Node(ViewName = "While Loop", Category = "Loop", NodeColor = NodeColor.Purple, OutputPortNames = new []{"Invoke", "Done"})]
+    [Node(ViewName = "While Loop", Category = "Loop", Color = NodeColor.Purple, OutputPortNames = new []{"Invoke", "Done"})]
     public class WhileLoopNode : BaseNode
     {
         #region Variables

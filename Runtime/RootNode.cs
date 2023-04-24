@@ -2,7 +2,7 @@
 
 namespace Jungle
 {
-    [Node(ViewName = "Start", Category = "", OutputPortNames = new []{"Begin"}, NodeColor = NodeColor.Green)]
+    [Node(ViewName = "Start", Category = "", OutputPortNames = new []{"Begin"}, Color = NodeColor.Green)]
     public class RootNode : BaseNode
     {
         public override void Initialize() {}

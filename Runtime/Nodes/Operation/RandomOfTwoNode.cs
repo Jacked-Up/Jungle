@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Jungle.Nodes.Operation
 {
-    [Node(ViewName = "Random of Two", Category = "Operation", NodeColor = NodeColor.Orange, OutputPortNames = new []{"One", "Two"})]
+    [Node(ViewName = "Random of Two", Category = "Operation", Color = NodeColor.Orange, OutputPortNames = new []{"One", "Two"})]
     public class RandomOfTwoNode : BaseNode
     {
         #region Variables
