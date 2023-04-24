@@ -35,7 +35,7 @@ namespace Jungle.Editor
                 }
                 else
                 {
-                    _jungleEditor.Close();
+                    //_jungleEditor.Close();
                 }
             });
             Add(container);
