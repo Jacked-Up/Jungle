@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "displayName": "Jungle",
   "description": "Node based system for creating and editing content quickly, easily and visually.",
-  "unity": "2021.1"
+  "unity": "2021.1",
+  "dependencies": {
+  },
   "author": {
     "name": "Jack Randolph",
     "email": "jackrandolph@jackedup.xyz",
