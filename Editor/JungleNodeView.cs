@@ -1,5 +1,4 @@
-﻿#if UNITY_EDITOR
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Jungle.Nodes;
 using UnityEditor;
@@ -90,4 +89,3 @@ namespace Jungle.Editor
         }
     }
 }
-#endif

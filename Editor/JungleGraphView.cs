@@ -1,4 +1,3 @@
-#if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -209,4 +208,3 @@ namespace Jungle.Editor
         public override void BuildContextualMenu(ContextualMenuPopulateEvent evt) {}
     }
 }
-#endif

@@ -1,5 +1,4 @@
-﻿#if UNITY_EDITOR
-using UnityEngine.UIElements;
+﻿using UnityEngine.UIElements;
 
 namespace Jungle.Editor
 {
@@ -8,4 +7,3 @@ namespace Jungle.Editor
         public new class UxmlFactory : UxmlFactory<JungleSplitView, UxmlTraits> {}
     }
 }
-#endif

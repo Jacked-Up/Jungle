@@ -1,5 +1,4 @@
-﻿#if UNITY_EDITOR
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Jungle.Editor
@@ -43,4 +42,3 @@ namespace Jungle.Editor
         }
     }
 }
-#endif
