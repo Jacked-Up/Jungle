@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Jungle.Nodes.Editor
 {
-    [Node(ViewName = "Debug", Category = "Editor", NodeColor = NodeColor.Yellow, OutputPortNames = new []{"Next"})]
+    [Node(ViewName = "Debug", Category = "Editor", NodeColor = NodeColor.Grey, InputPortName = "Execute", OutputPortNames = new []{"Next"})]
     public class DebugNode : BaseNode
     {
         #region Variables

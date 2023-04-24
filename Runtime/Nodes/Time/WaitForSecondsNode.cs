@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace Jungle.Nodes.Operation
+namespace Jungle.Nodes.Time
 {
-    [Node(ViewName = "Wait For Seconds", Category = "Time", NodeColor = NodeColor.Orange, OutputPortNames = new []{"Elapsed"})]
+    [Node(ViewName = "Wait For Seconds", Category = "Time", NodeColor = NodeColor.Yellow, OutputPortNames = new []{"Elapsed"})]
     public class WaitForSecondsNode : BaseNode
     {
         #region Variables
@@ -21,15 +21,15 @@ namespace Jungle.Nodes.Operation
         public override void Initialize()
         {
             _startTime = scaledTime
-                ? Time.time
-                : Time.unscaledTime;
+                ? UnityEngine.Time.time
+                : UnityEngine.Time.unscaledTime;
         }
 
         public override Verdict Execute()
         {
             var currentTime = scaledTime
-                ? Time.time
-                : Time.unscaledTime;
+                ? UnityEngine.Time.time
+                : UnityEngine.Time.unscaledTime;
 
             if (currentTime - _startTime >= duration)
             {

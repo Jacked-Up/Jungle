@@ -31,13 +31,13 @@ namespace Jungle.Nodes.Loop
         
         public override Verdict Execute()
         {
-            if (Time.unscaledTime >= _nextInvokeTime && _increment < incrementCount)
+            if (UnityEngine.Time.unscaledTime >= _nextInvokeTime && _increment < incrementCount)
             {
                 _increment++;
-                _nextInvokeTime = Time.unscaledTime + timeBetweenIncrements;
+                _nextInvokeTime = UnityEngine.Time.unscaledTime + timeBetweenIncrements;
                 return new Verdict(false, new List<int>{0});
             }
-            if (Time.unscaledTime < _nextInvokeTime && _increment < incrementCount)
+            if (UnityEngine.Time.unscaledTime < _nextInvokeTime && _increment < incrementCount)
             {
                 return new Verdict(false);
             }

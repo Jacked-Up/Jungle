@@ -125,6 +125,20 @@ namespace Jungle
             }
             return true;
         }
+
+        public bool StopNode(BaseNode node)
+        {
+            foreach (var executingTree in ExecutingTrees)
+            {
+                if (!executingTree.ExecutingNodes.Contains(node))
+                {
+                    continue;
+                }
+                executingTree.ExecutingNodes.Remove(node);
+                return true;
+            }
+            return false;
+        }
         
         private void SceneUnloadedCallback(Scene _)
         {

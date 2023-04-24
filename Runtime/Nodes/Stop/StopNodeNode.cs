@@ -1,24 +1,25 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace Jungle.Nodes.Stop
 {
-    [Node(ViewName = "Stop Node", Category = "Stop", NodeColor = NodeColor.Red, OutputPortNames = new string[0])]
+    [Node(ViewName = "Stop Node(s)", Category = "Stop", NodeColor = NodeColor.Red, OutputPortNames = new string[0])]
     public class StopNodeNode : BaseNode
     {
         #region Variables
 
-        [SerializeField] 
-        private BaseNode nodeToStop;
-        
+        [SerializeField]
+        private List<BaseNode> nodesToStop = new();
+
         #endregion
 
         public override void Initialize() {}
         
         public override Verdict Execute()
         {
-            if (tree.ExecutingNodes.Contains(nodeToStop))
+            foreach (var node in nodesToStop)
             {
-                tree.ExecutingNodes.Remove(nodeToStop);
+                JungleRuntime.Singleton.StopNode(node);
             }
             return new Verdict(true);
         }
