@@ -142,7 +142,7 @@ namespace Jungle
         
         private void SceneUnloadedCallback(Scene _)
         {
-            _nonPersistentExecutingTrees ??= new List<NodeTree>();
+            _nonPersistentExecutingTrees ??= new List<NodeTree>(); 
             foreach (var nodeTree in _nonPersistentExecutingTrees)
             {
                 StopTree(nodeTree);
