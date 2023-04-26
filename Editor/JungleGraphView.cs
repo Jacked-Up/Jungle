@@ -71,6 +71,7 @@ namespace Jungle.Editor
 
         public void PopulateView(NodeTree nodeTree)
         {
+            if (nodeTree == null) return;
             _selectedNodeTree = nodeTree;
 
             graphViewChanged -= GraphViewChangedCallback;

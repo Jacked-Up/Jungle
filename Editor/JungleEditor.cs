@@ -30,7 +30,7 @@ namespace Jungle.Editor
             
             var window = GetWindow<JungleEditor>();
             window.titleContent = new GUIContent("Jungle Editor");
-            
+
             if (selected is NodeTree nodeTree)
             {
                 window.PopulateGraphView(nodeTree);
@@ -38,7 +38,7 @@ namespace Jungle.Editor
             }
             return true;
         }
-        
+
         private void CreateGUI()
         {
             var jungleEditorFilePath = AssetDatabase.GetAssetPath(Resources.Load("JungleEditor"));
@@ -59,11 +59,8 @@ namespace Jungle.Editor
                 _inspectorView.UpdateSelection(nodeView);
             };
             _activeNodeTree = Selection.activeObject as NodeTree;
-            if (_activeNodeTree != null)
-            {
-                PopulateGraphView(_activeNodeTree);
-            }
-            
+            PopulateGraphView(_activeNodeTree);
+
             // Search view ---------------------------------------------------------------------------------------------
             _searchWindow = CreateInstance<JungleSearchWindow>();
             _searchWindow.Initialize(this, _graphView);
@@ -77,6 +74,8 @@ namespace Jungle.Editor
             if (nodeTree == null) return;
             if (AssetDatabase.CanOpenAssetInEditor(nodeTree.GetInstanceID()))
             {
+                var titleLabel = rootVisualElement.Q<Label>("tree-name-label");
+                titleLabel.text = nodeTree.name;
                 _graphView.PopulateView(nodeTree);
             }
             else
