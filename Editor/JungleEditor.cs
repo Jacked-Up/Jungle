@@ -9,60 +9,80 @@ namespace Jungle.Editor
     {
         #region Variables
 
-        public JungleInspectorView JungleInspectorView
-        {
-            get;
-            private set;
-        }
-        
-        private JungleGraphView _jungleGraphView;
+        public const string STYLE_SHEET_PATH =
+            "Packages/com.jackedupstudios.jungle/Editor/UI/JungleEditorStyle.uss";
+
+        private NodeTree _activeNodeTree;
+        private JungleGraphView _graphView;
+        private JungleInspectorView _inspectorView;
+        private JungleSearchWindow _searchWindow;
         
         #endregion
 
         [OnOpenAsset]
-        public static bool OpenAssetCallback(int instanceId, int line)
+        public static bool OpenAssetCallback(int _, int __)
         {
-            if (Selection.activeObject is not NodeTree)
+            var selected = Selection.activeObject;
+            if (selected is not NodeTree)
             {
                 return false;
             }
-            var editorWindow = GetWindow<JungleEditor>();
-            editorWindow.titleContent = new GUIContent("Jungle Editor");
+            
+            var window = GetWindow<JungleEditor>();
+            window.titleContent = new GUIContent("Jungle Editor");
+            
+            if (selected is NodeTree nodeTree)
+            {
+                window.PopulateGraphView(nodeTree);
+                return true;
+            }
             return true;
         }
-
-        public void CreateGUI()
+        
+        private void CreateGUI()
         {
             var jungleEditorFilePath = AssetDatabase.GetAssetPath(Resources.Load("JungleEditor"));
             var visualTreeAsset = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(jungleEditorFilePath);
             visualTreeAsset.CloneTree(rootVisualElement);
 
-            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>("Packages/com.jackedupstudios.jungle/Editor/UI/JungleEditorStyle.uss");
+            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(STYLE_SHEET_PATH);
             rootVisualElement.styleSheets.Add(styleSheet);
-
-            _jungleGraphView = rootVisualElement.Q<JungleGraphView>();
-            _jungleGraphView.SetJungleEditor(this);
-            _jungleGraphView.EditorWindow = this;
-            JungleInspectorView = rootVisualElement.Q<JungleInspectorView>();
-            JungleInspectorView.SetJungleEditor(this);
             
-            _jungleGraphView.OnNodeSelected = NodeSelectionChangedCallback;
-            OnSelectionChange();
-        }
+            // Inspector view ------------------------------------------------------------------------------------------
+            _inspectorView = rootVisualElement.Q<JungleInspectorView>();
 
-        private void OnSelectionChange()
-        {
-            var nodeTree = Selection.activeObject as NodeTree;
-            if (nodeTree != null && AssetDatabase.CanOpenAssetInEditor(nodeTree.GetInstanceID()))
+            // Graph view ----------------------------------------------------------------------------------------------
+            _graphView = rootVisualElement.Q<JungleGraphView>();
+            _graphView.OnNodeSelected = nodeView =>
             {
-                _jungleGraphView.PopulateView(nodeTree);
+                _graphView.UpdateSelection(nodeView);
+                _inspectorView.UpdateSelection(nodeView);
+            };
+            _activeNodeTree = Selection.activeObject as NodeTree;
+            if (_activeNodeTree != null)
+            {
+                PopulateGraphView(_activeNodeTree);
             }
+            
+            // Search view ---------------------------------------------------------------------------------------------
+            _searchWindow = CreateInstance<JungleSearchWindow>();
+            _searchWindow.Initialize(this, _graphView);
+            _graphView.SetupSearchWindow(_searchWindow); // Sets up callbacks
         }
 
-        private void NodeSelectionChangedCallback(JungleNodeView nodeView)
+        private void OnGUI() { if (_activeNodeTree == null) Close(); }
+
+        private void PopulateGraphView(NodeTree nodeTree)
         {
-            JungleInspectorView.UpdateSelection(nodeView);
-            _jungleGraphView.SelectedNodeViewCallback(nodeView, this);
+            if (nodeTree == null) return;
+            if (AssetDatabase.CanOpenAssetInEditor(nodeTree.GetInstanceID()))
+            {
+                _graphView.PopulateView(nodeTree);
+            }
+            else
+            {
+                Debug.LogError("[Jungle Editor] Failed to open requested node tree");
+            }
         }
     }
 }

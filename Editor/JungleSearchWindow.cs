@@ -11,6 +11,7 @@ namespace Jungle.Editor
     {
         #region Variables
 
+        private JungleEditor _jungleEditor;
         private JungleGraphView _graphView;
         
         private struct CategoryCache
@@ -27,8 +28,9 @@ namespace Jungle.Editor
 
         #endregion
 
-        public void Initialize(JungleGraphView graphView)
+        public void Initialize(JungleEditor jungleEditor, JungleGraphView graphView)
         {
+            _jungleEditor = jungleEditor;
             _graphView = graphView;
         }
         
@@ -99,12 +101,13 @@ namespace Jungle.Editor
 
         public bool OnSelectEntry(SearchTreeEntry searchTreeEntry, SearchWindowContext context)
         {
-            var window = _graphView.EditorWindow;
+            var graphView = _graphView;
+            var window = _jungleEditor;
             var editorWindowMousePosition =
                 window.rootVisualElement.ChangeCoordinatesTo(window.rootVisualElement.parent,
                     context.screenMousePosition - window.position.position);
-            var graphViewMousePosition = _graphView.contentViewContainer.WorldToLocal(editorWindowMousePosition);
-            _graphView.CreateNode(searchTreeEntry.userData.GetType(), graphViewMousePosition);
+            var graphViewMousePosition = graphView.contentViewContainer.WorldToLocal(editorWindowMousePosition);
+            graphView.CreateNode(searchTreeEntry.userData.GetType(), graphViewMousePosition);
             return true;
         }
     }

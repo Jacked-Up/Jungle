@@ -7,35 +7,22 @@ namespace Jungle.Editor
     {
         #region Variables
 
-        private UnityEditor.Editor _editor;
-
-        private JungleEditor _jungleEditor;
+        private UnityEditor.Editor _nodeInspector;
         
         #endregion
 
-        public JungleInspectorView() {}
-        
         public new class UxmlFactory : UxmlFactory<JungleInspectorView, UxmlTraits> {}
 
-        public void SetJungleEditor(JungleEditor editor)
-        {
-            _jungleEditor = editor;
-        }
-        
         public void UpdateSelection(JungleNodeView nodeView)
         {
             Clear();
-            Object.DestroyImmediate(_editor);
-            _editor = UnityEditor.Editor.CreateEditor(nodeView.Node);
+            Object.DestroyImmediate(_nodeInspector);
+            _nodeInspector = UnityEditor.Editor.CreateEditor(nodeView.Node);
             var container = new IMGUIContainer(() =>
             {
-                if (_editor.target != null)
+                if (_nodeInspector.target != null)
                 {
-                    _editor.OnInspectorGUI();
-                }
-                else
-                {
-                    //_jungleEditor.Close();
+                    _nodeInspector.OnInspectorGUI();
                 }
             });
             Add(container);
