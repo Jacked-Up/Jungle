@@ -80,7 +80,7 @@ namespace Jungle.Editor
 
             if (_selectedNodeTree.rootNode == null)
             {
-                _selectedNodeTree.rootNode = _selectedNodeTree.CreateNode(typeof(RootNode), new Vector2(50f, 50f)) as RootNode;
+                _selectedNodeTree.rootNode = _selectedNodeTree.CreateNode(typeof(RootNode), new Vector2(50f, 100f)) as RootNode;
                 EditorUtility.SetDirty(_selectedNodeTree);
                 AssetDatabase.SaveAssets();
             }
@@ -171,14 +171,12 @@ namespace Jungle.Editor
             CreateNodeView(node);
         }
 
-        public void DuplicateNode(JungleNodeView reference)
+        public void DuplicateNode(JungleNodeView nodeView)
         {
-            if (reference.Node is RootNode) return;
-            
-            var nodeOriginal = reference.Node;
-            var nodePosition = reference.Node.NodeProperties.position + new Vector2(25f, 25f);
-            var node = _selectedNodeTree.DuplicateNode(nodeOriginal, nodePosition);
-            CreateNodeView(node);
+            if (nodeView.Node is RootNode) return;
+            var nodeReference = nodeView.Node;
+            var nodeCopy = _selectedNodeTree.DuplicateNode(nodeReference);
+            CreateNodeView(nodeCopy);
         }
         
         private void CreateNodeView(BaseNode baseNode)

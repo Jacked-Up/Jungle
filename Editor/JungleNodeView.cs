@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Jungle.Editor
 {
@@ -27,7 +27,7 @@ namespace Jungle.Editor
             var graphPosition = node.NodeProperties.position;
             style.left = graphPosition.x;
             style.top = graphPosition.y;
-            
+
             switch (node.NodeColor)
             {
                 case NodeColor.Red:
@@ -56,6 +56,20 @@ namespace Jungle.Editor
                     break;
             }
 
+            if (node is not RootNode)
+            {
+                var nameLabel = mainContainer.Q<Label>("context-label");
+                var nodeContext = node.NodeProperties.name;
+                nameLabel.text = nodeContext.Length < 26 
+                    ? nodeContext 
+                    : $"{nodeContext[..23]}...";
+            }
+            else
+            {
+                mainContainer.Q<Label>("context-label").RemoveFromHierarchy();
+                outputContainer.transform.position = new Vector3(0, -25, 0);
+            }
+
             CreateInputPort();
             CreateOutputPorts();
         }
@@ -75,11 +89,10 @@ namespace Jungle.Editor
 
         private void CreateOutputPorts()
         {
-            var outputPortNamesList = Node.OutputPortNames.ToList();
             foreach (var portName in Node.OutputPortNames)
             {
                 var port = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Multi, typeof(bool));
-                port.portName = portName;
+                port.portName = Node is not RootNode ? portName : string.Empty;
                 OutputPorts.Add(port);
                 outputContainer.Add(port);
             }
@@ -92,6 +105,8 @@ namespace Jungle.Editor
             var nodeProperties = new NodeProperties
             {
                 guid = Node.NodeProperties.guid,
+                name = Node.NodeProperties.name,
+                comments = Node.NodeProperties.comments,
                 position = new Vector2(position.xMin, position.yMin)
             };
             Node.NodeProperties = nodeProperties;

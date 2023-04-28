@@ -83,47 +83,55 @@ namespace Jungle
         }
 
 #if UNITY_EDITOR
-        public BaseNode CreateNode(Type nodeType, Vector2 position)
+        public BaseNode CreateNode(System.Type node, Vector2 graphPosition)
         {
-            var node = CreateInstance(nodeType) as BaseNode;
-            if (node != null)
+            var nodeInstance = CreateInstance(node) as BaseNode;
+            if (nodeInstance == null) return null;
+            
+            nodeInstance.name = $"{node.Name}";
+            nodeInstance.tree = this;
+            nodeInstance.NodeProperties = new NodeProperties
             {
-                node.name = $"({name}) {nodeType.Name}";
-                node.tree = this;
-                node.NodeProperties = new NodeProperties(GUID.Generate().ToString(), position);
-            }
-            else return null;
+                guid = GUID.Generate().ToString(),
+                name = node.Name,
+                comments = "Notes\n \n",
+                position = graphPosition
+            };
             
-            Undo.RecordObject(this, $"Added {node.name} to tree");
-            nodes.Add(node);
+            Undo.RecordObject(this, $"Added {nodeInstance.name} to tree");
+            nodes.Add(nodeInstance);
             
-            AssetDatabase.AddObjectToAsset(node, this);
-            Undo.RegisterCreatedObjectUndo(node, $"Added {node.name} to tree");
+            AssetDatabase.AddObjectToAsset(nodeInstance, this);
+            Undo.RegisterCreatedObjectUndo(nodeInstance, $"Added {nodeInstance.name} to tree");
             AssetDatabase.SaveAssets();
             
-            return node;
+            return nodeInstance;
         }
 
-        public BaseNode DuplicateNode(BaseNode baseNode, Vector2 position)
+        public BaseNode DuplicateNode(BaseNode node)
         {
-            var node = Instantiate(baseNode);
-            node.ports = new List<NodePort>();
-            if (node != null)
+            var nodeCopy = Instantiate(node);
+            if (nodeCopy == null) return null;
+            
+            nodeCopy.name = node.name;
+            nodeCopy.tree = this;
+            nodeCopy.NodeProperties = new NodeProperties
             {
-                node.name = node.name[..^7];
-                node.tree = this;
-                node.NodeProperties = new NodeProperties(GUID.Generate().ToString(), position);
-            }
-            else return null;
+                guid = GUID.Generate().ToString(),
+                name = nodeCopy.NodeProperties.name,
+                comments = nodeCopy.NodeProperties.comments,
+                position = node.NodeProperties.position + new Vector2(25, 25)
+            };
+            nodeCopy.ports = new List<NodePort>();
             
-            Undo.RecordObject(this, $"Added {node.name} to tree");
-            nodes.Add(node);
+            Undo.RecordObject(this, $"Added {nodeCopy.name} to tree");
+            nodes.Add(nodeCopy);
             
-            AssetDatabase.AddObjectToAsset(node, this);
-            Undo.RegisterCreatedObjectUndo(node, $"Added {node.name} to tree");
+            AssetDatabase.AddObjectToAsset(nodeCopy, this);
+            Undo.RegisterCreatedObjectUndo(nodeCopy, $"Added {nodeCopy.name} to tree");
             AssetDatabase.SaveAssets();
             
-            return node;
+            return nodeCopy;
         }
         
         public void DeleteNode(BaseNode node)

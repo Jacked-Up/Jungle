@@ -2,7 +2,8 @@
     <Style src="project://database/Packages/com.jackedupstudios.jungle/Editor/UI/JungleNodeViewStyle.uss?fileID=7433441132597879392&amp;guid=71737f929a53ffe4cac670416573ced3&amp;type=3#JungleNodeViewStyle" />
     <ui:VisualElement name="node-border" style="margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0;">
         <ui:VisualElement name="title" style="margin-left: 10px; margin-right: 10px; margin-top: 5px; margin-bottom: 5px;">
-            <ui:Label name="title-label" text="Node" class="unity-text-element unity-label" style="-unity-font-style: bold; align-items: stretch; align-self: center; justify-content: center; -unity-text-align: upper-center;" />
+            <ui:Label tabindex="-1" text="My Node" display-tooltip-when-elided="true" name="title-label" style="-unity-font-style: bold; font-size: 16px; align-self: stretch; margin-bottom: 0; padding-bottom: 0; padding-top: 0; padding-right: 0; padding-left: 0;" />
+            <ui:Label name="context-label" text="Node" enable-rich-text="false" class="unity-text-element unity-label" style="-unity-font-style: normal; align-items: stretch; align-self: stretch; justify-content: center; -unity-text-align: upper-left; font-size: 10px; margin-top: 0; margin-bottom: 0;" />
             <ui:VisualElement name="title-button-container">
                 <ui:VisualElement name="collapse-button">
                     <ui:VisualElement name="icon" />

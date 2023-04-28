@@ -120,9 +120,9 @@
 }
 
 .grey #node-border {
-    background-color: rgb(94, 94, 94);
-    border-left-color: rgb(53, 53, 53);
-    border-right-color: rgb(53, 53, 53);
-    border-top-color: rgb(53, 53, 53);
-    border-bottom-color: rgb(53, 53, 53);
+    background-color: rgb(82, 82, 82);
+    border-left-color: rgb(132, 132, 132);
+    border-right-color: rgb(132, 132, 132);
+    border-top-color: rgb(132, 132, 132);
+    border-bottom-color: rgb(132, 132, 132);
 }

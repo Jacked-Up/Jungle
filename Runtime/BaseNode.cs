@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Jungle
 {
@@ -132,13 +133,9 @@ namespace Jungle
     public struct NodeProperties
     {
         public string guid;
+        [FormerlySerializedAs("context")] public string name;
+        [FormerlySerializedAs("notes")] public string comments;
         public Vector2 position;
-
-        public NodeProperties(string guid, Vector2 position)
-        {
-            this.guid = guid;
-            this.position = position;
-        }
     }
 #endif
 }
