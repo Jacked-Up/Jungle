@@ -23,16 +23,13 @@ namespace Jungle.Editor
             {
                 if (_nodeInspector.target != null)
                 {
-                    var node = (BaseNode)_nodeInspector.target;
+                    var node = (Node)_nodeInspector.target;
                     var properties = node.NodeProperties;
-                    GUILayout.Label("Comments:");
-                    var comments = EditorGUILayout.TextArea(properties.comments);
-                    var context = EditorGUILayout.TextField("Name", properties.name);
+                    var viewName = EditorGUILayout.TextField("Name", properties.viewName);
                     node.NodeProperties = new NodeProperties
                     {
                         guid = properties.guid,
-                        name = context,
-                        comments = comments,
+                        viewName = viewName,
                         position = properties.position
                     };
                     

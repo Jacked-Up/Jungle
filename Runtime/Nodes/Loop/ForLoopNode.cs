@@ -1,11 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Jungle.Nodes.Loop
 {
-    [Node(ViewName = "For Loop", Category = "Loop", Color = NodeColor.Purple, OutputPortNames = new []{"Invoke", "Done"})]
-    public class ForLoopNode : BaseNode
+    [Node(TitleName = "For Loop",
+        Category = "Loop",
+        Color = NodeAttribute.NodeColor.Purple,
+        OutputPortNames = new []{"Invoke", "Done"})]
+    public class ForLoopNode : Node
     {
         #region Variables
 
@@ -23,25 +25,28 @@ namespace Jungle.Nodes.Loop
         
         #endregion
 
-        public override void Initialize()
+        public override void Start(in object inputValue)
         {
             _increment = 0;
             _nextInvokeTime = 0f;
         }
-        
-        public override Verdict Execute()
+
+        public override bool Update(out PortCall[] call)
         {
             if (UnityEngine.Time.unscaledTime >= _nextInvokeTime && _increment < incrementCount)
             {
                 _increment++;
                 _nextInvokeTime = UnityEngine.Time.unscaledTime + timeBetweenIncrements;
-                return new Verdict(false, new List<int>{0});
+                call = new [] {new PortCall(0, new Nothing())};
+                return false;
             }
             if (UnityEngine.Time.unscaledTime < _nextInvokeTime && _increment < incrementCount)
             {
-                return new Verdict(false);
+                call = Array.Empty<PortCall>();
+                return false;
             }
-            return new Verdict(true, new List<int>{1});
+            call = new [] {new PortCall(1, new Nothing())};
+            return true;
         }
     }
 }

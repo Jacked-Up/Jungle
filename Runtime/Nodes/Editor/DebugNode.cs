@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Jungle.Nodes.Editor
 {
-    [Node(ViewName = "Debug", Category = "Editor", Color = NodeColor.Grey, InputPortName = "Execute", OutputPortNames = new []{"Next"})]
-    public class DebugNode : BaseNode
+    [Node(TitleName = "Debug",
+        Category = "Editor", 
+        Color = NodeAttribute.NodeColor.Grey)]
+    public class DebugNode : Node
     {
         #region Variables
 
@@ -23,12 +24,15 @@ namespace Jungle.Nodes.Editor
 
         #endregion
 
-        public override void Initialize() {}
+        public override void Start(in object inputValue)
+        {
+            
+        }
 
-        public override Verdict Execute()
+        public override bool Update(out PortCall[] call)
         {
 #if UNITY_EDITOR
-            var completeMessage = $"[{tree.name}] {message}";
+            var completeMessage = $"[{Tree.name}] {message}";
             switch (type)
             {
                 case Type.Log:
@@ -42,7 +46,8 @@ namespace Jungle.Nodes.Editor
                     break;
             }
 #endif
-            return new Verdict(true, new List<int> { 0 });
+            call = new[] {new PortCall(0, new Nothing())};
+            return true;
         }
     }
 }

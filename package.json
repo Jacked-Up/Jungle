@@ -2,12 +2,15 @@
   "name": "com.jackedupstudios.jungle",
   "version": "1.0.0",
   "displayName": "Jungle",
-  "description": "Node based system for creating and editing content quickly, easily and visually.",
-  "unity": "2021.1",
-  "dependencies": { },
+  "description": "A visual node-based sequencer for easily editing content quickly.",
+  "unity": "2020.3",
+  "documentationUrl": "https://www.jackedup.xyz/jungle/docs",
+  "dependencies": {
+    "com.unity.collections": "1.4.0"
+  },
   "author": {
     "name": "Jacked Up Studios",
     "email": "jackrandolph@jackedup.xyz",
-    "url": "https://www.jackedup.xyz"
+    "url": "https://www.jackedup.xyz/jungle"
   }
 }

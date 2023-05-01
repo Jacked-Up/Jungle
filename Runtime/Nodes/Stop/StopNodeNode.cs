@@ -3,25 +3,32 @@ using UnityEngine;
 
 namespace Jungle.Nodes.Stop
 {
-    [Node(ViewName = "Stop Node(s)", Category = "Stop", Color = NodeColor.Red, OutputPortNames = new string[0])]
-    public class StopNodeNode : BaseNode
+    [Node(TitleName = "Stop Node(s)",
+        Category = "Stop",
+        Color = NodeAttribute.NodeColor.Red,
+        OutputPortNames = new string[0])]
+    public class StopNodeNode : Node
     {
         #region Variables
 
         [SerializeField]
-        private List<BaseNode> nodesToStop = new();
+        private List<Node> nodesToStop = new List<Node>();
 
         #endregion
 
-        public override void Initialize() {}
-        
-        public override Verdict Execute()
+        public override void Start(in object inputValue)
+        {
+            
+        }
+
+        public override bool Update(out PortCall[] call)
         {
             foreach (var node in nodesToStop)
             {
                 JungleRuntime.Singleton.StopNode(node);
             }
-            return new Verdict(true);
+            call = new[] {new PortCall(0, new Nothing())};
+            return true;
         }
     }
 }

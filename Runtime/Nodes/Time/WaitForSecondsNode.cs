@@ -1,11 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Jungle.Nodes.Time
 {
-    [Node(ViewName = "Wait For Seconds", Category = "Time", Color = NodeColor.Yellow, OutputPortNames = new []{"Elapsed"})]
-    public class WaitForSecondsNode : BaseNode
+    [Node(TitleName = "Wait For Seconds",
+        Category = "Time",
+        Color = NodeAttribute.NodeColor.Yellow,
+        OutputPortNames = new []{"Elapsed"})]
+    public class WaitForSecondsNode : Node
     {
         #region Variables
 
@@ -25,14 +27,14 @@ namespace Jungle.Nodes.Time
             duration = Mathf.Clamp(duration, 0f, Mathf.Infinity);
         }
 
-        public override void Initialize()
+        public override void Start(in object inputValue)
         {
             _startTime = scaledTime
                 ? UnityEngine.Time.time
                 : UnityEngine.Time.unscaledTime;
         }
 
-        public override Verdict Execute()
+        public override bool Update(out PortCall[] call)
         {
             var currentTime = scaledTime
                 ? UnityEngine.Time.time
@@ -40,9 +42,11 @@ namespace Jungle.Nodes.Time
 
             if (currentTime - _startTime >= duration)
             {
-                return new Verdict(true, new List<int> {0});
+                call = new[] {new PortCall(0, new Nothing())};
+                return true;
             }
-            return new Verdict(false);
+            call = Array.Empty<PortCall>();
+            return false;
         }
     }
 

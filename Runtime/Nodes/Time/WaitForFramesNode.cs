@@ -1,11 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Jungle.Nodes.Time
 {
-    [Node(ViewName = "Wait For Frames", Category = "Time", Color = NodeColor.Yellow, OutputPortNames = new []{"Elapsed"})]
-    public class WaitForFramesNode : BaseNode
+    [Node(TitleName = "Wait For Frames", 
+        Category = "Time",
+        Color = NodeAttribute.NodeColor.Yellow, 
+        OutputPortNames = new []{"Elapsed"})]
+    public class WaitForFramesNode : Node
     {
         #region Variables
 
@@ -22,19 +24,21 @@ namespace Jungle.Nodes.Time
             if (frames < 0) frames = 0;
         }
 
-        public override void Initialize()
+        public override void Start(in object inputValue)
         {
             _frameIndex = 0;
         }
 
-        public override Verdict Execute()
+        public override bool Update(out PortCall[] call)
         {
             _frameIndex++;
             if (_frameIndex < frames)
             {
-                return new Verdict(false);
+                call = Array.Empty<PortCall>();
+                return false;
             }
-            return new Verdict(true, new List<int>{0});
+            call = new[] {new PortCall(0, new Nothing())};
+            return true;
         }
     }
     

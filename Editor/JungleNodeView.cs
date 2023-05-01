@@ -7,21 +7,21 @@ using UnityEngine.UIElements;
 
 namespace Jungle.Editor
 {
-    public class JungleNodeView : Node
+    public class JungleNodeView : UnityEditor.Experimental.GraphView.Node
     {
         #region Variables
         
         public Action<JungleNodeView> NodeSelected;
-        public readonly BaseNode Node;
-        public Port InputPorts;
-        public readonly List<Port> OutputPorts = new();
+        public readonly Node Node;
+        public UnityEditor.Experimental.GraphView.Port InputPorts;
+        public readonly List<UnityEditor.Experimental.GraphView.Port> OutputPorts = new List<UnityEditor.Experimental.GraphView.Port>();
         
         #endregion
 
-        public JungleNodeView(BaseNode node) : base(AssetDatabase.GetAssetPath(Resources.Load("JungleNodeView")))
+        public JungleNodeView(Node node) : base(AssetDatabase.GetAssetPath(Resources.Load("JungleNodeView")))
         {
             Node = node;
-            title = node.ViewName;
+            title = node.TitleName;
             viewDataKey = node.NodeProperties.guid;
 
             var graphPosition = node.NodeProperties.position;
@@ -30,39 +30,39 @@ namespace Jungle.Editor
 
             switch (node.NodeColor)
             {
-                case NodeColor.Red:
+                case NodeAttribute.NodeColor.Red:
                     AddToClassList("red");
                     break;
-                case NodeColor.Orange:
+                case NodeAttribute.NodeColor.Orange:
                     AddToClassList("orange");
                     break;
-                case NodeColor.Yellow:
+                case NodeAttribute.NodeColor.Yellow:
                     AddToClassList("yellow");
                     break;
-                case NodeColor.Green:
+                case NodeAttribute.NodeColor.Green:
                     AddToClassList("green");
                     break;
-                case NodeColor.Blue:
+                case NodeAttribute.NodeColor.Blue:
                     AddToClassList("blue");
                     break;
-                case NodeColor.Purple:
+                case NodeAttribute.NodeColor.Purple:
                     AddToClassList("purple");
                     break;
-                case NodeColor.Violet:
+                case NodeAttribute.NodeColor.Violet:
                     AddToClassList("violet");
                     break;
-                case NodeColor.Grey:
+                case NodeAttribute.NodeColor.Grey:
                     AddToClassList("grey");
                     break;
             }
 
-            if (node is not RootNode)
+            if (node.GetType() != typeof(RootNode))
             {
                 var nameLabel = mainContainer.Q<Label>("context-label");
-                var nodeContext = node.NodeProperties.name;
-                nameLabel.text = nodeContext.Length < 26 
-                    ? nodeContext 
-                    : $"{nodeContext[..23]}...";
+                var nodeViewName = node.NodeProperties.viewName;
+                nameLabel.text = nodeViewName.Length < 26 
+                    ? nodeViewName 
+                    : $"{nodeViewName.Substring(0, 23)}...";
             }
             else
             {
@@ -76,12 +76,12 @@ namespace Jungle.Editor
 
         private void CreateInputPort()
         {
-            if (Node is not RootNode)
+            if (Node.GetType() != typeof(RootNode))
             {
-                InputPorts = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Multi, typeof(bool));
+                InputPorts = InstantiatePort(Orientation.Horizontal, Direction.Input, UnityEditor.Experimental.GraphView.Port.Capacity.Multi, typeof(bool));
                 if (InputPorts != null)
                 {
-                    InputPorts.portName = Node.InputPortName;
+                    InputPorts.portName = Node.InputInfo.PortName;
                     inputContainer.Add(InputPorts);
                 }
             }
@@ -89,12 +89,14 @@ namespace Jungle.Editor
 
         private void CreateOutputPorts()
         {
-            foreach (var portName in Node.OutputPortNames)
+            foreach (var portInfo in Node.OutputInfo)
             {
-                var port = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Multi, typeof(bool));
-                port.portName = Node is not RootNode ? portName : string.Empty;
-                OutputPorts.Add(port);
-                outputContainer.Add(port);
+                var portView = InstantiatePort(Orientation.Horizontal, Direction.Output, UnityEditor.Experimental.GraphView.Port.Capacity.Multi, typeof(bool));
+                portView.portName = Node.GetType() != typeof(RootNode) 
+                    ? portInfo.PortName
+                    : string.Empty;
+                OutputPorts.Add(portView);
+                outputContainer.Add(portView);
             }
         }
 
@@ -105,8 +107,7 @@ namespace Jungle.Editor
             var nodeProperties = new NodeProperties
             {
                 guid = Node.NodeProperties.guid,
-                name = Node.NodeProperties.name,
-                comments = Node.NodeProperties.comments,
+                viewName = Node.NodeProperties.viewName,
                 position = new Vector2(position.xMin, position.yMin)
             };
             Node.NodeProperties = nodeProperties;

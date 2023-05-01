@@ -23,7 +23,7 @@ namespace Jungle.Editor
         public static bool OpenAssetCallback(int _, int __)
         {
             var selected = Selection.activeObject;
-            if (selected is not NodeTree)
+            if (selected.GetType() != typeof(NodeTree))
             {
                 return false;
             }
@@ -72,16 +72,9 @@ namespace Jungle.Editor
         private void PopulateGraphView(NodeTree nodeTree)
         {
             if (nodeTree == null) return;
-            if (AssetDatabase.CanOpenAssetInEditor(nodeTree.GetInstanceID()))
-            {
-                var titleLabel = rootVisualElement.Q<Label>("tree-name-label");
-                titleLabel.text = nodeTree.name;
-                _graphView.PopulateView(nodeTree);
-            }
-            else
-            {
-                Debug.LogError("[Jungle Editor] Failed to open requested node tree");
-            }
+            var titleLabel = rootVisualElement.Q<Label>("tree-name-label");
+            titleLabel.text = nodeTree.name;
+            _graphView.PopulateView(nodeTree);
         }
     }
 }

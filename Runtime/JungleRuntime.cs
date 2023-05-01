@@ -22,14 +22,17 @@ namespace Jungle
             }
         }
        
+        /// <summary>
+        /// 
+        /// </summary>
         public static JungleRuntime Singleton
         {
             get;
             private set;
         }
         
-        private List<NodeTree> _persistentExecutingTrees = new();
-        private List<NodeTree> _nonPersistentExecutingTrees = new();
+        private List<NodeTree> _persistentExecutingTrees = new List<NodeTree>();
+        private List<NodeTree> _nonPersistentExecutingTrees = new List<NodeTree>();
 
         #endregion
 
@@ -40,7 +43,8 @@ namespace Jungle
 #if UNITY_EDITOR
                 Debug.LogError("[Jungle Runtime] A Jungle runtime was instantiated while another instance already existed");
 #endif
-                Destroy(Singleton);
+                enabled = false;
+                return;
             }
             Singleton = this;
         }
@@ -57,17 +61,17 @@ namespace Jungle
 
         private void Update()
         {
-            var finishedTrees = new List<NodeTree>();
+            var query = new List<NodeTree>();
             foreach (var nodeTree in ExecutingTrees)
             {
-                if (nodeTree.State == NodeTreeState.Executed)
+                if (nodeTree.State == NodeTree.TreeState.Finished)
                 {
-                    finishedTrees.Add(nodeTree);
+                    query.Add(nodeTree);
                     continue;
                 }
-                nodeTree.PerformExecution();
+                nodeTree.Update();
             }
-            finishedTrees.ForEach(nodeTree =>
+            query.ForEach(nodeTree =>
             {
                 StopTree(nodeTree);
             });
@@ -79,14 +83,14 @@ namespace Jungle
         /// <param name="nodeTree">Node tree to add to execution queue.</param>
         /// <param name="persistent">If the node tree should persist between scene changes.</param>
         /// <returns>True if the node tree was initialized and queued for execution.</returns>
-        public bool RunTree(NodeTree nodeTree, bool persistent)
+        public bool StartTree(NodeTree nodeTree, bool persistent)
         {
             _persistentExecutingTrees ??= new List<NodeTree>();
             _nonPersistentExecutingTrees ??= new List<NodeTree>();
-            if (!nodeTree.Start() && !ExecutingTrees.Contains(nodeTree))
+            if (ExecutingTrees.Contains(nodeTree))
             {
 #if UNITY_EDITOR
-                Debug.LogWarning($"[Jungle Runtime] Attempt to execute {nodeTree.name} but it was already running OR is already queued for execution");
+                Debug.LogWarning($"[Jungle Runtime] Attempt to start {nodeTree.name} but it was already running");
 #endif
                 return false;
             }
@@ -98,6 +102,7 @@ namespace Jungle
             {
                 _nonPersistentExecutingTrees.Add(nodeTree);
             }
+            nodeTree.Start();
             return true;
         }
         
@@ -114,7 +119,6 @@ namespace Jungle
             {
                 return false;
             }
-            nodeTree.Stop();
             if (_persistentExecutingTrees.Contains(nodeTree))
             {
                 _persistentExecutingTrees.Remove(nodeTree);
@@ -123,10 +127,11 @@ namespace Jungle
             {
                 _nonPersistentExecutingTrees.Remove(nodeTree);
             }
+            nodeTree.Stop();
             return true;
         }
 
-        public bool StopNode(BaseNode node)
+        public bool StopNode(Node node)
         {
             foreach (var executingTree in ExecutingTrees)
             {

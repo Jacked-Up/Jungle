@@ -17,12 +17,12 @@ namespace Jungle.Editor
         private struct CategoryCache
         {
             public string CategoryName;
-            public List<BaseNode> Nodes;
+            public List<Node> Nodes;
 
-            public CategoryCache(string categoryName, BaseNode firstNode)
+            public CategoryCache(string categoryName, Node firstNode)
             {
                 CategoryName = categoryName;
-                Nodes = new List<BaseNode> {firstNode};
+                Nodes = new List<Node> {firstNode};
             }
         }
 
@@ -36,11 +36,11 @@ namespace Jungle.Editor
         
         public List<SearchTreeEntry> CreateSearchTree(SearchWindowContext context)
         {
-            var nodeTypes = TypeCache.GetTypesDerivedFrom<BaseNode>();
+            var nodeTypes = TypeCache.GetTypesDerivedFrom<Node>();
             var categories = new List<CategoryCache>();
             nodeTypes.ToList().ForEach(nodeType =>
             {
-                var typeObject = CreateInstance(nodeType) as BaseNode;
+                var typeObject = CreateInstance(nodeType) as Node;
                 if (typeObject == null || typeObject is RootNode) return;
                 var typeCategory = typeObject.Category;
                 if (categories.All(category => category.CategoryName != typeCategory))
@@ -77,7 +77,7 @@ namespace Jungle.Editor
                     });
                     category.Nodes.ForEach(node =>
                     {
-                        searchTree.Add(new SearchTreeEntry(new GUIContent(node.ViewName))
+                        searchTree.Add(new SearchTreeEntry(new GUIContent(node.TitleName))
                         {
                             userData = node,
                             level = 2
@@ -89,7 +89,7 @@ namespace Jungle.Editor
             {
                 category.Nodes.ForEach(node =>
                 {
-                    searchTree.Add(new SearchTreeEntry(new GUIContent(node.ViewName))
+                    searchTree.Add(new SearchTreeEntry(new GUIContent(node.TitleName))
                     {
                         userData = node,
                         level = 1

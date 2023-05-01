@@ -4,25 +4,33 @@ using UnityEngine;
 
 namespace Jungle.Nodes.Loop
 {
-    [Node(ViewName = "While Loop", Category = "Loop", Color = NodeColor.Purple, OutputPortNames = new []{"Invoke", "Done"})]
-    public class WhileLoopNode : BaseNode
+    [Node(TitleName = "While Loop", 
+        Category = "Loop",
+        Color = NodeAttribute.NodeColor.Purple,
+        OutputPortNames = new []{"Invoke", "Done"})]
+    public class WhileLoopNode : Node
     {
         #region Variables
 
         [SerializeField]
-        private List<BaseNode> nodes = new();
+        private List<Node> nodes = new List<Node>();
 
         #endregion
 
-        public override void Initialize() {}
-        
-        public override Verdict Execute()
+        public override void Start(in object inputValue)
         {
-            if (tree.ExecutingNodes.Any(executingNode => nodes.Any(node => node == executingNode)))
+            
+        }
+
+        public override bool Update(out PortCall[] call)
+        {
+            if (Tree.ExecutingNodes.Any(executingNode => nodes.Any(node => node == executingNode)))
             {
-                return new Verdict(false, new List<int>{0});
+                call = new[] {new PortCall(0, new Nothing())};
+                return false;
             }
-            return new Verdict(true, new List<int>{1});
+            call = new[] {new PortCall(1, new Nothing())};
+            return true;
         }
     }
 }
