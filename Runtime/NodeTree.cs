@@ -62,7 +62,7 @@ namespace Jungle
         {
             if (State == TreeState.Running) return;
             ExecutingNodes = new List<Node> {rootNode};
-            ExecutingNodes[0].Start(new Nothing());
+            ExecutingNodes[0].Initialize(new Nothing());
             State = TreeState.Running;
         }
 
@@ -83,7 +83,7 @@ namespace Jungle
             var query = new List<Node>(ExecutingNodes);
             foreach (var node in ExecutingNodes)
             {
-                var verdict = node.Update(out var portCalls);
+                var verdict = node.Execute(out var portCalls);
                 foreach (var call in portCalls)
                 {
                     if (call.Index < 0 || call.Index > node.OutputPorts.Length - 1)
@@ -95,7 +95,7 @@ namespace Jungle
                     }
                     foreach (var connection in node.OutputPorts[call.Index].Connections)
                     {
-                        connection.Start(call.Value);
+                        connection.Initialize(call.Value);
                     }
                 }
                 if (verdict)

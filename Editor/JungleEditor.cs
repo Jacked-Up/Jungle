@@ -22,20 +22,12 @@ namespace Jungle.Editor
         [OnOpenAsset]
         public static bool OpenAssetCallback(int _, int __)
         {
-            var selected = Selection.activeObject;
-            if (selected.GetType() != typeof(NodeTree))
+            if (Selection.activeObject.GetType() != typeof(NodeTree))
             {
                 return false;
             }
-            
             var window = GetWindow<JungleEditor>();
             window.titleContent = new GUIContent("Jungle Editor");
-
-            if (selected is NodeTree nodeTree)
-            {
-                window.PopulateGraphView(nodeTree);
-                return true;
-            }
             return true;
         }
 

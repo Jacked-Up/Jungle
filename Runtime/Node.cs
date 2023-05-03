@@ -28,21 +28,61 @@ namespace Jungle
         /// <summary>
         /// 
         /// </summary>
-        public Port InputPort => inputPort;
+        public Port InputPort
+        {
+            get
+            {
+#if UNITY_EDITOR
+                if (inputPort.PortType != InputInfo.PortType)
+                {
+                    Debug.LogError($"[{name}] Input port connections have been lost because the port type changed" +
+                                   $"\nWas type {inputPort.PortType} and is now type {InputInfo.PortType}");
+                    inputPort.PortType = InputInfo.PortType;
+                    inputPort.Connections = Array.Empty<Node>();
+                    UnityEditor.EditorUtility.SetDirty(this);
+                }
+#endif
+                return inputPort;
+            }
+        }
         [SerializeField] [HideInInspector]
         private Port inputPort;
 
         /// <summary>
         /// Array of the nodes output ports
         /// </summary>
-        public Port[] OutputPorts => outputPorts;
+        public Port[] OutputPorts
+        {
+            get
+            {
+#if UNITY_EDITOR
+                if (outputPorts.Length != OutputInfo.Length)
+                {
+                    outputPorts = new Port[OutputInfo.Length];
+                    //UnityEditor.EditorUtility.SetDirty(this); <- Redundant
+                }
+                for (var i = 0; i < outputPorts.Length; i++)
+                {
+                    if (outputPorts[i].PortType != OutputInfo[i].PortType)
+                    {
+                        Debug.LogError($"[{name}] Output port {i.ToString()} connections have been lost because the port type changed" +
+                                       $"\nWas type {outputPorts[i].PortType} and is now type {OutputInfo[i].PortType}");
+                        outputPorts[i].PortType = OutputInfo[i].PortType;
+                        outputPorts[i].Connections = Array.Empty<Node>();
+                        UnityEditor.EditorUtility.SetDirty(this);
+                    }
+                }
+#endif
+                return outputPorts;
+            }
+        }
         [SerializeField] [HideInInspector]
         private Port[] outputPorts;
-        
+
         /// <summary>
         /// True if the node has ever been run
         /// </summary>
-        public bool Started { get; set; }
+        public bool Started { get; set; } = false;
 
         #endregion
 
@@ -51,14 +91,14 @@ namespace Jungle
         /// *Invoked before the update method
         /// </summary>
         /// <param name="inputValue">The input value returned by the parent node</param>
-        public abstract void Start(in object inputValue);
+        public abstract void Initialize(in object inputValue);
 
         /// <summary>
         /// Invoked every frame just like the Unity update event method
         /// </summary>
         /// <param name="call">Ports to invoke during this update call</param>
         /// <returns>Returns true if the node has declared it is finished executing. Returns false if not</returns>
-        public abstract bool Update(out PortCall[] call);
+        public abstract bool Execute(out PortCall[] call);
 
 #if UNITY_EDITOR
         /// <summary>
@@ -185,30 +225,6 @@ namespace Jungle
             UnityEditor.EditorUtility.SetDirty(this);
             return true;
         }
-
-        public void EnsureInitialized()
-        {
-            if (inputPort.PortType != InputInfo.PortType)
-            {
-                // ADD REQUEST FOR IF IT SHOULD REMOVE STUFF -----------------------------------------------------------
-                inputPort.PortType = InputInfo.PortType;
-                inputPort.Connections = Array.Empty<Node>();
-            }
-            if (outputPorts.Length != OutputInfo.Length)
-            {
-                outputPorts = new Port[OutputInfo.Length];
-            }
-            for (var i = 0; i < outputPorts.Length; i++)
-            {
-                if (outputPorts[i].PortType != OutputInfo[i].PortType)
-                {
-                    // ADD REQUEST FOR IF IT SHOULD REMOVE STUFF -------------------------------------------------------
-                    outputPorts[i].PortType = OutputInfo[i].PortType;
-                    outputPorts[i].Connections = Array.Empty<Node>();
-                }
-            }
-            UnityEditor.EditorUtility.SetDirty(this);
-        }
 #endif
     }
 
@@ -216,7 +232,7 @@ namespace Jungle
     /// Base port class. Used for both input and output ports
     /// </summary>
     [Serializable]
-    public struct Port
+    public class Port
     {
         /// <summary>
         /// List of nodes connected to this port that are children/parents of the node
@@ -227,11 +243,12 @@ namespace Jungle
             set => connections = value;
         }
         [SerializeField] [HideInInspector]
-        private Node[] connections;
+        private Node[] connections = Array.Empty<Node>();
         
         /// <summary>
         /// The accepted/sent value type this port is capable of
         /// *Port type name is limited to 128 bytes of memory
+        /// *Default type is "nothing"
         /// </summary>
         public Type PortType
         {
@@ -239,7 +256,7 @@ namespace Jungle
             set => portType = (FixedString128Bytes)value.AssemblyQualifiedName;
         }
         [SerializeField] [HideInInspector]
-        private FixedString128Bytes portType;
+        private FixedString128Bytes portType = (FixedString128Bytes)typeof(Nothing).AssemblyQualifiedName;
     }
 
     /// <summary>
@@ -266,7 +283,7 @@ namespace Jungle
     }
     
     /// <summary>
-    /// Default value case that contains no data
+    /// Data value used to define a data-less port
     /// </summary>
     public struct Nothing {}
     

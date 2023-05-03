@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Jungle.Nodes;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -27,34 +28,7 @@ namespace Jungle.Editor
             var graphPosition = node.NodeProperties.position;
             style.left = graphPosition.x;
             style.top = graphPosition.y;
-
-            switch (node.NodeColor)
-            {
-                case NodeAttribute.NodeColor.Red:
-                    AddToClassList("red");
-                    break;
-                case NodeAttribute.NodeColor.Orange:
-                    AddToClassList("orange");
-                    break;
-                case NodeAttribute.NodeColor.Yellow:
-                    AddToClassList("yellow");
-                    break;
-                case NodeAttribute.NodeColor.Green:
-                    AddToClassList("green");
-                    break;
-                case NodeAttribute.NodeColor.Blue:
-                    AddToClassList("blue");
-                    break;
-                case NodeAttribute.NodeColor.Purple:
-                    AddToClassList("purple");
-                    break;
-                case NodeAttribute.NodeColor.Violet:
-                    AddToClassList("violet");
-                    break;
-                case NodeAttribute.NodeColor.Grey:
-                    AddToClassList("grey");
-                    break;
-            }
+            AddToClassList(node.NodeColor.ToString().ToLower());
 
             if (node.GetType() != typeof(RootNode))
             {

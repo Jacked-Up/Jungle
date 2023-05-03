@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Jungle.Nodes;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -13,10 +14,10 @@ namespace Jungle.Editor
         #region Variables
 
         public Action<JungleNodeView> OnNodeSelected;
-        
-        private NodeTree _selectedNodeTree;
+        private NodeTree _selectedTree;
         private JungleNodeView _selectedNodeView;
-
+        private readonly Vector2 defaultRootNodePosition = new(120, 120);
+        
         #endregion
 
         public JungleGraphView()
@@ -35,7 +36,7 @@ namespace Jungle.Editor
 
             Undo.undoRedoPerformed += () =>
             {
-                PopulateView(_selectedNodeTree);
+                PopulateView(_selectedTree);
                 AssetDatabase.SaveAssets();
             };
         }
@@ -50,19 +51,19 @@ namespace Jungle.Editor
             };
         }
         
-        private void OnExecuteCommand(ExecuteCommandEvent evt)
+        private void OnExecuteCommand(ExecuteCommandEvent arg)
         {
             if (panel.GetCapturingElement(PointerId.mousePointerId) != null || _selectedNodeView == null) return;
-            if (evt.commandName == "Duplicate")
+            if (arg.commandName == "Duplicate")
             {
                 DuplicateNode(_selectedNodeView);
-                evt.StopPropagation();
+                arg.StopPropagation();
             }
-            if (!evt.isPropagationStopped || evt.imguiEvent == null) return;
-            evt.imguiEvent.Use();
+            if (!arg.isPropagationStopped || arg.imguiEvent == null) return;
+            arg.imguiEvent.Use();
         }
 
-        private JungleNodeView FindNodeView(Node node)
+        private JungleNodeView GetNodeView(Node node)
         {
             return GetNodeByGuid(node.NodeProperties.guid) as JungleNodeView;
         }
@@ -70,42 +71,38 @@ namespace Jungle.Editor
         public void PopulateView(NodeTree nodeTree)
         {
             if (nodeTree == null) return;
-            _selectedNodeTree = nodeTree;
+            _selectedTree = nodeTree;
 
-            //graphViewChanged -= GraphViewChangedCallback;
-            //DeleteElements(graphElements);
+            graphViewChanged -= GraphViewChangedCallback;
+            DeleteElements(graphElements);
             graphViewChanged += GraphViewChangedCallback;
 
-            if (_selectedNodeTree.rootNode == null)
+            if (_selectedTree.rootNode == null)
             {
-                _selectedNodeTree.rootNode = _selectedNodeTree.CreateNode(typeof(RootNode), new Vector2(120f, 120f)) as RootNode;
-                EditorUtility.SetDirty(_selectedNodeTree);
+                var root = _selectedTree.CreateNode(typeof(RootNode), defaultRootNodePosition) as RootNode;
+                _selectedTree.rootNode = root;
+                EditorUtility.SetDirty(_selectedTree);
                 AssetDatabase.SaveAssets();
             }
             
             // Creates node view and edges
-            _selectedNodeTree.nodes.ToList().ForEach(node =>
+            foreach (var node in _selectedTree.nodes)
             {
                 CreateNodeView(node);
-                node.EnsureInitialized();
-                
-                var parentView = FindNodeView(node);
-                var portIndex = 0;
-                node.OutputPorts.ToList().ForEach(port =>
+                for (var i = 0; i < node.OutputPorts.Length; i++)
                 {
-                    var outputPort = parentView.OutputPorts[portIndex];
-                    portIndex++;
-
-                    if (outputPort != null)
+                    foreach (var connection in node.OutputPorts[i].Connections)
                     {
-                        port.Connections.ToList().ForEach(child =>
+                        var outputNodeView = GetNodeView(node);
+                        var inputNodeView = GetNodeView(connection);
+                        if (outputNodeView.OutputPorts[i] != null)
                         {
-                            var edge = outputPort.ConnectTo(FindNodeView(child).InputPorts);
-                            AddElement(edge);
-                        });
+                            var edgeView = outputNodeView.OutputPorts[i].ConnectTo(inputNodeView.InputPorts);
+                            AddElement(edgeView);
+                        }
                     }
-                });
-            });
+                }
+            }
         }
 
         public override List<UnityEditor.Experimental.GraphView.Port> GetCompatiblePorts(UnityEditor.Experimental.GraphView.Port startPort, NodeAdapter _)
@@ -122,7 +119,7 @@ namespace Jungle.Editor
                 {
                     if (nodeView.Node.GetType() != typeof(RootNode))
                     {
-                        _selectedNodeTree.DeleteNode(nodeView.Node);
+                        _selectedTree.DeleteNode(nodeView.Node);
                         return;
                     }
                     rootNodeView = element;
@@ -131,7 +128,7 @@ namespace Jungle.Editor
                 {
                     var parentView = edge.output.node as JungleNodeView;
                     var childView = edge.input.node as JungleNodeView;
-                    _selectedNodeTree.RemoveConnection(parentView.Node, childView.Node);
+                    _selectedTree.RemoveConnection(parentView.Node, childView.Node);
                 }
             });
             graphViewChange.edgesToCreate?.ForEach(edge =>
@@ -139,7 +136,7 @@ namespace Jungle.Editor
                 var parentView = edge.output.node as JungleNodeView;
                 var childView = edge.input.node as JungleNodeView;
                 var nodeIndex = parentView.OutputPorts.IndexOf(edge.output);
-                _selectedNodeTree.CreateConnection(parentView.Node, childView.Node, nodeIndex);
+                _selectedTree.CreateConnection(parentView.Node, childView.Node, nodeIndex);
             });
             if (rootNodeView != null)
             {
@@ -155,7 +152,7 @@ namespace Jungle.Editor
         
         public void CreateNode(Type nodeType, Vector2 position)
         {
-            var node = _selectedNodeTree.CreateNode(nodeType, position);
+            var node = _selectedTree.CreateNode(nodeType, position);
             CreateNodeView(node);
         }
 
@@ -163,7 +160,7 @@ namespace Jungle.Editor
         {
             if (nodeView.Node is RootNode) return;
             var nodeReference = nodeView.Node;
-            var nodeCopy = _selectedNodeTree.DuplicateNode(nodeReference);
+            var nodeCopy = _selectedTree.DuplicateNode(nodeReference);
             CreateNodeView(nodeCopy);
         }
         

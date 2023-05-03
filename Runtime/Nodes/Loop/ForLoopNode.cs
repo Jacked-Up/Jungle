@@ -25,13 +25,13 @@ namespace Jungle.Nodes.Loop
         
         #endregion
 
-        public override void Start(in object inputValue)
+        public override void Initialize(in object inputValue)
         {
             _increment = 0;
             _nextInvokeTime = 0f;
         }
 
-        public override bool Update(out PortCall[] call)
+        public override bool Execute(out PortCall[] call)
         {
             if (UnityEngine.Time.unscaledTime >= _nextInvokeTime && _increment < incrementCount)
             {

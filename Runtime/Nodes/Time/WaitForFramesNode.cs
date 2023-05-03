@@ -24,12 +24,12 @@ namespace Jungle.Nodes.Time
             if (frames < 0) frames = 0;
         }
 
-        public override void Start(in object inputValue)
+        public override void Initialize(in object inputValue)
         {
             _frameIndex = 0;
         }
 
-        public override bool Update(out PortCall[] call)
+        public override bool Execute(out PortCall[] call)
         {
             _frameIndex++;
             if (_frameIndex < frames)

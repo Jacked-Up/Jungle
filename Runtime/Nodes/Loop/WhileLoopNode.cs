@@ -17,12 +17,12 @@ namespace Jungle.Nodes.Loop
 
         #endregion
 
-        public override void Start(in object inputValue)
+        public override void Initialize(in object inputValue)
         {
             
         }
 
-        public override bool Update(out PortCall[] call)
+        public override bool Execute(out PortCall[] call)
         {
             if (Tree.ExecutingNodes.Any(executingNode => nodes.Any(node => node == executingNode)))
             {

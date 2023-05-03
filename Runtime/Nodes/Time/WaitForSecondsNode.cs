@@ -27,14 +27,14 @@ namespace Jungle.Nodes.Time
             duration = Mathf.Clamp(duration, 0f, Mathf.Infinity);
         }
 
-        public override void Start(in object inputValue)
+        public override void Initialize(in object inputValue)
         {
             _startTime = scaledTime
                 ? UnityEngine.Time.time
                 : UnityEngine.Time.unscaledTime;
         }
 
-        public override bool Update(out PortCall[] call)
+        public override bool Execute(out PortCall[] call)
         {
             var currentTime = scaledTime
                 ? UnityEngine.Time.time

@@ -16,12 +16,12 @@ namespace Jungle.Nodes.Stop
 
         #endregion
 
-        public override void Start(in object inputValue)
+        public override void Initialize(in object inputValue)
         {
             
         }
 
-        public override bool Update(out PortCall[] call)
+        public override bool Execute(out PortCall[] call)
         {
             foreach (var node in nodesToStop)
             {

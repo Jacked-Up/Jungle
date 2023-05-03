@@ -1,4 +1,4 @@
-﻿namespace Jungle
+﻿namespace Jungle.Nodes
 {
     [Node(TitleName = "Start", 
         Category = "HIDDEN", 
@@ -7,12 +7,12 @@
     )]
     public class RootNode : Node
     {
-        public override void Start(in object inputValue)
+        public override void Initialize(in object inputValue)
         {
             
         }
 
-        public override bool Update(out PortCall[] call)
+        public override bool Execute(out PortCall[] call)
         {
             call = new[] {new PortCall(0, new Nothing())};
             return true;
