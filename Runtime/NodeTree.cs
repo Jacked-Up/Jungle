@@ -93,7 +93,7 @@ namespace Jungle
 #endif
                         continue;
                     }
-                    foreach (var connection in node.OutputPorts[call.PortID].Connections)
+                    foreach (var connection in node.OutputPorts[call.PortID].connections)
                     {
                         connection.Initialize(call.Value);
                     }

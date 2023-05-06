@@ -7,7 +7,7 @@ namespace Jungle
     /// <summary>
     /// The Jungle sequencer base node class
     /// </summary>
-    [Node]
+    [Serializable] [Node]
     public class Node : ScriptableObject, INode
     {
         #region Variables
@@ -15,37 +15,22 @@ namespace Jungle
         /// <summary>
         /// Reference to the tree which this node is a child of
         /// </summary>
-        public NodeTree Tree
-        {
-            get => tree;
-            set => tree = value;
-        }
-
-        [SerializeField] [HideInInspector]
-        private NodeTree tree;
+        [SerializeField] [HideInInspector] 
+        public NodeTree tree;
 
         /// <summary>
         /// 
         /// </summary>
-        public Port InputPort
-        {
-            get => inputPort;
-            private set => inputPort = value;
-        }
-
+        public Port InputPort => inputPort;
         [SerializeField] [HideInInspector] 
         private Port inputPort;
 
         /// <summary>
         /// Array of the nodes output ports
         /// </summary>
-        public Port[] OutputPorts
-        {
-            get => outputPorts;
-            private set => outputPorts = value;
-        }
+        public List<Port> OutputPorts => outputPorts;
         [SerializeField] [HideInInspector] 
-        private Port[] outputPorts = Array.Empty<Port>();
+        private List<Port> outputPorts = new();
 
         /// <summary>
         /// True if the node has ever been run
@@ -127,16 +112,29 @@ namespace Jungle
         /// <param name="index">Output port index</param>
         public void AddOutputConnection(Node node, int index)
         {
+            var outputPortList = new List<Port>();
+            for (var i = 0; i < OutputInfo.Length; i++)
+            {
+                if (i > OutputPorts.Length)
+                {
+                    outputPortList.Add(new Port(Array.Empty<>()));
+                    continue;
+                }
+                if (OutputPorts[])
+            }
+            foreach (var info in OutputInfo)
+            {
+                
+            }
+            
             if (OutputPorts.Length != OutputInfo.Length)
             {
-                Debug.Log("A");
-                
                 var portQuery = new List<Port>();
                 foreach (var info in OutputInfo)
                 {
                     portQuery.Add(new Port(Array.Empty<Node>(), info.PortType));
                 }
-                OutputPorts = portQuery.ToArray();
+                outputPorts = portQuery.ToArray();
             }
             
             var portsList = new List<Port>();
@@ -147,7 +145,7 @@ namespace Jungle
                     portsList.Add(OutputPorts[i]);
                     continue;
                 }
-                var connectionsList = new List<Node>(OutputPorts[i].Connections);
+                var connectionsList = new List<Node>(OutputPorts[i].connections);
                 if (connectionsList.Contains(node))
                 {
                     portsList.Add(OutputPorts[i]);
@@ -168,7 +166,7 @@ namespace Jungle
             var portList = new List<Port>(OutputPorts);
             for (var i = 0; i < portList.Count; i++)
             {
-                var connectionsList = new List<Node>(portList[i].Connections);
+                var connectionsList = new List<Node>(portList[i].connections);
                 if (!connectionsList.Contains(node)) continue;
                 connectionsList.Remove(node);
                 portList[i] = new Port(connectionsList.ToArray(), portList[i].PortType);
@@ -183,13 +181,13 @@ namespace Jungle
         /// <param name="node"></param>
         public void AddInputConnection(Node node)
         {
-            var connectionsList = new List<Node>(inputPort.Connections);
+            var connectionsList = new List<Node>(inputPort.connections);
             if (connectionsList.Contains(node))
             {
                 return;
             }
             connectionsList.Add(node);
-            inputPort.Connections = connectionsList.ToArray();
+            inputPort.connections = connectionsList;
             UnityEditor.EditorUtility.SetDirty(this);
         }
 
@@ -199,13 +197,13 @@ namespace Jungle
         /// <param name="node"></param>
         public void RemoveInputConnection(Node node)
         {
-            var connectionsList = new List<Node>(inputPort.Connections);
+            var connectionsList = new List<Node>(inputPort.connections);
             if (!connectionsList.Contains(node))
             {
                 return;
             }
             connectionsList.Remove(node);
-            inputPort.Connections = connectionsList.ToArray();
+            inputPort.connections = connectionsList;
             UnityEditor.EditorUtility.SetDirty(this);
         }
 #endif
@@ -218,19 +216,10 @@ namespace Jungle
     public struct Port
     {
         /// <summary>
-        /// List connections to this port
+        /// List of the nodes that are connected to this port
         /// </summary>
-        public Node[] Connections
-        {
-            get
-            {
-                connections ??= Array.Empty<Node>();
-                return connections;
-            }
-            set => connections = value;
-        }
-        [SerializeField] [HideInInspector] 
-        private Node[] connections;
+        [SerializeField] [HideInInspector]
+        public List<Node> connections;
 
         /// <summary>
         /// The value type that can be called at this port
@@ -252,8 +241,9 @@ namespace Jungle
         [SerializeField] [HideInInspector] 
         private string portType;
 
-        public Port(Node[] connections, Type portType)
+        public Port(List<Node> connections, Type portType)
         {
+            connections ??= new List<Node>();
             this.connections = connections;
             this.portType = portType.AssemblyQualifiedName;
         }
@@ -308,7 +298,6 @@ namespace Jungle
         /// The color of the node in the visual editor
         /// </summary>
         public NodeColor Color { get; set; } = NodeColor.Blue;
-
         public enum NodeColor
         {
             Red,
@@ -353,11 +342,6 @@ namespace Jungle
         {
             get
             {
-                if (OutputPortTypes.Length != 0 && OutputPortNames.Length != OutputPortTypes.Length)
-                {
-                    Debug.LogError($"[Node] {TitleName}s port names and port types do not match in count");
-                }
-
                 var query = new List<PortInfo>();
                 for (var i = 0; i < OutputPortNames.Length; i++)
                 {
@@ -367,7 +351,6 @@ namespace Jungle
                         : typeof(Nothing);
                     query.Add(new PortInfo(portName, portType));
                 }
-
                 return query.ToArray();
             }
         }
