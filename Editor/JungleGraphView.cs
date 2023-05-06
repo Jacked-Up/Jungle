@@ -82,13 +82,13 @@ namespace Jungle.Editor
                 
                 var outputNodePortViews = GetNodeView(node)?.OutputPortViews;
                 if (outputNodePortViews == null) continue;
-                foreach (var outputPort in node.outputPorts)
+                foreach (var outputPort in node.OutputPorts)
                 {
-                    foreach (var connection in outputPort.connections)
+                    foreach (var connection in outputPort.Connections)
                     {
                         var inputNodePortView = GetNodeView(connection)?.InputPortView;
                         if (inputNodePortView == null) continue;
-                        AddElement(outputNodePortViews[outputPort.connections.IndexOf(connection)].ConnectTo(inputNodePortView));
+                        AddElement(outputNodePortViews[outputPort.Connections.ToList().IndexOf(connection)].ConnectTo(inputNodePortView));
                     }
                 }
             }

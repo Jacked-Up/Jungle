@@ -86,14 +86,14 @@ namespace Jungle
                 var finished = node.Execute(out var portCalls);
                 foreach (var call in portCalls)
                 {
-                    if (call.PortID > node.outputPorts.Count - 1)
+                    if (call.PortID > node.OutputPorts.Length - 1)
                     {
 #if UNITY_EDITOR
                         Debug.LogError($"[{name}] {node.name} attempted to call an output port that is out of the index range");        
 #endif
                         continue;
                     }
-                    foreach (var connection in node.outputPorts[call.PortID].connections)
+                    foreach (var connection in node.OutputPorts[call.PortID].Connections)
                     {
                         connection.Initialize(call.Value);
                     }
