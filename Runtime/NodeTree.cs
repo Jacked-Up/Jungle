@@ -83,28 +83,26 @@ namespace Jungle
             var query = new List<Node>(ExecutingNodes);
             foreach (var node in ExecutingNodes)
             {
-                var verdict = node.Execute(out var portCalls);
+                var finished = node.Execute(out var portCalls);
                 foreach (var call in portCalls)
                 {
-                    if (call.Index < 0 || call.Index > node.OutputPorts.Length - 1)
+                    if (call.PortID > node.outputPorts.Count - 1)
                     {
 #if UNITY_EDITOR
                         Debug.LogError($"[{name}] {node.name} attempted to call an output port that is out of the index range");        
 #endif
                         continue;
                     }
-                    foreach (var connection in node.OutputPorts[call.Index].Connections)
+                    foreach (var connection in node.outputPorts[call.PortID].connections)
                     {
                         connection.Initialize(call.Value);
                     }
                 }
-                if (verdict)
-                {
-                    query.Remove(node);
-                }
+                // Remove from query if the node is finished executing
+                if (finished) query.Remove(node);
             }
             // Populate executing nodes with new query ONLY if it has changed
-            // I believe this prevents the list from redundantly reallocating new memory
+            // I believe this prevents the list from redundantly reallocating new memory. I could be wrong
             if (!ExecutingNodes.Equals(query)) ExecutingNodes = query;
             if (ExecutingNodes.Count == 0) State = TreeState.Finished;
         }
@@ -148,6 +146,7 @@ namespace Jungle
             AssetDatabase.AddObjectToAsset(node, this);
             Undo.RegisterCreatedObjectUndo(node, $"Added {node.name} to tree");
             EditorUtility.SetDirty(this);
+            AssetDatabase.SaveAssets();
             
             return node;
         }
@@ -187,7 +186,8 @@ namespace Jungle
             AssetDatabase.AddObjectToAsset(node, this);
             Undo.RegisterCreatedObjectUndo(node, $"Added {node.name} to tree");
             EditorUtility.SetDirty(this);
-
+            AssetDatabase.SaveAssets();
+            
             return node;
         }
         
@@ -203,6 +203,7 @@ namespace Jungle
             query.Remove(node);
             Undo.DestroyObjectImmediate(node);
             nodes = query.ToArray();
+            AssetDatabase.SaveAssets();
         }
 
         /// <summary>
@@ -214,10 +215,8 @@ namespace Jungle
         public void CreateConnection(Node parent, Node child, int index)
         {
             Undo.RecordObject(parent, $"Added edge to {parent.name}");
-            if (parent.AddOutputConnection(child, index))
-            {
-                child.AddInputConnection(parent);
-            }
+            parent.AddOutputConnection(child, index);
+            child.AddInputConnection(parent);
         }
         
         /// <summary>
@@ -228,10 +227,8 @@ namespace Jungle
         public void RemoveConnection(Node parent, Node child)
         {
             Undo.RecordObject(parent, $"Removed edge from {parent.name}");
-            if (parent.RemoveOutputConnection(child))
-            {
-                child.RemoveInputConnection(parent);
-            }
+            parent.RemoveOutputConnection(child);
+            child.RemoveInputConnection(parent);
         }
 #endif
     }

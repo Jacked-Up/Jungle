@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using Unity.Collections;
 using UnityEngine;
 
 namespace Jungle
@@ -10,10 +8,10 @@ namespace Jungle
     /// The Jungle sequencer base node class
     /// </summary>
     [Node]
-    public abstract class Node : ScriptableObject, INode
+    public class Node : ScriptableObject, INode
     {
         #region Variables
-        
+
         /// <summary>
         /// Reference to the tree which this node is a child of
         /// </summary>
@@ -22,62 +20,23 @@ namespace Jungle
             get => tree;
             set => tree = value;
         }
-        [SerializeField] [HideInInspector] 
+
+        [SerializeField] [HideInInspector]
         private NodeTree tree;
 
         /// <summary>
         /// 
         /// </summary>
-        public Port InputPort
-        {
-            get
-            {
-#if UNITY_EDITOR
-                if (inputPort.PortType != InputInfo.PortType)
-                {
-                    Debug.LogError($"[{name}] Input port connections have been lost because the port type changed" +
-                                   $"\nWas type {inputPort.PortType} and is now type {InputInfo.PortType}");
-                    inputPort.PortType = InputInfo.PortType;
-                    inputPort.Connections = Array.Empty<Node>();
-                    UnityEditor.EditorUtility.SetDirty(this);
-                }
-#endif
-                return inputPort;
-            }
-        }
-        [SerializeField] [HideInInspector]
-        private Port inputPort;
+        //public Port InputPort => inputPort;
+        [SerializeField] [HideInInspector] 
+        public Port inputPort;
 
         /// <summary>
         /// Array of the nodes output ports
         /// </summary>
-        public Port[] OutputPorts
-        {
-            get
-            {
-#if UNITY_EDITOR
-                if (outputPorts.Length != OutputInfo.Length)
-                {
-                    outputPorts = new Port[OutputInfo.Length];
-                    //UnityEditor.EditorUtility.SetDirty(this); <- Redundant
-                }
-                for (var i = 0; i < outputPorts.Length; i++)
-                {
-                    if (outputPorts[i].PortType != OutputInfo[i].PortType)
-                    {
-                        Debug.LogError($"[{name}] Output port {i.ToString()} connections have been lost because the port type changed" +
-                                       $"\nWas type {outputPorts[i].PortType} and is now type {OutputInfo[i].PortType}");
-                        outputPorts[i].PortType = OutputInfo[i].PortType;
-                        outputPorts[i].Connections = Array.Empty<Node>();
-                        UnityEditor.EditorUtility.SetDirty(this);
-                    }
-                }
-#endif
-                return outputPorts;
-            }
-        }
-        [SerializeField] [HideInInspector]
-        private Port[] outputPorts;
+        //public List<Port> OutputPorts => outputPorts;
+        [SerializeField] [HideInInspector] 
+        public Port[] outputPorts;
 
         /// <summary>
         /// True if the node has ever been run
@@ -91,14 +50,18 @@ namespace Jungle
         /// *Invoked before the update method
         /// </summary>
         /// <param name="inputValue">The input value returned by the parent node</param>
-        public abstract void Initialize(in object inputValue);
+        public virtual void Initialize(in object inputValue) { }
 
         /// <summary>
         /// Invoked every frame just like the Unity update event method
         /// </summary>
         /// <param name="call">Ports to invoke during this update call</param>
         /// <returns>Returns true if the node has declared it is finished executing. Returns false if not</returns>
-        public abstract bool Execute(out PortCall[] call);
+        public virtual bool Execute(out PortCall[] call)
+        {
+            call = new PortCall[] {new(0, new Nothing())};
+            return true;
+        }
 
 #if UNITY_EDITOR
         /// <summary>
@@ -114,22 +77,22 @@ namespace Jungle
                 UnityEditor.EditorUtility.SetDirty(this);
             }
         }
-        [SerializeField] [HideInInspector]
-        private NodeProperties nodeProperties;
+
+        [SerializeField] [HideInInspector] private NodeProperties nodeProperties;
 
         private NodeAttribute NodeInfo
-            => (NodeAttribute)GetType().GetCustomAttributes(typeof(NodeAttribute), true)[0];
-        
+            => (NodeAttribute) GetType().GetCustomAttributes(typeof(NodeAttribute), true)[0];
+
         /// <summary>
         /// Main name of the node displayed in big letters inside the Jungle editor graph view
         /// </summary>
         public string TitleName => NodeInfo.TitleName;
-        
+
         /// <summary>
         /// Category placement of the node inside the create node window 
         /// </summary>
         public string Category => NodeInfo.Category;
-        
+
         /// <summary>
         /// Displayed color of the node inside the Jungle editor graph view
         /// </summary>
@@ -139,91 +102,94 @@ namespace Jungle
         /// Name and data type info about the input port
         /// </summary>
         public NodeAttribute.PortInfo InputInfo => NodeInfo.InputInfo;
-        
+
         /// <summary>
         /// Name and data type info about the output ports
         /// </summary>
         public NodeAttribute.PortInfo[] OutputInfo => NodeInfo.OutputInfo;
-        
+
         /// <summary>
         /// Adds a child node to the specified output port index (EDITOR ONLY)
         /// </summary>
         /// <param name="node">Node to add as a connection</param>
         /// <param name="index">Output port index</param>
-        public bool AddOutputConnection(Node node, int index)
+        public void AddOutputConnection(Node node, int index)
         {
-            if (OutputPorts.Length != OutputInfo.Length)
+            if (outputPorts.Length != OutputInfo.Length)
             {
-                if (OutputPorts.Length != 0)
+                var typeRepairedOutputPortList = new List<Port>(OutputInfo.Length);
+                for (var i = 0; i < outputPorts.Length; i++)
                 {
-                    Debug.Log($"[{name}] Outputs have been re-cached. This could mean a loss of connections");
+                    outputPorts[i] = new Port(outputPorts[i].connections, OutputInfo[i].PortType);
                 }
-                outputPorts = new Port[OutputInfo.Length];
+                outputPorts = typeRepairedOutputPortList;
             }
-            if (OutputPorts[index].Connections.Contains(node))
+            if (index > outputPorts.Count - 1 || outputPorts[index].connections.Contains(node))
             {
-                Debug.LogWarning($"[{name}] {node.name} attempted to make connection to output but is already connected");
-                return false;
+                return;
             }
-            outputPorts[index].Connections = new List<Node>(outputPorts[index].Connections) {node}.ToArray();
+            
+            var outputPortsQuery = new List<Port>(outputPorts);
+            
+            
+            var outputPort = outputPortsQuery[index];
+            var outputPortConnections = new List<Node>(outputPort.connections) {node};
+            outputPort.connections = outputPortConnections;
             UnityEditor.EditorUtility.SetDirty(this);
-            return true;
+
+            outputPorts = outputPortsQuery;
         }
 
         /// <summary>
         /// Removes the node as a child of this node
         /// </summary>
         /// <param name="node">Node to remove as a connection</param>
-        public bool RemoveOutputConnection(Node node)
+        public void RemoveOutputConnection(Node node)
         {
-            if (OutputPorts.Length == 0) return false;
-            for (var i = 0; i < OutputPorts.Length; i++)
+            var outputPortsQuery = new List<Port>(outputPorts);
+            foreach (var port in outputPorts)
             {
-                if (!OutputPorts[i].Connections.Contains(node))
+                if (!port.connections.Contains(node))
                 {
                     continue;
                 }
-                var query = new List<Node>(outputPorts[i].Connections);
-                query.Remove(node);
-                outputPorts[i].Connections = query.ToArray();
+                var portConnections = new List<Node>(port.connections);
+                portConnections.Remove(node);
+                outputPortsQuery.Add(new Port(portConnections, port.PortType));
                 UnityEditor.EditorUtility.SetDirty(this);
-                return true;
             }
-            Debug.LogWarning($"[{name}] Failed to remove node connection with name {node.name}");
-            return false;
+            if (!outputPortsQuery.Equals(outputPorts))
+            {
+                outputPorts = outputPortsQuery;
+            }
         }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="node"></param>
-        public bool AddInputConnection(Node node)
+        public void AddInputConnection(Node node)
         {
-            if (InputPort.Connections.Contains(node))
+            if (inputPort.connections.Contains(node))
             {
-                Debug.LogWarning($"[{name}] {node.name} attempted to make connection to input but is already connected");
-                return false;
+                return;
             }
-            inputPort.Connections = new List<Node>(inputPort.Connections) {node}.ToArray();
+            inputPort.connections.Add(node);
             UnityEditor.EditorUtility.SetDirty(this);
-            return true;
         }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="node"></param>
-        public bool RemoveInputConnection(Node node)
+        public void RemoveInputConnection(Node node)
         {
-            if (!InputPort.Connections.Contains(node))
+            if (!inputPort.connections.Contains(node))
             {
-                return false;
+                return;
             }
-            var query = new List<Node>(inputPort.Connections);
-            query.Remove(node);
-            inputPort.Connections = query.ToArray();
+            inputPort.connections.Remove(node);
             UnityEditor.EditorUtility.SetDirty(this);
-            return true;
         }
 #endif
     }
@@ -232,84 +198,69 @@ namespace Jungle
     /// Base port class. Used for both input and output ports
     /// </summary>
     [Serializable]
-    public class Port
+    public struct Port
     {
         /// <summary>
-        /// List of nodes connected to this port that are children/parents of the node
+        /// List connections to this port
         /// </summary>
-        public Node[] Connections
-        {
-            get => connections;
-            set => connections = value;
-        }
-        [SerializeField] [HideInInspector]
-        private Node[] connections = Array.Empty<Node>();
-        
+        [SerializeField] [HideInInspector] public List<Node> connections;
+
         /// <summary>
-        /// The accepted/sent value type this port is capable of
-        /// *Port type name is limited to 128 bytes of memory
-        /// *Default type is "nothing"
+        /// The value type that can be called at this port
+        /// *Default type is "Nothing". Use type nothing to signify the port sends/receives no data
         /// </summary>
         public Type PortType
         {
-            get => Type.GetType(portType.ToString());
-            set => portType = (FixedString128Bytes)value.AssemblyQualifiedName;
+            get
+            {
+                if (string.IsNullOrEmpty(portType))
+                {
+                    portType = typeof(Nothing).AssemblyQualifiedName;
+                    return typeof(Nothing);
+                }
+
+                return Type.GetType(portType);
+            }
         }
-        [SerializeField] [HideInInspector]
-        private FixedString128Bytes portType = (FixedString128Bytes)typeof(Nothing).AssemblyQualifiedName;
+
+        [SerializeField] [HideInInspector] private string portType;
+
+        public Port(List<Node> connections, Type portType)
+        {
+            this.connections = connections;
+            this.portType = portType.AssemblyQualifiedName;
+        }
     }
 
     /// <summary>
-    /// Calls out a port at the index with a the object value
-    /// *Property of name "Value" is sent to the connected port
+    /// Container that stores the port ID and the value to send to the port
     /// </summary>
     public struct PortCall
     {
         /// <summary>
-        /// Index of the port to callout
+        /// ID of the port to send the value to 
         /// </summary>
-        public byte Index { get; private set; }
-        
+        public byte PortID { get; private set; }
+
         /// <summary>
         /// Value to send out of the requested port
         /// </summary>
         public object Value { get; private set; }
 
-        public PortCall(byte index, object value)
+        public PortCall(byte portID, object value)
         {
-            Index = index;
+            PortID = portID;
             Value = value;
         }
     }
-    
+
     /// <summary>
     /// Data value used to define a data-less port
     /// </summary>
-    public struct Nothing {}
-    
-#if UNITY_EDITOR
-    /// <summary>
-    /// Details about the port used in the Jungle editor
-    /// </summary>
-    [Serializable]
-    public struct NodeProperties
+    public struct Nothing
     {
-        /// <summary>
-        /// The unique GUID of the node
-        /// </summary>
-        public string guid;
-        
-        /// <summary>
-        /// The contextual name of the node in the graph view
-        /// </summary>
-        public string viewName;
-        
-        /// <summary>
-        /// Position of the node inside the graph view
-        /// </summary>
-        public Vector2 position;
     }
-    
+
     /// <summary>
     /// Jungle node declaration attribute
     /// </summary>
@@ -320,16 +271,17 @@ namespace Jungle
         /// The name the node goes by
         /// </summary>
         public string TitleName { get; set; } = "Untitled Node";
-        
+
         /// <summary>
         /// ...
         /// </summary>
         public string Category { get; set; } = string.Empty;
-        
+
         /// <summary>
         /// The color of the node in the visual editor
         /// </summary>
         public NodeColor Color { get; set; } = NodeColor.Blue;
+
         public enum NodeColor
         {
             Red,
@@ -378,6 +330,7 @@ namespace Jungle
                 {
                     Debug.LogError($"[Node] {TitleName}s port names and port types do not match in count");
                 }
+
                 var query = new List<PortInfo>();
                 for (var i = 0; i < OutputPortNames.Length; i++)
                 {
@@ -387,6 +340,7 @@ namespace Jungle
                         : typeof(Nothing);
                     query.Add(new PortInfo(portName, portType));
                 }
+
                 return query.ToArray();
             }
         }
@@ -405,6 +359,29 @@ namespace Jungle
                 PortType = portType;
             }
         }
+    }
+
+#if UNITY_EDITOR
+    /// <summary>
+    /// Details about the node in the Jungle editor like GUID, position, and view name
+    /// </summary>
+    [Serializable]
+    public struct NodeProperties
+    {
+        /// <summary>
+        /// The unique GUID of the node
+        /// </summary>
+        public string guid;
+
+        /// <summary>
+        /// The contextual name of the node in the graph view
+        /// </summary>
+        public string viewName;
+
+        /// <summary>
+        /// Position of the node inside the graph view
+        /// </summary>
+        public Vector2 position;
     }
 #endif
 }

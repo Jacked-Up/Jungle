@@ -47,7 +47,7 @@ namespace Jungle.Editor
             _graphView = rootVisualElement.Q<JungleGraphView>();
             _graphView.OnNodeSelected = nodeView =>
             {
-                _graphView.UpdateSelection(nodeView);
+                _graphView.SelectedNodeView = nodeView;
                 _inspectorView.UpdateSelection(nodeView);
             };
             _activeNodeTree = Selection.activeObject as NodeTree;
@@ -66,7 +66,7 @@ namespace Jungle.Editor
             if (nodeTree == null) return;
             var titleLabel = rootVisualElement.Q<Label>("tree-name-label");
             titleLabel.text = nodeTree.name;
-            _graphView.PopulateView(nodeTree);
+            _graphView.PopulateGraphView(nodeTree);
         }
     }
 }

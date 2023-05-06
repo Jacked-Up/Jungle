@@ -18,7 +18,7 @@ namespace Jungle.Editor
         {
             Clear();
             Object.DestroyImmediate(_nodeInspector);
-            _nodeInspector = UnityEditor.Editor.CreateEditor(nodeView.Node);
+            _nodeInspector = UnityEditor.Editor.CreateEditor(nodeView.NodeInstance);
             var container = new IMGUIContainer(() =>
             {
                 if (_nodeInspector.target != null)
