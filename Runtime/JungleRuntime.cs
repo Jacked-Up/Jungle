@@ -9,13 +9,13 @@ namespace Jungle
         #region Variables
 
         /// <summary>
-        /// Returns a list of executing node trees. (Includes both persistent and non-persistent trees)
+        /// List of executing node trees. (Includes both persistent and non-persistent trees)
         /// </summary>
-        public List<NodeTree> ExecutingTrees
+        public List<Tree> ExecutingTrees
         {
             get
             {
-                var combinedList = new List<NodeTree>();
+                var combinedList = new List<Tree>();
                 combinedList.AddRange(_persistentExecutingTrees);
                 combinedList.AddRange(_nonPersistentExecutingTrees);
                 return combinedList;
@@ -23,7 +23,7 @@ namespace Jungle
         }
        
         /// <summary>
-        /// 
+        /// Jungle runtime mono behaviour reference
         /// </summary>
         public static JungleRuntime Singleton
         {
@@ -31,8 +31,8 @@ namespace Jungle
             private set;
         }
         
-        private List<NodeTree> _persistentExecutingTrees = new List<NodeTree>();
-        private List<NodeTree> _nonPersistentExecutingTrees = new List<NodeTree>();
+        private List<Tree> _persistentExecutingTrees = new();
+        private List<Tree> _nonPersistentExecutingTrees = new();
 
         #endregion
 
@@ -61,10 +61,10 @@ namespace Jungle
 
         private void Update()
         {
-            var query = new List<NodeTree>();
+            var query = new List<Tree>();
             foreach (var nodeTree in ExecutingTrees)
             {
-                if (nodeTree.State == NodeTree.TreeState.Finished)
+                if (nodeTree.State == Tree.TreeState.Finished)
                 {
                     query.Add(nodeTree);
                     continue;
@@ -80,54 +80,54 @@ namespace Jungle
         /// <summary>
         /// Initializes and executes a node tree.
         /// </summary>
-        /// <param name="nodeTree">Node tree to add to execution queue.</param>
+        /// <param name="tree">Node tree to add to execution queue.</param>
         /// <param name="persistent">If the node tree should persist between scene changes.</param>
         /// <returns>True if the node tree was initialized and queued for execution.</returns>
-        public bool StartTree(NodeTree nodeTree, bool persistent)
+        public bool StartTree(Tree tree, bool persistent)
         {
-            _persistentExecutingTrees ??= new List<NodeTree>();
-            _nonPersistentExecutingTrees ??= new List<NodeTree>();
-            if (ExecutingTrees.Contains(nodeTree))
+            _persistentExecutingTrees ??= new List<Tree>();
+            _nonPersistentExecutingTrees ??= new List<Tree>();
+            if (ExecutingTrees.Contains(tree))
             {
 #if UNITY_EDITOR
-                Debug.LogWarning($"[Jungle Runtime] Attempt to start {nodeTree.name} but it was already running");
+                Debug.LogWarning($"[Jungle Runtime] Attempt to start {tree.name} but it was already running");
 #endif
                 return false;
             }
             if (persistent)
             {
-                _persistentExecutingTrees.Add(nodeTree);
+                _persistentExecutingTrees.Add(tree);
             }
             else
             {
-                _nonPersistentExecutingTrees.Add(nodeTree);
+                _nonPersistentExecutingTrees.Add(tree);
             }
-            nodeTree.Start();
+            tree.Start();
             return true;
         }
         
         /// <summary>
         /// Stops the execution of a node tree.
         /// </summary>
-        /// <param name="nodeTree">Node tree to remove from execution.</param>
+        /// <param name="tree">Node tree to remove from execution.</param>
         /// <returns>True if the node tree was remove from the execution queue.</returns>
-        public bool StopTree(NodeTree nodeTree)
+        public bool StopTree(Tree tree)
         {
-            _persistentExecutingTrees ??= new List<NodeTree>();
-            _nonPersistentExecutingTrees ??= new List<NodeTree>();
-            if (!ExecutingTrees.Contains(nodeTree))
+            _persistentExecutingTrees ??= new List<Tree>();
+            _nonPersistentExecutingTrees ??= new List<Tree>();
+            if (!ExecutingTrees.Contains(tree))
             {
                 return false;
             }
-            if (_persistentExecutingTrees.Contains(nodeTree))
+            if (_persistentExecutingTrees.Contains(tree))
             {
-                _persistentExecutingTrees.Remove(nodeTree);
+                _persistentExecutingTrees.Remove(tree);
             }
-            else if (_nonPersistentExecutingTrees.Contains(nodeTree))
+            else if (_nonPersistentExecutingTrees.Contains(tree))
             {
-                _nonPersistentExecutingTrees.Remove(nodeTree);
+                _nonPersistentExecutingTrees.Remove(tree);
             }
-            nodeTree.Stop();
+            tree.Stop();
             return true;
         }
 
@@ -147,7 +147,7 @@ namespace Jungle
         
         private void SceneUnloadedCallback(Scene _)
         {
-            _nonPersistentExecutingTrees ??= new List<NodeTree>(); 
+            _nonPersistentExecutingTrees ??= new List<Tree>(); 
             foreach (var nodeTree in _nonPersistentExecutingTrees)
             {
                 StopTree(nodeTree);

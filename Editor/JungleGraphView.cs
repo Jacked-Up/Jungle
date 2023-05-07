@@ -17,7 +17,7 @@ namespace Jungle.Editor
         public Action<JungleNodeView> OnNodeSelected { get; set; }
         
         private readonly Vector2 defaultRootNodePosition = new(100, 120);
-        private NodeTree _selectedTree;
+        private Tree _selectedTree;
 
         #endregion
 
@@ -32,7 +32,7 @@ namespace Jungle.Editor
             
             RegisterCallback<ExecuteCommandEvent>(ExecuteCommandCallback);
             
-            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(JungleEditor.STYLE_SHEET_PATH);
+            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(JungleEditor.STYLE_SHEET_FILE_PATH);
             styleSheets.Add(styleSheet);
 
             Undo.undoRedoPerformed += () =>
@@ -53,10 +53,10 @@ namespace Jungle.Editor
             AddElement(nodeView);
         }
         
-        public void PopulateGraphView(NodeTree nodeTree)
+        public void PopulateGraphView(Tree tree)
         {
-            if (nodeTree == null) return;
-            _selectedTree = nodeTree;
+            if (tree == null) return;
+            _selectedTree = tree;
 
             graphViewChanged -= GraphViewChangedCallback;
             DeleteElements(graphElements);
@@ -104,6 +104,7 @@ namespace Jungle.Editor
 
         private JungleNodeView GetNodeView(Node node)
         {
+            if (node == null) return null;
             return GetNodeByGuid(node.NodeProperties.guid) as JungleNodeView;
         }
         
@@ -149,7 +150,7 @@ namespace Jungle.Editor
                 {
                     if (edge.output.node is JungleNodeView parentView && edge.input.node is JungleNodeView childView)
                     {
-                        _selectedTree.RemoveConnection(parentView.NodeInstance, childView.NodeInstance);
+                        _selectedTree.RemoveConnection(parentView.NodeInstance, childView.NodeInstance, 0);
                     }
                 }
             }
@@ -164,8 +165,8 @@ namespace Jungle.Editor
             {
                 if (edge.output.node is JungleNodeView parentView && edge.input.node is JungleNodeView childView)
                 {
-                    var nodeIndex = parentView.OutputPortViews.IndexOf(edge.output);
-                    _selectedTree.CreateConnection(parentView.NodeInstance, childView.NodeInstance, nodeIndex);
+                    var nodeIndex = (byte)parentView.OutputPortViews.IndexOf(edge.output);
+                    _selectedTree.MakeConnection(parentView.NodeInstance, childView.NodeInstance, nodeIndex);
                 }
             }
             

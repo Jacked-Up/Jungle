@@ -1,0 +1,284 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
+namespace Jungle
+{
+    /// <summary>
+    /// 
+    /// </summary>
+    [Serializable] [CreateAssetMenu(fileName = "Node Tree", menuName = "Jungle Node Tree")]
+    public class Tree : ScriptableObject
+    {
+        #region Variables
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        [HideInInspector]
+        public Node rootNode;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [HideInInspector]
+        public Node[] nodes = Array.Empty<Node>();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public List<Node> ExecutingNodes { get; private set; } = new();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public TreeState State { get; private set; } = TreeState.Ready;
+        /// <summary>
+        /// Status flag of the node tree
+        /// </summary>
+        public enum TreeState
+        {
+            /// <summary>
+            /// Describes a node that has never been run and is not currently running
+            /// </summary>
+            Ready,
+            /// <summary>
+            /// Describes a node that is currently running
+            /// </summary>
+            Running,
+            /// <summary>
+            /// Describes a node that is not currently running and has run at some point
+            /// </summary>
+            Finished
+        }
+        
+        #endregion
+
+        /// <summary>
+        /// Initializes the node tree for execution
+        /// </summary>
+        public void Start()
+        {
+            if (State == TreeState.Running) return;
+            ExecutingNodes = new List<Node> {rootNode};
+            ExecutingNodes[0].Initialize(new Nothing());
+            State = TreeState.Running;
+        }
+
+        /// <summary>
+        /// Stops the execution of the node tree
+        /// </summary>
+        public void Stop()
+        {
+            State = TreeState.Finished;
+        }
+        
+        /// <summary>
+        /// Executes all listening nodes in the node tree and removes nodes which have finished execution
+        /// </summary>
+        public void Update()
+        {
+            if (State == TreeState.Finished) return;
+            var query = new List<Node>(ExecutingNodes);
+            foreach (var node in ExecutingNodes)
+            {
+                var finished = node.Execute(out var portCalls);
+                foreach (var call in portCalls)
+                {
+                    if (call.PortID > node.OutputPorts.Length - 1)
+                    {
+#if UNITY_EDITOR
+                        if (node.OutputPorts.Length != 0)
+                        {
+                            Debug.LogError($"[{name}] {node.name} attempted to call an output port that is out of" +
+                                           " the index range");
+                        }
+#endif
+                        continue;
+                    }
+                    foreach (var connection in node.OutputPorts[call.PortID].connections)
+                    {
+                        connection.Initialize(call.Value);
+                        query.Add(connection);
+                    }
+                }
+                // Remove from query if the node is finished executing
+                if (finished) query.Remove(node);
+            }
+            // Populate executing nodes with new query ONLY if it has changed
+            // I believe this prevents the list from redundantly reallocating new memory. I could be wrong
+            if (!ExecutingNodes.Equals(query)) ExecutingNodes = query;
+            if (ExecutingNodes.Count == 0) State = TreeState.Finished;
+        }
+
+#if UNITY_EDITOR
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="nodeType"></param>
+        /// <param name="position"></param>
+        /// <returns></returns>
+        public Node CreateNode(Type nodeType, Vector2 position)
+        {
+            var node = CreateInstance(nodeType) as Node;
+            if (node == null) return null;
+            
+            // Create unique file name
+            var i = 0;
+            var path = $"{AssetDatabase.GetAssetPath(this)}/{name}_{nodeType.Name}_{i.ToString()}.asset";
+            while (AssetDatabase.LoadAssetAtPath(path, typeof(Node)) != null) i++;
+            node.name = $"{name}_{nodeType.Name}_{i.ToString()}";
+            
+            // Build node and populate graph view properties
+            node.tree = this;
+            node.NodeProperties = new NodeProperties
+            {
+                guid = GUID.Generate().ToString(),
+                viewName = string.Empty,
+                position = position
+            };
+            
+            // Add new node instance to list
+            Undo.RecordObject(this, $"Added {node.name} to tree");
+            var nodesList = new List<Node>();
+            nodes ??= Array.Empty<Node>();
+            nodesList.AddRange(nodes.ToList());
+            nodesList.Add(node);
+            nodes = nodesList.ToArray();
+            
+            // Add new node instance to this node tree asset
+            AssetDatabase.AddObjectToAsset(node, this);
+            Undo.RegisterCreatedObjectUndo(node, $"Added {node.name} to tree");
+            EditorUtility.SetDirty(this);
+            AssetDatabase.SaveAssets();
+            
+            return node;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="original"></param>
+        /// <returns></returns>
+        public Node DuplicateNode(Node original)
+        {
+            var node = Instantiate(original);
+            if (node == null) return null;
+            
+            // Create unique file name
+            var i = 0;
+            var path = $"{AssetDatabase.GetAssetPath(this)}/{name}_{original.GetType().Name}_{i.ToString()}.asset";
+            while (AssetDatabase.LoadAssetAtPath(path, typeof(Node)) != null) i++;
+            node.name = $"{name}_{original.GetType().Name}_{i.ToString()}";
+            
+            // Build node and populate graph view properties
+            node.tree = this;
+            node.NodeProperties = new NodeProperties
+            {
+                guid = GUID.Generate().ToString(),
+                viewName = node.NodeProperties.viewName,
+                position = original.NodeProperties.position + new Vector2(35, 35)
+            };
+            
+            // Add new node instance to list
+            Undo.RecordObject(this, $"Added {node.name} to tree");
+            var query = nodes.ToList();
+            query.Add(node);
+            nodes = query.ToArray();
+            
+            // Add new node instance to this node tree asset
+            AssetDatabase.AddObjectToAsset(node, this);
+            Undo.RegisterCreatedObjectUndo(node, $"Added {node.name} to tree");
+            EditorUtility.SetDirty(this);
+            AssetDatabase.SaveAssets();
+            
+            return node;
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="node"></param>
+        public void DeleteNode(Node node)
+        {
+            var query = nodes.ToList();
+            if (!query.Contains(node)) return;
+            Undo.RecordObject(this, $"Deleted {node.name} from tree");
+            query.Remove(node);
+            Undo.DestroyObjectImmediate(node);
+            nodes = query.ToArray();
+            AssetDatabase.SaveAssets();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="connect"></param>
+        /// <param name="portIndex"></param>
+        public void MakeConnection(Node node, Node connect, byte portIndex)
+        {
+            Undo.RecordObject(node, $"Added edge to {node.name}");
+            node.MakeConnection(connect, portIndex);
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="disconnect"></param>
+        public void RemoveConnection(Node node, Node disconnect, byte portIndex)
+        {
+            Undo.RecordObject(node, $"Removed edge from {node.name}");
+            node.RemoveConnection(disconnect);
+        }
+#endif
+    }
+
+#if UNITY_EDITOR
+    [CustomEditor(typeof(Tree))]
+    public class TreeEditor : Editor
+    {
+        #region Variables
+
+        private Tree instance;
+
+        #endregion
+
+        private void OnEnable()
+        {
+            instance = target as Tree;
+        }
+
+        public override void OnInspectorGUI()
+        {
+            EditorGUILayout.LabelField("Information:");
+            EditorGUILayout.LabelField($"Node Count: {instance.nodes?.Length ?? 0}");
+            var treeStatus = instance.State is Tree.TreeState.Ready or Tree.TreeState.Finished
+                ? "Ready"
+                : "Running";
+            EditorGUILayout.LabelField($"Tree Status: {treeStatus}");
+            
+            GUILayout.Space(5);
+            GUI.enabled = Application.isPlaying;
+            if (instance.State != Tree.TreeState.Running && GUILayout.Button("Play"))
+            {
+                JungleRuntime.Singleton.StartTree(instance, false);
+            }
+            else if (instance.State == Tree.TreeState.Running && GUILayout.Button("Stop"))
+            {
+                JungleRuntime.Singleton.StopTree(instance);
+            }
+            if (!Application.isPlaying)
+            {
+                EditorGUILayout.HelpBox("You can only test while in play-mode", MessageType.Info);
+            }
+            Repaint();
+        }
+    }
+#endif
+}

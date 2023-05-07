@@ -18,4 +18,12 @@
             return true;
         }
     }
+
+#if UNITY_EDITOR
+    [UnityEditor.CustomEditor(typeof(RootNode))]
+    public class RootNodeEditor : UnityEditor.Editor
+    {
+        public override void OnInspectorGUI() { }
+    }
+#endif
 }

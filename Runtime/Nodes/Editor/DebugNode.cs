@@ -32,7 +32,7 @@ namespace Jungle.Nodes.Editor
         public override bool Execute(out PortCall[] call)
         {
 #if UNITY_EDITOR
-            var completeMessage = $"[{Tree.name}] {message}";
+            var completeMessage = $"[{tree.name}] {message}";
             switch (type)
             {
                 case Type.Log:

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Jungle
@@ -16,26 +17,14 @@ namespace Jungle
         /// Reference to the tree which this node is a child of
         /// </summary>
         [SerializeField] [HideInInspector] 
-        public NodeTree tree;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public Port InputPort => inputPort;
-        [SerializeField] [HideInInspector] 
-        private Port inputPort;
+        public Tree tree;
 
         /// <summary>
         /// Array of the nodes output ports
         /// </summary>
-        public List<Port> OutputPorts => outputPorts;
+        public Port[] OutputPorts => outputPorts;
         [SerializeField] [HideInInspector] 
-        private List<Port> outputPorts = new();
-
-        /// <summary>
-        /// True if the node has ever been run
-        /// </summary>
-        public bool Started { get; set; } = false;
+        private Port[] outputPorts = Array.Empty<Port>();
 
         #endregion
 
@@ -106,105 +95,55 @@ namespace Jungle
         public NodeAttribute.PortInfo[] OutputInfo => NodeInfo.OutputInfo;
 
         /// <summary>
-        /// Adds a child node to the specified output port index (EDITOR ONLY)
+        /// 
         /// </summary>
-        /// <param name="node">Node to add as a connection</param>
-        /// <param name="index">Output port index</param>
-        public void AddOutputConnection(Node node, int index)
+        /// <param name="portIndex"></param>
+        /// <param name="node"></param>
+        public void MakeConnection(Node node, byte portIndex)
         {
-            var outputPortList = new List<Port>();
-            for (var i = 0; i < OutputInfo.Length; i++)
-            {
-                if (i > OutputPorts.Length)
-                {
-                    outputPortList.Add(new Port(Array.Empty<>()));
-                    continue;
-                }
-                if (OutputPorts[])
-            }
-            foreach (var info in OutputInfo)
-            {
-                
-            }
-            
+            // Fix any mismatches with the port attributes
+            // Output ports count error
             if (OutputPorts.Length != OutputInfo.Length)
             {
-                var portQuery = new List<Port>();
-                foreach (var info in OutputInfo)
+                if (OutputPorts.Length != 0)
                 {
-                    portQuery.Add(new Port(Array.Empty<Node>(), info.PortType));
+                    Debug.LogError($"[{name}] Output port count was changed was changed. All connections have " +
+                                   "been lost to prevent type mismatch errors");
                 }
-                outputPorts = portQuery.ToArray();
+                var repairedPortsList = OutputInfo.Select(info =>
+                {
+                    return new Port(Array.Empty<Node>(), info.PortType);
+                }).ToArray();
+                outputPorts = repairedPortsList;
             }
+            // Output ports type mismatch error
+            var newPortsList = new List<Port>();
+            for (var i = 0; i < OutputInfo.Length; i++)
+            {
+                var portType = OutputInfo[i].PortType;
+                if (OutputPorts[i].PortType != portType)
+                {
+                    Debug.LogError($"[{name}] Port by name \"{OutputInfo[i].PortName}\" was of type" +
+                                   $" {OutputPorts[i].PortType} but is now of type {portType}." +
+                                   " All port connections have been lost to prevent type mismatch errors");
+                }
+                var connections = i == portIndex 
+                    ? new List<Node>(OutputPorts[i].connections) {node}.ToArray()
+                    : OutputPorts[i].connections;
+                newPortsList.Add(new Port(connections, portType));
+            }
+            outputPorts = newPortsList.ToArray();
+            UnityEditor.EditorUtility.SetDirty(this);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="port"></param>
+        /// <param name="node"></param>
+        public void RemoveConnection(Node node)
+        {
             
-            var portsList = new List<Port>();
-            for (var i = 0; i < OutputPorts.Length; i++)
-            {
-                if (i != index)
-                {
-                    portsList.Add(OutputPorts[i]);
-                    continue;
-                }
-                var connectionsList = new List<Node>(OutputPorts[i].connections);
-                if (connectionsList.Contains(node))
-                {
-                    portsList.Add(OutputPorts[i]);
-                    continue;
-                }
-                connectionsList.Add(node);
-                portsList.Add(new Port(connectionsList.ToArray(), OutputPorts[i].PortType));
-            }
-            outputPorts = portsList.ToArray();
-        }
-
-        /// <summary>
-        /// Removes the node as a child of this node
-        /// </summary>
-        /// <param name="node">Node to remove as a connection</param>
-        public void RemoveOutputConnection(Node node)
-        {
-            var portList = new List<Port>(OutputPorts);
-            for (var i = 0; i < portList.Count; i++)
-            {
-                var connectionsList = new List<Node>(portList[i].connections);
-                if (!connectionsList.Contains(node)) continue;
-                connectionsList.Remove(node);
-                portList[i] = new Port(connectionsList.ToArray(), portList[i].PortType);
-                break;
-            }
-            outputPorts = portList.ToArray();
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="node"></param>
-        public void AddInputConnection(Node node)
-        {
-            var connectionsList = new List<Node>(inputPort.connections);
-            if (connectionsList.Contains(node))
-            {
-                return;
-            }
-            connectionsList.Add(node);
-            inputPort.connections = connectionsList;
-            UnityEditor.EditorUtility.SetDirty(this);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="node"></param>
-        public void RemoveInputConnection(Node node)
-        {
-            var connectionsList = new List<Node>(inputPort.connections);
-            if (!connectionsList.Contains(node))
-            {
-                return;
-            }
-            connectionsList.Remove(node);
-            inputPort.connections = connectionsList;
-            UnityEditor.EditorUtility.SetDirty(this);
         }
 #endif
     }
@@ -219,7 +158,7 @@ namespace Jungle
         /// List of the nodes that are connected to this port
         /// </summary>
         [SerializeField] [HideInInspector]
-        public List<Node> connections;
+        public Node[] connections;
 
         /// <summary>
         /// The value type that can be called at this port
@@ -241,9 +180,9 @@ namespace Jungle
         [SerializeField] [HideInInspector] 
         private string portType;
 
-        public Port(List<Node> connections, Type portType)
+        public Port(Node[] connections, Type portType)
         {
-            connections ??= new List<Node>();
+            connections ??= Array.Empty<Node>();
             this.connections = connections;
             this.portType = portType.AssemblyQualifiedName;
         }
@@ -360,7 +299,14 @@ namespace Jungle
         /// </summary>
         public struct PortInfo
         {
+            /// <summary>
+            /// 
+            /// </summary>
             public string PortName { get; private set; }
+            
+            /// <summary>
+            /// 
+            /// </summary>
             public Type PortType { get; private set; }
 
             public PortInfo(string portName, Type portType)

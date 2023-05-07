@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Jungle.Nodes;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
@@ -14,12 +13,11 @@ namespace Jungle.Editor
         #region Variables
 
         public Action<JungleNodeView> NodeSelected;
-        
-        public Node NodeInstance { get; private set; }
 
-        //public UnityEditor.Experimental.GraphView.Port 
-        
-        public List<UnityEditor.Experimental.GraphView.Port> OutputPortViews
+        public readonly Node NodeInstance;
+
+        public readonly List<UnityEditor.Experimental.GraphView.Port> OutputPortViews = new();
+        /*
         {
             get
             {
@@ -31,12 +29,9 @@ namespace Jungle.Editor
                 return convert;
             }
         }
+        */
 
-        public UnityEditor.Experimental.GraphView.Port InputPortView
-        {
-            get;
-            private set;
-        }
+        public readonly UnityEditor.Experimental.GraphView.Port InputPortView;
 
         // DONT LISTEN TO IT. IT DOES EXIST. PROMISE. LOVE YOU.
         private static string UIFileAssetPath => AssetDatabase.GetAssetPath(Resources.Load("JungleNodeView"));
@@ -78,19 +73,22 @@ namespace Jungle.Editor
             // Create input port view
             if (!isRootNodeType)
             {
-                InputPortView = InstantiatePort(Orientation.Horizontal, Direction.Input, UnityEditor.Experimental.GraphView.Port.Capacity.Multi, typeof(bool));
-                if (InputPortView != null)
+                var inputPortView = InstantiatePort(Orientation.Horizontal, Direction.Input,
+                    UnityEditor.Experimental.GraphView.Port.Capacity.Multi, NodeInstance.InputInfo.PortType);
+                if (inputPortView != null)
                 {
-                    InputPortView.portName = NodeInstance.InputInfo.PortName;
-                    inputContainer.Add(InputPortView);
+                    inputPortView.portName = NodeInstance.InputInfo.PortName;
+                    inputContainer.Add(inputPortView);
                 }
+                InputPortView = inputPortView;
             }
 
             // Create output port views
             //var outputPortViews = new List<UnityEditor.Experimental.GraphView.Port>(NodeInstance.OutputInfo.Length);
             for (var i = 0; i < nodeReference.OutputInfo.Length; i++)
             {
-                var portView = InstantiatePort(Orientation.Horizontal, Direction.Output, UnityEditor.Experimental.GraphView.Port.Capacity.Multi, typeof(bool));
+                var portView = InstantiatePort(Orientation.Horizontal, Direction.Output,
+                    UnityEditor.Experimental.GraphView.Port.Capacity.Multi, nodeReference.OutputInfo[i].PortType);
                 if (!isRootNodeType)
                 {
                     portView.portName = nodeReference.OutputInfo[i].PortName;
@@ -100,7 +98,7 @@ namespace Jungle.Editor
                 {
                     portView.portName = string.Empty;
                 }
-                //outputPortViews.Add(portView);
+                OutputPortViews.Add(portView);
                 outputContainer.Add(portView);
             }
         }

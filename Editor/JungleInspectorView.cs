@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using Jungle.Nodes;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -25,7 +26,17 @@ namespace Jungle.Editor
                 {
                     var node = (Node)_nodeInspector.target;
                     var properties = node.NodeProperties;
-                    var viewName = EditorGUILayout.TextField("Name", properties.viewName);
+                    string viewName;
+                    if (node.GetType() == typeof(RootNode))
+                    {
+                        GUI.enabled = false;
+                        viewName = EditorGUILayout.TextField("View Name", "...");
+                    }
+                    else
+                    {
+                        viewName = EditorGUILayout.TextField("View Name", properties.viewName);
+                    }
+                    GUI.enabled = true;
                     node.NodeProperties = new NodeProperties
                     {
                         guid = properties.guid,
@@ -35,9 +46,15 @@ namespace Jungle.Editor
                     
                     GUILayout.Space(1);
                     var lineRect = EditorGUILayout.GetControlRect(false, 1);
-                    EditorGUI.DrawRect(lineRect, new Color(1f, 1f, 1f, 0.15f));
+                    EditorGUI.DrawRect(lineRect, EditorGUIUtility.isProSkin 
+                        ? new Color(0.7f, 0.7f, 0.7f, 0.5f) 
+                        : new Color(0.3f, 0.3f, 0.3f, 0.5f));
                     GUILayout.Space(5);
-                    
+
+                    if (Application.isPlaying)
+                    {
+                        EditorGUILayout.HelpBox("All changes made in play-mode will not revert!", MessageType.Warning);
+                    }
                     _nodeInspector.OnInspectorGUI();
                 }
             });

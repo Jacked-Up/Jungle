@@ -12,7 +12,7 @@ namespace Jungle.Nodes.Stop
         #region Variables
 
         [SerializeField] 
-        private List<NodeTree> nodeTreesToStop = new List<NodeTree>();
+        private List<Tree> nodeTreesToStop = new List<Tree>();
 
         #endregion
 
