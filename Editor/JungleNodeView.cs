@@ -54,7 +54,7 @@ namespace Jungle.Editor
             
             // Set color of node in the Jungle Editor
             AddToClassList(nodeReference.NodeColor.ToString().ToLower());
-
+            
             if (!isRootNodeType)
             {
                 var nameLabel = mainContainer.Q<Label>("context-label");

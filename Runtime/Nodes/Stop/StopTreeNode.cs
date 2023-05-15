@@ -5,8 +5,9 @@ namespace Jungle.Nodes.Stop
 {
     [Node(TitleName = "Stop Tree(s)",
         Category = "Stop",
-        Color = NodeAttribute.NodeColor.Red,
-        OutputPortNames = new string[0])]
+        Color = Color.Red,
+        OutputPortNames = new string[0]
+    )]
     public class StopTreeNode : Node
     {
         #region Variables
@@ -27,7 +28,7 @@ namespace Jungle.Nodes.Stop
             {
                 JungleRuntime.Singleton.StopTree(node);
             }
-            call = new[] {new PortCall(0, new Nothing())};
+            call = new[] {new PortCall(0, true)};
             return true;
         }
     }

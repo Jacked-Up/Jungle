@@ -1,27 +1,20 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Jungle
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    [DisallowMultipleComponent] [AddComponentMenu("")]
     public class JungleRuntime : MonoBehaviour
     {
         #region Variables
 
-        /// <summary>
-        /// List of executing node trees. (Includes both persistent and non-persistent trees)
-        /// </summary>
-        public List<Tree> ExecutingTrees
-        {
-            get
-            {
-                var combinedList = new List<Tree>();
-                combinedList.AddRange(_persistentExecutingTrees);
-                combinedList.AddRange(_nonPersistentExecutingTrees);
-                return combinedList;
-            }
-        }
-       
         /// <summary>
         /// Jungle runtime mono behaviour reference
         /// </summary>
@@ -31,11 +24,28 @@ namespace Jungle
             private set;
         }
         
-        private List<Tree> _persistentExecutingTrees = new();
-        private List<Tree> _nonPersistentExecutingTrees = new();
+        /// <summary>
+        /// List of executing node trees. (Includes both persistent and non-persistent trees)
+        /// </summary>
+        public List<Tree> RunningTrees
+        {
+            get
+            {
+                var combinedList = new List<Tree>();
+                _persistentRunningTrees ??= new List<Tree>();
+                combinedList.AddRange(_persistentRunningTrees);
+                _nonPersistentRunningTrees ??= new List<Tree>();
+                combinedList.AddRange(_nonPersistentRunningTrees);
+                return combinedList;
+            }
+        }
 
+        private List<Tree> _persistentRunningTrees = new();
+        private List<Tree> _nonPersistentRunningTrees = new();
+        private List<Scene> _sceneQuery = new();
+        
         #endregion
-
+        
         private void Awake()
         {
             if (Singleton != null)
@@ -57,12 +67,16 @@ namespace Jungle
         private void OnDisable()
         {
             SceneManager.sceneUnloaded -= SceneUnloadedCallback;
+            foreach (var runningTree in RunningTrees)
+            {
+                StopTree(runningTree);
+            }
         }
 
         private void Update()
         {
             var query = new List<Tree>();
-            foreach (var nodeTree in ExecutingTrees)
+            foreach (var nodeTree in RunningTrees)
             {
                 if (nodeTree.State == Tree.TreeState.Finished)
                 {
@@ -78,80 +92,120 @@ namespace Jungle
         }
 
         /// <summary>
-        /// Initializes and executes a node tree.
+        /// 
         /// </summary>
-        /// <param name="tree">Node tree to add to execution queue.</param>
-        /// <param name="persistent">If the node tree should persist between scene changes.</param>
-        /// <returns>True if the node tree was initialized and queued for execution.</returns>
-        public bool StartTree(Tree tree, bool persistent)
+        /// <param name="tree"></param>
+        /// <returns></returns>
+        public bool PlayTree(Tree tree)
         {
-            _persistentExecutingTrees ??= new List<Tree>();
-            _nonPersistentExecutingTrees ??= new List<Tree>();
-            if (ExecutingTrees.Contains(tree))
+            _persistentRunningTrees ??= new List<Tree>();
+            if (RunningTrees.Contains(tree))
             {
 #if UNITY_EDITOR
                 Debug.LogWarning($"[Jungle Runtime] Attempt to start {tree.name} but it was already running");
 #endif
                 return false;
             }
-            if (persistent)
-            {
-                _persistentExecutingTrees.Add(tree);
-            }
-            else
-            {
-                _nonPersistentExecutingTrees.Add(tree);
-            }
-            tree.Start();
+            _persistentRunningTrees.Add(tree);
+            return true;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tree"></param>
+        /// <param name="linkedScene"></param>
+        /// <returns></returns>
+        public bool PlayTree(Tree tree, Scene linkedScene)
+        {
+            _nonPersistentRunningTrees ??= new List<Tree>();
+            _sceneQuery ??= new List<Scene>();
+            _nonPersistentRunningTrees.Add(tree);
+            _sceneQuery.Add(linkedScene);
             return true;
         }
         
         /// <summary>
-        /// Stops the execution of a node tree.
+        /// 
         /// </summary>
-        /// <param name="tree">Node tree to remove from execution.</param>
-        /// <returns>True if the node tree was remove from the execution queue.</returns>
+        /// <param name="tree"></param>
+        /// <returns></returns>
         public bool StopTree(Tree tree)
         {
-            _persistentExecutingTrees ??= new List<Tree>();
-            _nonPersistentExecutingTrees ??= new List<Tree>();
-            if (!ExecutingTrees.Contains(tree))
+            _persistentRunningTrees ??= new List<Tree>();
+            _nonPersistentRunningTrees ??= new List<Tree>();
+            if (!RunningTrees.Contains(tree))
             {
                 return false;
             }
-            if (_persistentExecutingTrees.Contains(tree))
+            if (_persistentRunningTrees.Contains(tree))
             {
-                _persistentExecutingTrees.Remove(tree);
+                _persistentRunningTrees.Remove(tree);
             }
-            else if (_nonPersistentExecutingTrees.Contains(tree))
+            else if (_nonPersistentRunningTrees.Contains(tree))
             {
-                _nonPersistentExecutingTrees.Remove(tree);
+                _nonPersistentRunningTrees.Remove(tree);
             }
             tree.Stop();
             return true;
         }
-
-        public bool StopNode(Node node)
-        {
-            foreach (var executingTree in ExecutingTrees)
-            {
-                if (!executingTree.ExecutingNodes.Contains(node))
-                {
-                    continue;
-                }
-                executingTree.ExecutingNodes.Remove(node);
-                return true;
-            }
-            return false;
-        }
         
-        private void SceneUnloadedCallback(Scene _)
+        private void SceneUnloadedCallback(Scene unloadedScene)
         {
-            _nonPersistentExecutingTrees ??= new List<Tree>(); 
-            foreach (var nodeTree in _nonPersistentExecutingTrees)
+            _nonPersistentRunningTrees ??= new List<Tree>();
+            _sceneQuery ??= new List<Scene>();
+            
+            var query = new List<Tree>();
+            var query2 = new List<Scene>();
+            foreach (var scene in _sceneQuery)
             {
-                StopTree(nodeTree);
+                if (scene != unloadedScene) continue;
+                var index = _sceneQuery.IndexOf(scene);
+                query.Add(_nonPersistentRunningTrees[index]);
+                query2.Add(scene);
+            }
+            foreach (var tree in query)
+            {
+                var stopped = StopTree(tree);
+#if UNITY_EDITOR
+                if (stopped)
+                {
+                    Debug.Log($"[{tree.name}] Tree was stopped prematurely");
+                }
+#endif
+                _nonPersistentRunningTrees.Remove(tree);
+            }
+            foreach (var request in query2)
+            {
+                _sceneQuery.Remove(request);
             }
         }
     }
+
+#if UNITY_EDITOR
+    [CustomEditor(typeof(JungleRuntime))]
+    public class JungleRuntimeEditor : Editor
+    {
+        #region Varaibles
+
+        private JungleRuntime instance;
+
+        #endregion
+
+        private void OnEnable()
+        {
+            instance = target as JungleRuntime;
+        }
+
+        public override void OnInspectorGUI()
+        {
+            GUI.enabled = false;
+            foreach (var tree in instance.RunningTrees)
+            {
+                EditorGUILayout.ObjectField(tree, typeof(Node));
+            }
+            Repaint();
+        }
+    }
+#endif
 }

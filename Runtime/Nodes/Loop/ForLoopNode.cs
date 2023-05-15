@@ -5,8 +5,9 @@ namespace Jungle.Nodes.Loop
 {
     [Node(TitleName = "For Loop",
         Category = "Loop",
-        Color = NodeAttribute.NodeColor.Purple,
-        OutputPortNames = new []{"Invoke", "Done"})]
+        Color = Color.Purple,
+        OutputPortNames = new []{"Invoke", "Done"}
+    )]
     public class ForLoopNode : Node
     {
         #region Variables
@@ -37,7 +38,7 @@ namespace Jungle.Nodes.Loop
             {
                 _increment++;
                 _nextInvokeTime = UnityEngine.Time.unscaledTime + timeBetweenIncrements;
-                call = new [] {new PortCall(0, new Nothing())};
+                call = new [] {new PortCall(0, true)};
                 return false;
             }
             if (UnityEngine.Time.unscaledTime < _nextInvokeTime && _increment < incrementCount)
@@ -45,7 +46,7 @@ namespace Jungle.Nodes.Loop
                 call = Array.Empty<PortCall>();
                 return false;
             }
-            call = new [] {new PortCall(1, new Nothing())};
+            call = new [] {new PortCall(1, true)};
             return true;
         }
     }

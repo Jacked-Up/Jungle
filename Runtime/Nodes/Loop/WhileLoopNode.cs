@@ -6,8 +6,9 @@ namespace Jungle.Nodes.Loop
 {
     [Node(TitleName = "While Loop", 
         Category = "Loop",
-        Color = NodeAttribute.NodeColor.Purple,
-        OutputPortNames = new []{"Invoke", "Done"})]
+        Color = Color.Purple,
+        OutputPortNames = new []{"Invoke", "Done"}
+    )]
     public class WhileLoopNode : Node
     {
         #region Variables
@@ -26,10 +27,10 @@ namespace Jungle.Nodes.Loop
         {
             if (tree.ExecutingNodes.Any(executingNode => nodes.Any(node => node == executingNode)))
             {
-                call = new[] {new PortCall(0, new Nothing())};
+                call = new[] {new PortCall(0, true)};
                 return false;
             }
-            call = new[] {new PortCall(1, new Nothing())};
+            call = new[] {new PortCall(1, true)};
             return true;
         }
     }

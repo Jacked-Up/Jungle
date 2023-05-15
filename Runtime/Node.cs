@@ -9,7 +9,7 @@ namespace Jungle
     /// The Jungle sequencer base node class
     /// </summary>
     [Serializable] [Node]
-    public class Node : ScriptableObject, INode
+    public abstract class Node : ScriptableObject, INode
     {
         #region Variables
 
@@ -18,37 +18,44 @@ namespace Jungle
         /// </summary>
         [SerializeField] [HideInInspector] 
         public Tree tree;
-
+        
         /// <summary>
         /// Array of the nodes output ports
         /// </summary>
         public Port[] OutputPorts => outputPorts;
         [SerializeField] [HideInInspector] 
         private Port[] outputPorts = Array.Empty<Port>();
-
+        
+        /// <summary>
+        /// List of available node colors
+        /// </summary>
+        public enum Color
+        {
+            Red,
+            Orange,
+            Yellow,
+            Green,
+            Blue,
+            Purple,
+            Violet,
+            Grey
+        }
+        
         #endregion
-
+        
         /// <summary>
-        /// Invoked when the parent node finishes
-        /// *Invoked before the update method
+        /// 
         /// </summary>
-        /// <param name="inputValue">The input value returned by the parent node</param>
-        public virtual void Initialize(in object inputValue)
-        {
-            
-        }
-
+        /// <param name="inputValue"></param>
+        public abstract void Initialize(in object inputValue);
+         
         /// <summary>
-        /// Invoked every frame just like the Unity update event method
+        /// 
         /// </summary>
-        /// <param name="call">Ports to invoke during this update call</param>
-        /// <returns>Returns true if the node has declared it is finished executing. Returns false if not</returns>
-        public virtual bool Execute(out PortCall[] call)
-        {
-            call = new PortCall[] {new(0, new Nothing())};
-            return true;
-        }
-
+        /// <param name="call"></param>
+        /// <returns></returns>
+        public abstract bool Execute(out PortCall[] call);
+        
 #if UNITY_EDITOR
         /// <summary>
         /// Jungle editor properties of the node.
@@ -82,7 +89,7 @@ namespace Jungle
         /// <summary>
         /// Displayed color of the node inside the Jungle editor graph view
         /// </summary>
-        public NodeAttribute.NodeColor NodeColor => NodeInfo.Color;
+        public Color NodeColor => NodeInfo.Color;
 
         /// <summary>
         /// Name and data type info about the input port
@@ -170,10 +177,9 @@ namespace Jungle
             {
                 if (string.IsNullOrEmpty(portType))
                 {
-                    portType = typeof(Nothing).AssemblyQualifiedName;
-                    return typeof(Nothing);
+                    portType = typeof(Error).AssemblyQualifiedName;
+                    return typeof(Error);
                 }
-
                 return Type.GetType(portType);
             }
         }
@@ -211,13 +217,6 @@ namespace Jungle
     }
 
     /// <summary>
-    /// Data value used to define a data-less port
-    /// </summary>
-    public struct Nothing
-    {
-    }
-
-    /// <summary>
     /// Jungle node declaration attribute
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
@@ -236,18 +235,7 @@ namespace Jungle
         /// <summary>
         /// The color of the node in the visual editor
         /// </summary>
-        public NodeColor Color { get; set; } = NodeColor.Blue;
-        public enum NodeColor
-        {
-            Red,
-            Orange,
-            Yellow,
-            Green,
-            Blue,
-            Purple,
-            Violet,
-            Grey
-        }
+        public Node.Color Color { get; set; } = Node.Color.Blue;
 
         /// <summary>
         /// 
@@ -257,7 +245,7 @@ namespace Jungle
         /// <summary>
         /// 
         /// </summary>
-        public Type InputPortType { get; set; } = typeof(Nothing);
+        public Type InputPortType { get; set; } = typeof(bool);
 
         /// <summary>
         /// 
@@ -267,12 +255,12 @@ namespace Jungle
         /// <summary>
         /// 
         /// </summary>
-        public Type[] OutputPortTypes { get; set; } = {typeof(Nothing)};
+        public Type[] OutputPortTypes { get; set; } = {typeof(bool)};
 
         /// <summary>
         /// The nodes input port
         /// </summary>
-        public PortInfo InputInfo => new PortInfo(InputPortName, InputPortType);
+        public PortInfo InputInfo => new(InputPortName, InputPortType);
 
         /// <summary>
         /// List of the nodes output ports
@@ -281,13 +269,23 @@ namespace Jungle
         {
             get
             {
+                // In the case the developer has set a number of output port names that does not equal the number of 
+                // output port types, and vice versa, pick the largest array and create default name/type to
+                // prevent errors
+                var queryCount = OutputPortNames.Length == OutputPortTypes.Length
+                    ? OutputPortNames.Length
+                    : OutputPortNames.Length > OutputPortTypes.Length 
+                        ? OutputPortNames.Length 
+                        : OutputPortTypes.Length;
                 var query = new List<PortInfo>();
-                for (var i = 0; i < OutputPortNames.Length; i++)
+                for (var i = 0; i < queryCount; i++)
                 {
-                    var portName = OutputPortNames[i];
-                    var portType = i <= OutputPortTypes.Length - 1
+                    var portName = i < OutputPortNames.Length
+                        ? OutputPortNames[i]
+                        : "ERROR";
+                    var portType = i < OutputPortTypes.Length
                         ? OutputPortTypes[i]
-                        : typeof(Nothing);
+                        : typeof(Error);
                     query.Add(new PortInfo(portName, portType));
                 }
                 return query.ToArray();
@@ -317,6 +315,11 @@ namespace Jungle
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    public struct Error { }
+    
 #if UNITY_EDITOR
     /// <summary>
     /// Details about the node in the Jungle editor like GUID, position, and view name

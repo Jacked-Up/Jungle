@@ -2,8 +2,9 @@
 {
     [Node(TitleName = "Start", 
         Category = "HIDDEN", 
-        Color = NodeAttribute.NodeColor.Green,
-        OutputPortNames = new []{"Begin"}
+        Color = Color.Green,
+        OutputPortNames = new []{"Begin"},
+        OutputPortTypes = new []{typeof(bool)}
     )]
     public class RootNode : Node
     {
@@ -11,10 +12,10 @@
         {
             
         }
-
+        
         public override bool Execute(out PortCall[] call)
         {
-            call = new[] {new PortCall(0, new Nothing())};
+            call = new[] {new PortCall(0, true)};
             return true;
         }
     }

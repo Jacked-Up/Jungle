@@ -150,7 +150,7 @@ namespace Jungle.Editor
                 {
                     if (edge.output.node is JungleNodeView parentView && edge.input.node is JungleNodeView childView)
                     {
-                        _selectedTree.RemoveConnection(parentView.NodeInstance, childView.NodeInstance, 0);
+                        _selectedTree.DisconnectNodes(parentView.NodeInstance, childView.NodeInstance, 0);
                     }
                 }
             }
@@ -166,7 +166,7 @@ namespace Jungle.Editor
                 if (edge.output.node is JungleNodeView parentView && edge.input.node is JungleNodeView childView)
                 {
                     var nodeIndex = (byte)parentView.OutputPortViews.IndexOf(edge.output);
-                    _selectedTree.MakeConnection(parentView.NodeInstance, childView.NodeInstance, nodeIndex);
+                    _selectedTree.ConnectNodes(parentView.NodeInstance, childView.NodeInstance, nodeIndex);
                 }
             }
             

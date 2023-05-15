@@ -5,8 +5,9 @@ namespace Jungle.Nodes.Time
 {
     [Node(TitleName = "Wait For Frames", 
         Category = "Time",
-        Color = NodeAttribute.NodeColor.Yellow, 
-        OutputPortNames = new []{"Elapsed"})]
+        Color = Color.Yellow, 
+        OutputPortNames = new []{"Elapsed"}
+    )]
     public class WaitForFramesNode : Node
     {
         #region Variables
@@ -37,7 +38,7 @@ namespace Jungle.Nodes.Time
                 call = Array.Empty<PortCall>();
                 return false;
             }
-            call = new[] {new PortCall(0, new Nothing())};
+            call = new[] {new PortCall(0, true)};
             return true;
         }
     }

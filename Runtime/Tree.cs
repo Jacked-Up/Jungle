@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
+using UnityEngine.SceneManagement;
 #endif
 
 namespace Jungle
@@ -36,6 +37,16 @@ namespace Jungle
         /// <summary>
         /// 
         /// </summary>
+        public Scene LinkedScene { get; private set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public float PlayTime { get; private set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public TreeState State { get; private set; } = TreeState.Ready;
         /// <summary>
         /// Status flag of the node tree
@@ -61,12 +72,35 @@ namespace Jungle
         /// <summary>
         /// Initializes the node tree for execution
         /// </summary>
-        public void Start()
+        public void Play()
         {
             if (State == TreeState.Running) return;
-            ExecutingNodes = new List<Node> {rootNode};
-            ExecutingNodes[0].Initialize(new Nothing());
-            State = TreeState.Running;
+            if (!JungleRuntime.Singleton.PlayTree(this))
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"[{name}] Failed to initialize and play");
+#endif
+                return;
+            }
+            HandlePlay();
+        }
+
+        /// <summary>
+        /// Initializes the node tree for execution and links to a scene
+        /// </summary>
+        /// <param name="linkedScene">If the linked scene is unloaded while the tree is executing, execution will
+        /// automatically halt</param>
+        public void Play(Scene linkedScene)
+        {
+            if (State == TreeState.Running) return;
+            if (!JungleRuntime.Singleton.PlayTree(this, linkedScene))
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"[{name}] Failed to initialize and play");
+#endif
+                return;
+            }
+            HandlePlay();
         }
 
         /// <summary>
@@ -74,6 +108,16 @@ namespace Jungle
         /// </summary>
         public void Stop()
         {
+            if (State != TreeState.Running) return;
+            if (!JungleRuntime.Singleton.StopTree(this))
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"[{name}] Failed to stop playing");
+#endif
+                return;
+            }
+            //ExecutingNodes = new List<Node>(); -- Unnecessary
+            PlayTime = 0f;
             State = TreeState.Finished;
         }
         
@@ -94,8 +138,8 @@ namespace Jungle
 #if UNITY_EDITOR
                         if (node.OutputPorts.Length != 0)
                         {
-                            Debug.LogError($"[{name}] {node.name} attempted to call an output port that is out of" +
-                                           " the index range");
+                            Debug.LogError($"[{name}] {node.name} attempted to call an output port that is " +
+                                           $"out of the index range");
                         }
 #endif
                         continue;
@@ -115,6 +159,14 @@ namespace Jungle
             if (ExecutingNodes.Count == 0) State = TreeState.Finished;
         }
 
+        private void HandlePlay()
+        {
+            PlayTime = Time.unscaledTime;
+            ExecutingNodes = new List<Node> {rootNode};
+            ExecutingNodes[0].Initialize(true);
+            State = TreeState.Running;
+        }
+        
 #if UNITY_EDITOR
         /// <summary>
         /// 
@@ -125,7 +177,12 @@ namespace Jungle
         public Node CreateNode(Type nodeType, Vector2 position)
         {
             var node = CreateInstance(nodeType) as Node;
-            if (node == null) return null;
+            if (node == null)
+            {
+                Debug.LogError($"[Tree] [{name}] Failed to instance node of type {nodeType} because it doesn't " +
+                               "inherit from type node");
+                return null;
+            }
             
             // Create unique file name
             var i = 0;
@@ -138,7 +195,7 @@ namespace Jungle
             node.NodeProperties = new NodeProperties
             {
                 guid = GUID.Generate().ToString(),
-                viewName = string.Empty,
+                viewName = $"My {node.TitleName} {i.ToString()}",
                 position = position
             };
             
@@ -220,18 +277,19 @@ namespace Jungle
         /// <param name="node"></param>
         /// <param name="connect"></param>
         /// <param name="portIndex"></param>
-        public void MakeConnection(Node node, Node connect, byte portIndex)
+        public void ConnectNodes(Node node, Node connect, byte portIndex)
         {
             Undo.RecordObject(node, $"Added edge to {node.name}");
             node.MakeConnection(connect, portIndex);
         }
-        
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="node"></param>
         /// <param name="disconnect"></param>
-        public void RemoveConnection(Node node, Node disconnect, byte portIndex)
+        /// <param name="portIndex"></param>
+        public void DisconnectNodes(Node node, Node disconnect, byte portIndex)
         {
             Undo.RecordObject(node, $"Removed edge from {node.name}");
             node.RemoveConnection(disconnect);
@@ -245,6 +303,11 @@ namespace Jungle
     {
         #region Variables
 
+        private static bool _informationFoldoutOpen = true;
+        private static bool _debugFoldDownOpen;
+        private static bool _debugRuntimeFoldDownOpen;
+        private List<string> sceneLinkOptions;
+        private int selectedSceneIndex;
         private Tree instance;
 
         #endregion
@@ -256,27 +319,83 @@ namespace Jungle
 
         public override void OnInspectorGUI()
         {
-            EditorGUILayout.LabelField("Information:");
-            EditorGUILayout.LabelField($"Node Count: {instance.nodes?.Length ?? 0}");
-            var treeStatus = instance.State is Tree.TreeState.Ready or Tree.TreeState.Finished
-                ? "Ready"
-                : "Running";
-            EditorGUILayout.LabelField($"Tree Status: {treeStatus}");
+            _informationFoldoutOpen = EditorGUILayout.Foldout(_informationFoldoutOpen, new GUIContent("Information"));
+            if (_informationFoldoutOpen)
+            {
+                EditorGUILayout.LabelField($"Node Count: {instance.nodes?.Length ?? 0}");
+                
+                GUILayout.BeginHorizontal();
+                GUILayout.Space(10);
+                GUILayout.BeginVertical();
+                _debugRuntimeFoldDownOpen = EditorGUILayout.Foldout(_debugRuntimeFoldDownOpen, new GUIContent("Runtime"));
+                if (_debugRuntimeFoldDownOpen)
+                {
+                    GUI.enabled = false;
+                    var treeStatus = instance.State is Tree.TreeState.Ready or Tree.TreeState.Finished
+                        ? "Ready"
+                        : "Running";
+                    EditorGUILayout.LabelField($"Tree Status: {treeStatus}");
+                    if (instance.PlayTime != 0f)
+                    {
+                        EditorGUILayout.LabelField($"Play Time: {Math.Round(Time.unscaledTime - instance.PlayTime, 1)}s");
+                    }
+                    else
+                    {
+                        EditorGUILayout.LabelField($"Play Time: 0s");
+                    }
+                    GUI.enabled = true;
+                }
+                GUILayout.EndVertical();
+                GUILayout.EndHorizontal();
+            }
             
-            GUILayout.Space(5);
-            GUI.enabled = Application.isPlaying;
-            if (instance.State != Tree.TreeState.Running && GUILayout.Button("Play"))
+            GUILayout.Space(2.5f);
+            var lineRect = EditorGUILayout.GetControlRect(false, 1);
+            EditorGUI.DrawRect(lineRect, EditorGUIUtility.isProSkin 
+                ? new Color(0.7f, 0.7f, 0.7f, 0.5f) 
+                : new Color(0.3f, 0.3f, 0.3f, 0.5f));
+            GUILayout.Space(2.5f);
+            
+            _debugFoldDownOpen = EditorGUILayout.Foldout(_debugFoldDownOpen, new GUIContent("Debug"));
+            if (_debugFoldDownOpen)
             {
-                JungleRuntime.Singleton.StartTree(instance, false);
+                GUI.enabled = Application.isPlaying;
+                sceneLinkOptions = new List<string>() {"None"};
+                var sceneCount = SceneManager.sceneCount;
+                var sceneNames = new string[sceneCount];
+                for (var i = 0; i < sceneCount; i++) 
+                {
+                    sceneLinkOptions.Add(SceneManager.GetSceneAt(i).name);
+                }
+                selectedSceneIndex = EditorGUILayout.Popup("Linked Scene", selectedSceneIndex, sceneLinkOptions.ToArray());
+            
+                GUILayout.BeginHorizontal();
+                GUI.enabled = instance.State != Tree.TreeState.Running && Application.isPlaying;
+                if (GUILayout.Button("Play"))
+                {
+                    // Condition simply checks if a scene is selected and calls the proper method
+                    if (selectedSceneIndex == 0)
+                    {
+                        instance.Play();
+                    }
+                    else
+                    {
+                        instance.Play(SceneManager.GetSceneAt(selectedSceneIndex - 1));
+                    }
+                }
+                GUI.enabled = instance.State == Tree.TreeState.Running && Application.isPlaying;
+                if (GUILayout.Button("Stop"))
+                {
+                    instance.Stop();
+                }
+                GUILayout.EndHorizontal();
+                if (!Application.isPlaying)
+                {
+                    GUI.enabled = true;
+                    EditorGUILayout.HelpBox("You can only debug node trees while in play mode", MessageType.Info);
+                }
             }
-            else if (instance.State == Tree.TreeState.Running && GUILayout.Button("Stop"))
-            {
-                JungleRuntime.Singleton.StopTree(instance);
-            }
-            if (!Application.isPlaying)
-            {
-                EditorGUILayout.HelpBox("You can only test while in play-mode", MessageType.Info);
-            }
+
             Repaint();
         }
     }

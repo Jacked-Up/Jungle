@@ -5,8 +5,9 @@ namespace Jungle.Nodes.Time
 {
     [Node(TitleName = "Wait For Seconds",
         Category = "Time",
-        Color = NodeAttribute.NodeColor.Yellow,
-        OutputPortNames = new []{"Elapsed"})]
+        Color = Color.Yellow,
+        OutputPortNames = new []{"Elapsed"}
+    )]
     public class WaitForSecondsNode : Node
     {
         #region Variables
@@ -42,7 +43,7 @@ namespace Jungle.Nodes.Time
 
             if (currentTime - _startTime >= duration)
             {
-                call = new[] {new PortCall(0, new Nothing())};
+                call = new[] {new PortCall(0, true)};
                 return true;
             }
             call = Array.Empty<PortCall>();

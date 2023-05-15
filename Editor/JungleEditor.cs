@@ -47,6 +47,8 @@ namespace Jungle.Editor
 
         private void CreateGUI()
         {
+            JungleTutorials.TryShowEditorTutorial();
+            
             var jungleEditorFilePath = AssetDatabase.GetAssetPath(Resources.Load("JungleEditor"));
             var visualTreeAsset = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(jungleEditorFilePath);
             visualTreeAsset.CloneTree(rootVisualElement);

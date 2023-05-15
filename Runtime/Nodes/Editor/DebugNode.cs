@@ -4,7 +4,8 @@ namespace Jungle.Nodes.Editor
 {
     [Node(TitleName = "Debug",
         Category = "Editor", 
-        Color = NodeAttribute.NodeColor.Grey)]
+        Color = Color.Grey
+    )]
     public class DebugNode : Node
     {
         #region Variables
@@ -46,7 +47,7 @@ namespace Jungle.Nodes.Editor
                     break;
             }
 #endif
-            call = new[] {new PortCall(0, new Nothing())};
+            call = new[] {new PortCall(0, true)};
             return true;
         }
     }
