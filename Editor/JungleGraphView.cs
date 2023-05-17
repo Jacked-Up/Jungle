@@ -79,16 +79,20 @@ namespace Jungle.Editor
                     NodeSelected = OnNodeSelected
                 };
                 AddElement(nodeView);
+                Debug.Log("Created node view");
                 
                 var outputNodePortViews = GetNodeView(node)?.OutputPortViews;
                 if (outputNodePortViews == null) continue;
                 foreach (var outputPort in node.OutputPorts)
                 {
+                    Debug.Log("Fetched output port views");
                     foreach (var connection in outputPort.connections)
                     {
                         var inputNodePortView = GetNodeView(connection)?.InputPortView;
                         if (inputNodePortView == null) continue;
-                        AddElement(outputNodePortViews[outputPort.connections.ToList().IndexOf(connection)].ConnectTo(inputNodePortView));
+                        var outputPortConnections = outputPort.connections.ToList();
+                        AddElement(outputNodePortViews[outputPortConnections.IndexOf(connection)].ConnectTo(inputNodePortView));
+                        Debug.Log("Created an edge view connection");
                     }
                 }
             }

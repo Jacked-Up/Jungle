@@ -37,7 +37,18 @@ namespace Jungle
         /// <summary>
         /// 
         /// </summary>
-        public Scene LinkedScene { get; private set; }
+        public Scene[] PrerequisiteScenes
+        {
+            get => prerequisiteScenes;
+            set => prerequisiteScenes = value;
+        }
+        [SerializeField] [HideInInspector]
+        private Scene[] prerequisiteScenes = Array.Empty<Scene>();
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        public Scene RequisiteScene { get; private set; }
 
         /// <summary>
         /// 
@@ -303,55 +314,63 @@ namespace Jungle
     {
         #region Variables
 
+        private static bool _prerequisiteFoldoutOpen = true;
         private static bool _informationFoldoutOpen = true;
         private static bool _debugFoldDownOpen;
-        private static bool _debugRuntimeFoldDownOpen;
         private List<string> sceneLinkOptions;
         private int selectedSceneIndex;
         private Tree instance;
 
+        private SerializedProperty _prerequisiteScenes;
+        
         #endregion
 
         private void OnEnable()
         {
             instance = target as Tree;
+            _prerequisiteScenes = serializedObject.FindProperty("prerequisiteScenes");
         }
 
         public override void OnInspectorGUI()
         {
-            _informationFoldoutOpen = EditorGUILayout.Foldout(_informationFoldoutOpen, new GUIContent("Information"));
-            if (_informationFoldoutOpen)
+            _prerequisiteFoldoutOpen = EditorGUILayout.Foldout(_prerequisiteFoldoutOpen, new GUIContent("Prerequisites"));
+            if (_prerequisiteFoldoutOpen)
             {
-                EditorGUILayout.LabelField($"Node Count: {instance.nodes?.Length ?? 0}");
-                
-                GUILayout.BeginHorizontal();
-                GUILayout.Space(10);
-                GUILayout.BeginVertical();
-                _debugRuntimeFoldDownOpen = EditorGUILayout.Foldout(_debugRuntimeFoldDownOpen, new GUIContent("Runtime"));
-                if (_debugRuntimeFoldDownOpen)
-                {
-                    GUI.enabled = false;
-                    var treeStatus = instance.State is Tree.TreeState.Ready or Tree.TreeState.Finished
-                        ? "Ready"
-                        : "Running";
-                    EditorGUILayout.LabelField($"Tree Status: {treeStatus}");
-                    if (instance.PlayTime != 0f)
-                    {
-                        EditorGUILayout.LabelField($"Play Time: {Math.Round(Time.unscaledTime - instance.PlayTime, 1)}s");
-                    }
-                    else
-                    {
-                        EditorGUILayout.LabelField($"Play Time: 0s");
-                    }
-                    GUI.enabled = true;
-                }
-                GUILayout.EndVertical();
-                GUILayout.EndHorizontal();
+                serializedObject.Update();
+                EditorGUILayout.PropertyField(_prerequisiteScenes);
+                serializedObject.ApplyModifiedProperties();
             }
             
             GUILayout.Space(2.5f);
-            var lineRect = EditorGUILayout.GetControlRect(false, 1);
-            EditorGUI.DrawRect(lineRect, EditorGUIUtility.isProSkin 
+            EditorGUI.DrawRect(EditorGUILayout.GetControlRect(false, 1), EditorGUIUtility.isProSkin 
+                ? new Color(0.7f, 0.7f, 0.7f, 0.5f) 
+                : new Color(0.3f, 0.3f, 0.3f, 0.5f));
+            GUILayout.Space(2.5f);
+            
+            _informationFoldoutOpen = EditorGUILayout.Foldout(_informationFoldoutOpen, new GUIContent("Information"));
+            if (_informationFoldoutOpen)
+            {
+                GUI.enabled = false;
+                EditorGUILayout.LabelField($"Node Count: {instance.nodes?.Length ?? 0}");
+                
+                var treeStatus = instance.State is Tree.TreeState.Ready or Tree.TreeState.Finished
+                    ? "Ready"
+                    : "Running";
+                EditorGUILayout.LabelField($"Tree Status: {treeStatus}");
+                
+                if (instance.PlayTime != 0f)
+                {
+                    EditorGUILayout.LabelField($"Play Time: {Math.Round(Time.unscaledTime - instance.PlayTime, 1)}s");
+                }
+                else
+                {
+                    EditorGUILayout.LabelField("Play Time: 0s");
+                }
+                GUI.enabled = true;
+            }
+            
+            GUILayout.Space(2.5f);
+            EditorGUI.DrawRect(EditorGUILayout.GetControlRect(false, 1), EditorGUIUtility.isProSkin 
                 ? new Color(0.7f, 0.7f, 0.7f, 0.5f) 
                 : new Color(0.3f, 0.3f, 0.3f, 0.5f));
             GUILayout.Space(2.5f);
