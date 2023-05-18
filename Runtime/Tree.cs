@@ -206,7 +206,7 @@ namespace Jungle
             node.NodeProperties = new NodeProperties
             {
                 guid = GUID.Generate().ToString(),
-                viewName = $"My {node.TitleName} {i.ToString()}",
+                notes = string.Empty,
                 position = position
             };
             
@@ -248,7 +248,7 @@ namespace Jungle
             node.NodeProperties = new NodeProperties
             {
                 guid = GUID.Generate().ToString(),
-                viewName = node.NodeProperties.viewName,
+                notes = node.NodeProperties.notes,
                 position = original.NodeProperties.position + new Vector2(35, 35)
             };
             

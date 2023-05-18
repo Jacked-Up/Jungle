@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using Jungle.Nodes;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
@@ -12,114 +13,113 @@ namespace Jungle.Editor
     {
         #region Variables
 
-        public Action<JungleNodeView> NodeSelected;
+        public Node NodeObject;
 
-        public readonly Node NodeInstance;
+        public UnityEditor.Experimental.GraphView.Port InputPortView { get; private set; }
 
-        public readonly List<UnityEditor.Experimental.GraphView.Port> OutputPortViews = new();
-        /*
-        {
-            get
-            {
-                var convert = new List<UnityEditor.Experimental.GraphView.Port>();
-                outputContainer.contentContainer.Children().ToList().ForEach(element =>
-                {
-                    convert.Add((UnityEditor.Experimental.GraphView.Port)element);
-                });
-                return convert;
-            }
-        }
-        */
+        public List<UnityEditor.Experimental.GraphView.Port> OutputPortViews { get; private set; }
 
-        public readonly UnityEditor.Experimental.GraphView.Port InputPortView;
+        public Action<JungleNodeView> NodeSelectedCallback;
 
-        // DONT LISTEN TO IT. IT DOES EXIST. PROMISE. LOVE YOU.
-        private static string UIFileAssetPath => AssetDatabase.GetAssetPath(Resources.Load("JungleNodeView"));
+        private static string UIFileAssetPath 
+            => AssetDatabase.GetAssetPath(Resources.Load("JungleNodeView"));
         
         #endregion
 
         public JungleNodeView(Node nodeReference) : base(UIFileAssetPath)
         {
-            NodeInstance = nodeReference;
-            var isRootNodeType = NodeInstance.GetType() == typeof(RootNode);
-            
-            // Set title and reference GUID properties of node
-            title = nodeReference.TitleName;
-            viewDataKey = nodeReference.NodeProperties.guid;
+            // Sets the node object to the reference and returns true if the node reference
+            // is of type RootNode
+            var isRootNode = HandleNodeObject(nodeReference);
 
-            // Set position of node in Jungle Editor graph view
-            var graphPosition = nodeReference.NodeProperties.position;
-            style.left = graphPosition.x;
-            style.top = graphPosition.y;
-            
             // Set color of node in the Jungle Editor
             AddToClassList(nodeReference.NodeColor.ToString().ToLower());
-            
-            if (!isRootNodeType)
+
+            // A wonderful nest of grossness :)
+            var notesLabel = mainContainer.Q<Label>("notes-label");
+            if (!isRootNode)
             {
-                var nameLabel = mainContainer.Q<Label>("context-label");
-                var nodeViewName = nodeReference.NodeProperties.viewName;
-                nameLabel.text = nodeViewName.Length < 26 
-                    ? nodeViewName 
-                    : $"{nodeViewName[..23]}...";
+                var nodeNotes = nodeReference.NodeProperties.notes;
+                if (!string.IsNullOrEmpty(nodeNotes))
+                {
+                    using var reader = new StringReader(nodeNotes);
+                    var firstLine = reader.ReadLine();
+                    if (!string.IsNullOrEmpty(firstLine))
+                    {
+                        notesLabel.text = firstLine.Length < 26 
+                            ? firstLine 
+                            : $"{firstLine[..23]}...";
+                    }
+                }
+                else notesLabel.RemoveFromHierarchy();
             }
             // Special stylization for root node type
             else
             {
-                mainContainer.Q<Label>("context-label").RemoveFromHierarchy();
                 outputContainer.transform.position = new Vector3(0, -25, 0);
+                notesLabel.RemoveFromHierarchy();
             }
 
-            // Create input port view
-            if (!isRootNodeType)
-            {
-                var inputPortView = InstantiatePort(Orientation.Horizontal, Direction.Input,
-                    UnityEditor.Experimental.GraphView.Port.Capacity.Multi, NodeInstance.InputInfo.PortType);
-                if (inputPortView != null)
-                {
-                    inputPortView.portName = NodeInstance.InputInfo.PortName;
-                    inputContainer.Add(inputPortView);
-                }
-                InputPortView = inputPortView;
-            }
-
-            // Create output port views
-            //var outputPortViews = new List<UnityEditor.Experimental.GraphView.Port>(NodeInstance.OutputInfo.Length);
-            for (var i = 0; i < nodeReference.OutputInfo.Length; i++)
-            {
-                var portView = InstantiatePort(Orientation.Horizontal, Direction.Output,
-                    UnityEditor.Experimental.GraphView.Port.Capacity.Multi, nodeReference.OutputInfo[i].PortType);
-                if (!isRootNodeType)
-                {
-                    portView.portName = nodeReference.OutputInfo[i].PortName;
-                }
-                // Special stylization for root node type
-                else
-                {
-                    portView.portName = string.Empty;
-                }
-                OutputPortViews.Add(portView);
-                outputContainer.Add(portView);
-            }
+            if (!isRootNode) HandleInputPortViews();
+            HandleOutputPortViews(isRootNode);
         }
 
+        private bool HandleNodeObject(Node reference)
+        {
+            NodeObject = reference;
+            title = reference.TitleName;
+            viewDataKey = reference.NodeProperties.guid;
+            var graphPosition = reference.NodeProperties.position;
+            style.left = graphPosition.x;
+            style.top = graphPosition.y;
+            
+            return reference.GetType() == typeof(RootNode);
+        }
+
+        private void HandleInputPortViews()
+        {
+            var port = NodeObject.InputInfo;
+            
+            InputPortView = InstantiatePort(Orientation.Horizontal, Direction.Input,
+                UnityEditor.Experimental.GraphView.Port.Capacity.Multi, port.PortType);
+            InputPortView.portName = port.PortName;
+            
+            inputContainer.Add(InputPortView);
+        }
+
+        private void HandleOutputPortViews(bool isRootNode)
+        {
+            OutputPortViews = new List<UnityEditor.Experimental.GraphView.Port>();
+            foreach (var port in NodeObject.OutputInfo)
+            {
+                var newPortView = InstantiatePort(Orientation.Horizontal, Direction.Output,
+                    UnityEditor.Experimental.GraphView.Port.Capacity.Multi, port.PortType);
+                newPortView.portName = !isRootNode 
+                    ? port.PortName 
+                    : string.Empty;
+
+                OutputPortViews.Add(newPortView);
+                outputContainer.Add(newPortView);
+            }
+        }
+        
         public override void SetPosition(Rect position)
         {
             base.SetPosition(position);
-            Undo.RecordObject(NodeInstance, $"Set {NodeInstance.name} position");
+            Undo.RecordObject(NodeObject, $"Set {NodeObject.name} position");
             var nodeProperties = new NodeProperties
             {
-                guid = NodeInstance.NodeProperties.guid,
-                viewName = NodeInstance.NodeProperties.viewName,
+                guid = NodeObject.NodeProperties.guid,
+                notes = NodeObject.NodeProperties.notes,
                 position = new Vector2(position.xMin, position.yMin)
             };
-            NodeInstance.NodeProperties = nodeProperties;
+            NodeObject.NodeProperties = nodeProperties;
         }
 
         public override void OnSelected()
         {
             base.OnSelected();
-            NodeSelected?.Invoke(this);
+            NodeSelectedCallback?.Invoke(this);
         }
     }
 }

@@ -43,16 +43,16 @@ namespace Jungle.Editor
         }
 
         public new class UxmlFactory : UxmlFactory<JungleGraphView, UxmlTraits> {}
-
+        
         public void CreateNodeAndView(Type nodeType, Vector2 position)
         {
             var nodeView = new JungleNodeView(_selectedTree.CreateNode(nodeType, position))
             {
-                NodeSelected = OnNodeSelected
+                NodeSelectedCallback = OnNodeSelected
             };
             AddElement(nodeView);
         }
-        
+
         public void PopulateGraphView(Tree tree)
         {
             if (tree == null) return;
@@ -76,23 +76,33 @@ namespace Jungle.Editor
             {
                 var nodeView = new JungleNodeView(node)
                 {
-                    NodeSelected = OnNodeSelected
+                    NodeSelectedCallback = OnNodeSelected
                 };
                 AddElement(nodeView);
-                Debug.Log("Created node view");
-                
-                var outputNodePortViews = GetNodeView(node)?.OutputPortViews;
-                if (outputNodePortViews == null) continue;
-                foreach (var outputPort in node.OutputPorts)
+            }
+            foreach (var node in _selectedTree.nodes)
+            {
+                var nodeView = GetNodeView(node);
+                for (var i = 0; i < nodeView.OutputPortViews.Count; i++)
                 {
-                    Debug.Log("Fetched output port views");
+                    // If this condition is met, it means the node has no connections
+                    // Therefore it can be safely skipped
+                    if (nodeView.OutputPortViews.Count != nodeView.NodeObject.OutputPorts.Length)
+                    {
+                        continue;
+                    }
+                    var outputPortView = nodeView.OutputPortViews[i];
+                    var outputPort = nodeView.NodeObject.OutputPorts[i];
                     foreach (var connection in outputPort.connections)
                     {
-                        var inputNodePortView = GetNodeView(connection)?.InputPortView;
-                        if (inputNodePortView == null) continue;
-                        var outputPortConnections = outputPort.connections.ToList();
-                        AddElement(outputNodePortViews[outputPortConnections.IndexOf(connection)].ConnectTo(inputNodePortView));
-                        Debug.Log("Created an edge view connection");
+                        var connectionView = GetNodeView(connection);
+                        if (connectionView == null)
+                        {
+                            Debug.Log("Failed to find the connections node view");
+                            continue;
+                        }
+                        var inputPortView = connectionView.InputPortView;
+                        AddElement(outputPortView.ConnectTo(inputPortView));
                     }
                 }
             }
@@ -108,8 +118,12 @@ namespace Jungle.Editor
 
         private JungleNodeView GetNodeView(Node node)
         {
-            if (node == null) return null;
-            return GetNodeByGuid(node.NodeProperties.guid) as JungleNodeView;
+            if (node == null)
+            {
+                return null;
+            }
+            var nodeView = GetNodeByGuid(node.NodeProperties.guid);
+            return nodeView as JungleNodeView;
         }
         
         private void ExecuteCommandCallback(ExecuteCommandEvent arg)
@@ -121,13 +135,13 @@ namespace Jungle.Editor
             if (arg.commandName == "Duplicate")
             {
                 // Duplicating the root node is forbidden
-                if (SelectedNodeView.NodeInstance is RootNode)
+                if (SelectedNodeView.NodeObject is RootNode)
                 {
                     return;
                 }
-                var nodeView = new JungleNodeView(_selectedTree.DuplicateNode(SelectedNodeView.NodeInstance))
+                var nodeView = new JungleNodeView(_selectedTree.DuplicateNode(SelectedNodeView.NodeObject))
                 {
-                    NodeSelected = OnNodeSelected
+                    NodeSelectedCallback = OnNodeSelected
                 };
                 AddElement(nodeView);
                 arg.StopPropagation();
@@ -138,39 +152,45 @@ namespace Jungle.Editor
         
         private GraphViewChange GraphViewChangedCallback(GraphViewChange graphViewChange)
         {
-            GraphElement rootNodeView = null;
-            graphViewChange.elementsToRemove ??= new List<GraphElement>();
-            foreach (var element in graphViewChange.elementsToRemove)
+            // Remove all requested nodes
+            if (graphViewChange.elementsToRemove != null)
             {
-                if (element is JungleNodeView nodeView)
+                GraphElement rootNodeView = null;
+                foreach (var element in graphViewChange.elementsToRemove)
                 {
-                    if (nodeView.NodeInstance.GetType() != typeof(RootNode))
+                    if (element is JungleNodeView nodeView)
                     {
-                        _selectedTree.DeleteNode(nodeView.NodeInstance);
+                        if (nodeView.NodeObject.GetType() != typeof(RootNode))
+                        {
+                            _selectedTree.DeleteNode(nodeView.NodeObject);
+                        }
+                        else rootNodeView = element;
                     }
-                    else rootNodeView = element;
+                    else if (element is Edge edge)
+                    {
+                        if (edge.output.node is JungleNodeView parentView && edge.input.node is JungleNodeView childView)
+                        {
+                            _selectedTree.DisconnectNodes(parentView.NodeObject, childView.NodeObject, 0);
+                        }
+                    }
                 }
-                else if (element is Edge edge)
+                // Deleting the root node is forbidden
+                if (rootNodeView != null)
+                {
+                    graphViewChange.elementsToRemove.Remove(rootNodeView);
+                }
+            }
+
+            // Create requested edges
+            if (graphViewChange.edgesToCreate != null)
+            {
+                foreach (var edge in graphViewChange.edgesToCreate)
                 {
                     if (edge.output.node is JungleNodeView parentView && edge.input.node is JungleNodeView childView)
                     {
-                        _selectedTree.DisconnectNodes(parentView.NodeInstance, childView.NodeInstance, 0);
+                        var nodeIndex = (byte)parentView.OutputPortViews.ToList().IndexOf(edge.output);
+                        _selectedTree.ConnectNodes(parentView.NodeObject, childView.NodeObject, nodeIndex);
                     }
-                }
-            }
-            // Deleting the root node is forbidden
-            if (rootNodeView != null)
-            {
-                graphViewChange.elementsToRemove.Remove(rootNodeView);
-            }
-
-            graphViewChange.edgesToCreate ??= new List<Edge>();
-            foreach (var edge in graphViewChange.edgesToCreate)
-            {
-                if (edge.output.node is JungleNodeView parentView && edge.input.node is JungleNodeView childView)
-                {
-                    var nodeIndex = (byte)parentView.OutputPortViews.IndexOf(edge.output);
-                    _selectedTree.ConnectNodes(parentView.NodeInstance, childView.NodeInstance, nodeIndex);
                 }
             }
             

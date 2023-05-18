@@ -19,44 +19,34 @@ namespace Jungle.Editor
         {
             Clear();
             Object.DestroyImmediate(_nodeInspector);
-            _nodeInspector = UnityEditor.Editor.CreateEditor(nodeView.NodeInstance);
+            _nodeInspector = UnityEditor.Editor.CreateEditor(nodeView.NodeObject);
             var container = new IMGUIContainer(() =>
             {
-                if (_nodeInspector.target != null)
+                if (_nodeInspector.target == null) return;
+                
+                var node = (Node)_nodeInspector.target;
+                var properties = node.NodeProperties;
+                GUILayout.Label("Notes:");
+                var notes = GUILayout.TextArea(properties.notes, 300);
+                node.NodeProperties = new NodeProperties
                 {
-                    var node = (Node)_nodeInspector.target;
-                    var properties = node.NodeProperties;
-                    string viewName;
-                    if (node.GetType() == typeof(RootNode))
-                    {
-                        GUI.enabled = false;
-                        viewName = EditorGUILayout.TextField("View Name", "...");
-                    }
-                    else
-                    {
-                        viewName = EditorGUILayout.TextField("View Name", properties.viewName);
-                    }
-                    GUI.enabled = true;
-                    node.NodeProperties = new NodeProperties
-                    {
-                        guid = properties.guid,
-                        viewName = viewName,
-                        position = properties.position
-                    };
+                    guid = properties.guid,
+                    notes = notes,
+                    position = properties.position
+                };
                     
-                    GUILayout.Space(1);
-                    var lineRect = EditorGUILayout.GetControlRect(false, 1);
-                    EditorGUI.DrawRect(lineRect, EditorGUIUtility.isProSkin 
-                        ? new Color(0.7f, 0.7f, 0.7f, 0.5f) 
-                        : new Color(0.3f, 0.3f, 0.3f, 0.5f));
-                    GUILayout.Space(5);
+                GUILayout.Space(1);
+                var lineRect = EditorGUILayout.GetControlRect(false, 1);
+                EditorGUI.DrawRect(lineRect, EditorGUIUtility.isProSkin 
+                    ? new Color(0.7f, 0.7f, 0.7f, 0.5f) 
+                    : new Color(0.3f, 0.3f, 0.3f, 0.5f));
+                GUILayout.Space(5);
 
-                    if (Application.isPlaying)
-                    {
-                        EditorGUILayout.HelpBox("All changes made in play-mode will not revert!", MessageType.Warning);
-                    }
-                    _nodeInspector.OnInspectorGUI();
+                if (Application.isPlaying)
+                {
+                    EditorGUILayout.HelpBox("All changes made in play-mode will not revert!", MessageType.Warning);
                 }
+                _nodeInspector.OnInspectorGUI();
             });
             Add(container);
         }

@@ -89,6 +89,7 @@ namespace Jungle.Editor
             else
             {
                 var titleLabel = rootVisualElement.Q<Label>("tree-name-label");
+                if (titleLabel == null) return;
                 // Ensures the name displayed can be no longer than the maximum length
                 // If it is too long, this removes the extra text and adds a "..." bit
                 titleLabel.text = _activeTree.name.Length > MAXIMUM_DISPLAYED_TREE_NAME 

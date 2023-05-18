@@ -150,7 +150,7 @@ namespace Jungle
         /// <param name="node"></param>
         public void RemoveConnection(Node node)
         {
-            
+            Debug.Log("NEED TO IMPLEMENT REMOVING CONNECTIONS");
         }
 #endif
     }
@@ -335,7 +335,7 @@ namespace Jungle
         /// <summary>
         /// The contextual name of the node in the graph view
         /// </summary>
-        public string viewName;
+        public string notes;
 
         /// <summary>
         /// Position of the node inside the graph view
