@@ -148,9 +148,22 @@ namespace Jungle
         /// </summary>
         /// <param name="port"></param>
         /// <param name="node"></param>
-        public void RemoveConnection(Node node)
+        public void RemoveConnection(Node node, byte portIndex)
         {
-            Debug.Log("NEED TO IMPLEMENT REMOVING CONNECTIONS");
+            if (OutputPorts.Length != OutputInfo.Length)
+            {
+                return;
+            }
+            var outputPortsQuery = new List<Port>(OutputPorts);
+            var outputPort = OutputPorts[portIndex];
+            var connections = new List<Node>(outputPort.connections);
+            if (connections.Contains(node))
+            {
+                connections.Remove(node);
+            }
+            outputPortsQuery[portIndex] = new Port(connections.ToArray(), outputPort.PortType);
+            outputPorts = outputPortsQuery.ToArray();
+            UnityEditor.EditorUtility.SetDirty(this);
         }
 #endif
     }

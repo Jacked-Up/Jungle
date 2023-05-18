@@ -96,11 +96,7 @@ namespace Jungle.Editor
                     foreach (var connection in outputPort.connections)
                     {
                         var connectionView = GetNodeView(connection);
-                        if (connectionView == null)
-                        {
-                            Debug.Log("Failed to find the connections node view");
-                            continue;
-                        }
+                        if (connectionView == null) continue;
                         var inputPortView = connectionView.InputPortView;
                         AddElement(outputPortView.ConnectTo(inputPortView));
                     }
@@ -170,7 +166,8 @@ namespace Jungle.Editor
                     {
                         if (edge.output.node is JungleNodeView parentView && edge.input.node is JungleNodeView childView)
                         {
-                            _selectedTree.DisconnectNodes(parentView.NodeObject, childView.NodeObject, 0);
+                            var index = (byte)parentView.OutputPortViews.IndexOf(edge.output);
+                            _selectedTree.DisconnectNodes(parentView.NodeObject, childView.NodeObject, index);
                         }
                     }
                 }

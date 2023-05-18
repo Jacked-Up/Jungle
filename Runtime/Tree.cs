@@ -303,7 +303,7 @@ namespace Jungle
         public void DisconnectNodes(Node node, Node disconnect, byte portIndex)
         {
             Undo.RecordObject(node, $"Removed edge from {node.name}");
-            node.RemoveConnection(disconnect);
+            node.RemoveConnection(disconnect, portIndex);
         }
 #endif
     }
