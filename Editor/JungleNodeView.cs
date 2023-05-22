@@ -28,6 +28,9 @@ namespace Jungle.Editor
 
         public JungleNodeView(Node nodeReference) : base(UIFileAssetPath)
         {
+            // NEED TO DETECT THIS ERROR
+            if (nodeReference == null) return;
+            
             // Sets the node object to the reference and returns true if the node reference
             // is of type RootNode
             var isRootNode = HandleNodeObject(nodeReference);
@@ -82,7 +85,7 @@ namespace Jungle.Editor
             
             InputPortView = InstantiatePort(Orientation.Horizontal, Direction.Input,
                 UnityEditor.Experimental.GraphView.Port.Capacity.Multi, port.PortType);
-            InputPortView.portName = port.PortName;
+            InputPortView.portName = $"{port.PortName} <size=10><b>({port.PortType.Name})</b></size>";
             
             inputContainer.Add(InputPortView);
         }
@@ -94,7 +97,8 @@ namespace Jungle.Editor
             {
                 var newPortView = InstantiatePort(Orientation.Horizontal, Direction.Output,
                     UnityEditor.Experimental.GraphView.Port.Capacity.Multi, port.PortType);
-                newPortView.portName = !isRootNode 
+                newPortView.portName = $"<size=10><b>({port.PortType.Name})</b></size> ";
+                newPortView.portName += !isRootNode 
                     ? port.PortName 
                     : string.Empty;
 

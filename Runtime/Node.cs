@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Jungle
 {
     /// <summary>
-    /// The Jungle sequencer base node class
+    /// Base node class inherited by all Jungle sequencer nodes.
     /// </summary>
     [Serializable] [Node]
     public abstract class Node : ScriptableObject, INode
@@ -14,20 +14,21 @@ namespace Jungle
         #region Variables
 
         /// <summary>
-        /// Reference to the tree which this node is a child of
+        /// Reference to the tree which this node is apart of.
+        /// Recommended to never touch this.
         /// </summary>
         [SerializeField] [HideInInspector] 
         public Tree tree;
         
         /// <summary>
-        /// Array of the nodes output ports
+        /// Array of the output ports on this node.
         /// </summary>
         public Port[] OutputPorts => outputPorts;
         [SerializeField] [HideInInspector] 
         private Port[] outputPorts = Array.Empty<Port>();
         
         /// <summary>
-        /// List of available node colors
+        /// Jungle editor available node colors.
         /// </summary>
         public enum Color
         {
@@ -35,6 +36,7 @@ namespace Jungle
             Orange,
             Yellow,
             Green,
+            Teal,
             Blue,
             Purple,
             Violet,
@@ -44,22 +46,25 @@ namespace Jungle
         #endregion
         
         /// <summary>
-        /// 
+        /// This method is invoked everytime the node is called. This method will only run once per node call and always
+        /// runs before the "Execute" method. Should be used for initialization.
         /// </summary>
-        /// <param name="inputValue"></param>
+        /// <param name="inputValue">The value sent from a parent node.</param>
         public abstract void Initialize(in object inputValue);
          
         /// <summary>
-        /// 
+        /// This method is called every frame while this node is running. On every execution, return its run state using
+        /// true if finished, and false if still running. Port calls are used to send data to nodes connected to this
+        /// nodes output(s).
         /// </summary>
-        /// <param name="call"></param>
-        /// <returns></returns>
+        /// <param name="call">List of calls to send to connected nodes.</param>
+        /// <returns>True if the node is finished executing and false if not.</returns>
         public abstract bool Execute(out PortCall[] call);
         
 #if UNITY_EDITOR
         /// <summary>
         /// Jungle editor properties of the node.
-        /// *Strongly recommended to not touch this
+        /// *Strongly recommended to not touch this.
         /// </summary>
         public NodeProperties NodeProperties
         {
@@ -77,37 +82,43 @@ namespace Jungle
             => (NodeAttribute) GetType().GetCustomAttributes(typeof(NodeAttribute), true)[0];
 
         /// <summary>
-        /// Main name of the node displayed in big letters inside the Jungle editor graph view
+        /// Main name of the node displayed in big letters inside the Jungle editor graph view.
         /// </summary>
         public string TitleName => NodeInfo.TitleName;
 
         /// <summary>
-        /// Category placement of the node inside the create node window 
+        /// Category placement of the node inside the create node window.
         /// </summary>
         public string Category => NodeInfo.Category;
 
         /// <summary>
-        /// Displayed color of the node inside the Jungle editor graph view
+        /// Displayed color of the node inside the Jungle editor graph view.
         /// </summary>
         public Color NodeColor => NodeInfo.Color;
 
         /// <summary>
-        /// Name and data type info about the input port
+        /// Name and data type info about the input port.
         /// </summary>
         public NodeAttribute.PortInfo InputInfo => NodeInfo.InputInfo;
 
         /// <summary>
-        /// Name and data type info about the output ports
+        /// Name and data type info about the output ports.
         /// </summary>
         public NodeAttribute.PortInfo[] OutputInfo => NodeInfo.OutputInfo;
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="portIndex"></param>
         /// <param name="node"></param>
+        /// <param name="portIndex"></param>
         public void MakeConnection(Node node, byte portIndex)
         {
+            if (node.tree != tree)
+            {
+                // You cannot connect nodes from different trees
+                return;
+            }
+            
             // Fix any mismatches with the port attributes
             // Output ports count error
             if (OutputPorts.Length != OutputInfo.Length)
@@ -146,8 +157,8 @@ namespace Jungle
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="port"></param>
         /// <param name="node"></param>
+        /// <param name="portIndex"></param>
         public void RemoveConnection(Node node, byte portIndex)
         {
             if (OutputPorts.Length != OutputInfo.Length)
@@ -213,18 +224,18 @@ namespace Jungle
     public struct PortCall
     {
         /// <summary>
-        /// ID of the port to send the value to 
+        /// Index of the port to send the value to 
         /// </summary>
-        public byte PortID { get; private set; }
+        public byte PortIndex { get; private set; }
 
         /// <summary>
         /// Value to send out of the requested port
         /// </summary>
         public object Value { get; private set; }
 
-        public PortCall(byte portID, object value)
+        public PortCall(byte portIndex, object value)
         {
-            PortID = portID;
+            PortIndex = portIndex;
             Value = value;
         }
     }

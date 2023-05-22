@@ -3,8 +3,8 @@
     [Node(TitleName = "Start", 
         Category = "HIDDEN", 
         Color = Color.Green,
-        OutputPortNames = new []{"Begin"},
-        OutputPortTypes = new []{typeof(bool)}
+        OutputPortNames = new []{ "Begin" },
+        OutputPortTypes = new []{ typeof(bool) }
     )]
     public class RootNode : Node
     {

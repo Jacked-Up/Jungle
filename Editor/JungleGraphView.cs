@@ -198,7 +198,9 @@ namespace Jungle.Editor
         
         public override List<UnityEditor.Experimental.GraphView.Port> GetCompatiblePorts(UnityEditor.Experimental.GraphView.Port startPort, NodeAdapter _)
         {
-            return ports.ToList().Where(endPort => endPort.direction != startPort.direction && endPort.node != startPort.node).ToList();
+            return ports.ToList().Where(endPort => endPort.direction != startPort.direction 
+                                                   && endPort.node != startPort.node 
+                                                   && endPort.portType == startPort.portType).ToList();
         }
     }
 }

@@ -95,6 +95,14 @@
     border-bottom-color: rgb(0, 204, 74);
 }
 
+.teal #node-border {
+    background-color: rgb(0, 108, 108);
+    border-left-color: rgb(0, 204, 156);
+    border-right-color: rgb(0, 204, 156);
+    border-top-color: rgb(0, 204, 156);
+    border-bottom-color: rgb(0, 204, 156);
+}
+
 .blue #node-border {
     background-color: rgb(6, 57, 120);
     border-left-color: rgb(0, 105, 255);

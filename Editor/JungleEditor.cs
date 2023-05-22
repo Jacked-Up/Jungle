@@ -26,6 +26,13 @@ namespace Jungle.Editor
         private JungleInspectorView _inspectorView;
         private JungleSearchWindow _searchWindow;
         
+        private enum DebugType
+        {
+            Log,
+            Warning,
+            Error
+        }
+        
         #endregion
 
         private void OnEnable()
@@ -105,6 +112,18 @@ namespace Jungle.Editor
                 return;
             }
             _graphView.PopulateGraphView(tree);
+        }
+        
+        private static void MakeDebug(string message, DebugType type, UnityEngine.Object context = null)
+        {
+            var logType = type switch
+            {
+                DebugType.Log => LogType.Log,
+                DebugType.Warning => LogType.Warning,
+                DebugType.Error => LogType.Error,
+                _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+            };
+            Debug.LogFormat(logType, LogOption.NoStacktrace, context, $"[Jungle] {message}");
         }
     }
 }

@@ -2,11 +2,12 @@
 
 namespace Jungle.Nodes.Editor
 {
-    [Node(TitleName = "Debug",
+    [Node(
+        TitleName = "Debug Log",
         Category = "Editor", 
         Color = Color.Grey
     )]
-    public class DebugNode : Node
+    public class DebugLogNode : Node
     {
         #region Variables
 
@@ -47,7 +48,10 @@ namespace Jungle.Nodes.Editor
                     break;
             }
 #endif
-            call = new[] {new PortCall(0, true)};
+            call = new[]
+            {
+                new PortCall(0, true)
+            };
             return true;
         }
     }

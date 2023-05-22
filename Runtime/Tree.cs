@@ -103,7 +103,10 @@ namespace Jungle
         /// automatically halt</param>
         public void Play(Scene linkedScene)
         {
-            if (State == TreeState.Running) return;
+            if (State == TreeState.Running)
+            {
+                return;
+            }
             if (!JungleRuntime.Singleton.PlayTree(this, linkedScene))
             {
 #if UNITY_EDITOR
@@ -119,15 +122,11 @@ namespace Jungle
         /// </summary>
         public void Stop()
         {
-            if (State != TreeState.Running) return;
-            if (!JungleRuntime.Singleton.StopTree(this))
+            if (State != TreeState.Running)
             {
-#if UNITY_EDITOR
-                Debug.LogError($"[{name}] Failed to stop playing");
-#endif
                 return;
             }
-            //ExecutingNodes = new List<Node>(); -- Unnecessary
+            JungleRuntime.Singleton.StopTree(this);
             PlayTime = 0f;
             State = TreeState.Finished;
         }
@@ -144,7 +143,7 @@ namespace Jungle
                 var finished = node.Execute(out var portCalls);
                 foreach (var call in portCalls)
                 {
-                    if (call.PortID > node.OutputPorts.Length - 1)
+                    if (call.PortIndex > node.OutputPorts.Length - 1)
                     {
 #if UNITY_EDITOR
                         if (node.OutputPorts.Length != 0)
@@ -155,7 +154,7 @@ namespace Jungle
 #endif
                         continue;
                     }
-                    foreach (var connection in node.OutputPorts[call.PortID].connections)
+                    foreach (var connection in node.OutputPorts[call.PortIndex].connections)
                     {
                         connection.Initialize(call.Value);
                         query.Add(connection);
