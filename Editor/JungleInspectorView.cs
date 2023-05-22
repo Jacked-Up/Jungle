@@ -24,7 +24,7 @@ namespace Jungle.Editor
             {
                 if (_nodeInspector.target == null) return;
                 
-                var node = (Node)_nodeInspector.target;
+                var node = (JungleNode)_nodeInspector.target;
                 var properties = node.NodeProperties;
                 GUILayout.Label("Notes:");
                 var notes = GUILayout.TextArea(properties.notes, 300);

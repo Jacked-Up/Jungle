@@ -13,7 +13,7 @@ namespace Jungle.Editor
     {
         #region Variables
 
-        public Node NodeObject;
+        public JungleNode NodeObject;
 
         public UnityEditor.Experimental.GraphView.Port InputPortView { get; private set; }
 
@@ -26,7 +26,7 @@ namespace Jungle.Editor
         
         #endregion
 
-        public JungleNodeView(Node nodeReference) : base(UIFileAssetPath)
+        public JungleNodeView(JungleNode nodeReference) : base(UIFileAssetPath)
         {
             // NEED TO DETECT THIS ERROR
             if (nodeReference == null) return;
@@ -67,7 +67,7 @@ namespace Jungle.Editor
             HandleOutputPortViews(isRootNode);
         }
 
-        private bool HandleNodeObject(Node reference)
+        private bool HandleNodeObject(JungleNode reference)
         {
             NodeObject = reference;
             title = reference.TitleName;

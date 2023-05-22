@@ -15,7 +15,7 @@ namespace Jungle.Nodes.Object.Transform
         OutputPortNames = new []{ "Finished" },
         OutputPortTypes = new []{ typeof(UnityEngine.Transform) }
     )]
-    public class SetRotationNode : Node
+    public class SetRotationNode : JungleNode
     {
         #region Variables
         

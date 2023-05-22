@@ -27,21 +27,21 @@ namespace Jungle
         /// <summary>
         /// List of executing node trees. (Includes both persistent and non-persistent trees)
         /// </summary>
-        public List<Tree> RunningTrees
+        public List<JungleTree> RunningTrees
         {
             get
             {
-                var combinedList = new List<Tree>();
-                _persistentRunningTrees ??= new List<Tree>();
+                var combinedList = new List<JungleTree>();
+                _persistentRunningTrees ??= new List<JungleTree>();
                 combinedList.AddRange(_persistentRunningTrees);
-                _nonPersistentRunningTrees ??= new List<Tree>();
+                _nonPersistentRunningTrees ??= new List<JungleTree>();
                 combinedList.AddRange(_nonPersistentRunningTrees);
                 return combinedList;
             }
         }
 
-        private List<Tree> _persistentRunningTrees = new();
-        private List<Tree> _nonPersistentRunningTrees = new();
+        private List<JungleTree> _persistentRunningTrees = new();
+        private List<JungleTree> _nonPersistentRunningTrees = new();
         private List<Scene> _sceneQuery = new();
         
         #endregion
@@ -75,10 +75,10 @@ namespace Jungle
 
         private void Update()
         {
-            var query = new List<Tree>();
+            var query = new List<JungleTree>();
             foreach (var nodeTree in RunningTrees)
             {
-                if (nodeTree.State == Tree.TreeState.Finished)
+                if (nodeTree.State == JungleTree.TreeState.Finished)
                 {
                     query.Add(nodeTree);
                     continue;
@@ -96,9 +96,9 @@ namespace Jungle
         /// </summary>
         /// <param name="tree"></param>
         /// <returns></returns>
-        public bool PlayTree(Tree tree)
+        public bool PlayTree(JungleTree tree)
         {
-            _persistentRunningTrees ??= new List<Tree>();
+            _persistentRunningTrees ??= new List<JungleTree>();
             if (RunningTrees.Contains(tree))
             {
 #if UNITY_EDITOR
@@ -116,9 +116,9 @@ namespace Jungle
         /// <param name="tree"></param>
         /// <param name="linkedScene"></param>
         /// <returns></returns>
-        public bool PlayTree(Tree tree, Scene linkedScene)
+        public bool PlayTree(JungleTree tree, Scene linkedScene)
         {
-            _nonPersistentRunningTrees ??= new List<Tree>();
+            _nonPersistentRunningTrees ??= new List<JungleTree>();
             _sceneQuery ??= new List<Scene>();
             _nonPersistentRunningTrees.Add(tree);
             _sceneQuery.Add(linkedScene);
@@ -130,10 +130,10 @@ namespace Jungle
         /// </summary>
         /// <param name="tree"></param>
         /// <returns></returns>
-        public bool StopTree(Tree tree)
+        public bool StopTree(JungleTree tree)
         {
-            _persistentRunningTrees ??= new List<Tree>();
-            _nonPersistentRunningTrees ??= new List<Tree>();
+            _persistentRunningTrees ??= new List<JungleTree>();
+            _nonPersistentRunningTrees ??= new List<JungleTree>();
             if (!RunningTrees.Contains(tree))
             {
                 return false;
@@ -152,10 +152,10 @@ namespace Jungle
         
         private void SceneUnloadedCallback(Scene unloadedScene)
         {
-            _nonPersistentRunningTrees ??= new List<Tree>();
+            _nonPersistentRunningTrees ??= new List<JungleTree>();
             _sceneQuery ??= new List<Scene>();
             
-            var query = new List<Tree>();
+            var query = new List<JungleTree>();
             var query2 = new List<Scene>();
             foreach (var scene in _sceneQuery)
             {
@@ -202,7 +202,7 @@ namespace Jungle
             GUI.enabled = false;
             foreach (var tree in instance.RunningTrees)
             {
-                EditorGUILayout.ObjectField(tree, typeof(Node));
+                EditorGUILayout.ObjectField(tree, typeof(JungleNode));
             }
             Repaint();
         }

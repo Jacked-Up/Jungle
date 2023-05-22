@@ -11,7 +11,7 @@ namespace Jungle.Nodes.Object.GameObject
         OutputPortNames = new []{ "Found" },
         OutputPortTypes = new []{ typeof(UnityEngine.GameObject) }
     )]
-    public class GetGameObjectNode : Node
+    public class GetGameObjectNode : JungleNode
     {
         #region Variables
 

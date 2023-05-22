@@ -12,7 +12,7 @@ namespace Jungle.Nodes.Object.Camera
         OutputPortNames = new []{ "Found" },
         OutputPortTypes = new []{ typeof(UnityEngine.Camera) }
     )]
-    public class GetCameraNode : Node
+    public class GetCameraNode : JungleNode
     {
         #region Variables
         

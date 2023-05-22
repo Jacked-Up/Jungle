@@ -9,7 +9,7 @@ namespace Jungle
     /// Base node class inherited by all Jungle sequencer nodes.
     /// </summary>
     [Serializable] [Node]
-    public abstract class Node : ScriptableObject, INode
+    public abstract class JungleNode : ScriptableObject, INode
     {
         #region Variables
 
@@ -18,7 +18,7 @@ namespace Jungle
         /// Recommended to never touch this.
         /// </summary>
         [SerializeField] [HideInInspector] 
-        public Tree tree;
+        public JungleTree tree;
         
         /// <summary>
         /// Array of the output ports on this node.
@@ -111,7 +111,7 @@ namespace Jungle
         /// </summary>
         /// <param name="node"></param>
         /// <param name="portIndex"></param>
-        public void MakeConnection(Node node, byte portIndex)
+        public void MakeConnection(JungleNode node, byte portIndex)
         {
             if (node.tree != tree)
             {
@@ -130,7 +130,7 @@ namespace Jungle
                 }
                 var repairedPortsList = OutputInfo.Select(info =>
                 {
-                    return new Port(Array.Empty<Node>(), info.PortType);
+                    return new Port(Array.Empty<JungleNode>(), info.PortType);
                 }).ToArray();
                 outputPorts = repairedPortsList;
             }
@@ -146,7 +146,7 @@ namespace Jungle
                                    " All port connections have been lost to prevent type mismatch errors");
                 }
                 var connections = i == portIndex 
-                    ? new List<Node>(OutputPorts[i].connections) {node}.ToArray()
+                    ? new List<JungleNode>(OutputPorts[i].connections) {node}.ToArray()
                     : OutputPorts[i].connections;
                 newPortsList.Add(new Port(connections, portType));
             }
@@ -159,7 +159,7 @@ namespace Jungle
         /// </summary>
         /// <param name="node"></param>
         /// <param name="portIndex"></param>
-        public void RemoveConnection(Node node, byte portIndex)
+        public void RemoveConnection(JungleNode node, byte portIndex)
         {
             if (OutputPorts.Length != OutputInfo.Length)
             {
@@ -167,7 +167,7 @@ namespace Jungle
             }
             var outputPortsQuery = new List<Port>(OutputPorts);
             var outputPort = OutputPorts[portIndex];
-            var connections = new List<Node>(outputPort.connections);
+            var connections = new List<JungleNode>(outputPort.connections);
             if (connections.Contains(node))
             {
                 connections.Remove(node);
@@ -189,7 +189,7 @@ namespace Jungle
         /// List of the nodes that are connected to this port
         /// </summary>
         [SerializeField] [HideInInspector]
-        public Node[] connections;
+        public JungleNode[] connections;
 
         /// <summary>
         /// The value type that can be called at this port
@@ -210,9 +210,9 @@ namespace Jungle
         [SerializeField] [HideInInspector] 
         private string portType;
 
-        public Port(Node[] connections, Type portType)
+        public Port(JungleNode[] connections, Type portType)
         {
-            connections ??= Array.Empty<Node>();
+            connections ??= Array.Empty<JungleNode>();
             this.connections = connections;
             this.portType = portType.AssemblyQualifiedName;
         }
@@ -259,7 +259,7 @@ namespace Jungle
         /// <summary>
         /// The color of the node in the visual editor
         /// </summary>
-        public Node.Color Color { get; set; } = Node.Color.Blue;
+        public JungleNode.Color Color { get; set; } = JungleNode.Color.Blue;
 
         /// <summary>
         /// 

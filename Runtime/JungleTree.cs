@@ -13,7 +13,7 @@ namespace Jungle
     /// 
     /// </summary>
     [Serializable] [CreateAssetMenu(fileName = "Node Tree", menuName = "Jungle Node Tree")]
-    public class Tree : ScriptableObject
+    public class JungleTree : ScriptableObject
     {
         #region Variables
         
@@ -21,18 +21,18 @@ namespace Jungle
         /// 
         /// </summary>
         [HideInInspector]
-        public Node rootNode;
+        public JungleNode rootNode;
 
         /// <summary>
         /// 
         /// </summary>
         [HideInInspector]
-        public Node[] nodes = Array.Empty<Node>();
+        public JungleNode[] nodes = Array.Empty<JungleNode>();
 
         /// <summary>
         /// 
         /// </summary>
-        public List<Node> ExecutingNodes { get; private set; } = new();
+        public List<JungleNode> ExecutingNodes { get; private set; } = new();
 
         /// <summary>
         /// 
@@ -137,7 +137,7 @@ namespace Jungle
         public void Update()
         {
             if (State == TreeState.Finished) return;
-            var query = new List<Node>(ExecutingNodes);
+            var query = new List<JungleNode>(ExecutingNodes);
             foreach (var node in ExecutingNodes)
             {
                 var finished = node.Execute(out var portCalls);
@@ -172,7 +172,7 @@ namespace Jungle
         private void HandlePlay()
         {
             PlayTime = Time.unscaledTime;
-            ExecutingNodes = new List<Node> {rootNode};
+            ExecutingNodes = new List<JungleNode> {rootNode};
             ExecutingNodes[0].Initialize(true);
             State = TreeState.Running;
         }
@@ -184,9 +184,9 @@ namespace Jungle
         /// <param name="nodeType"></param>
         /// <param name="position"></param>
         /// <returns></returns>
-        public Node CreateNode(Type nodeType, Vector2 position)
+        public JungleNode CreateNode(Type nodeType, Vector2 position)
         {
-            var node = CreateInstance(nodeType) as Node;
+            var node = CreateInstance(nodeType) as JungleNode;
             if (node == null)
             {
                 Debug.LogError($"[Tree] [{name}] Failed to instance node of type {nodeType} because it doesn't " +
@@ -197,7 +197,7 @@ namespace Jungle
             // Create unique file name
             var i = 0;
             var path = $"{AssetDatabase.GetAssetPath(this)}/{name}_{nodeType.Name}_{i.ToString()}.asset";
-            while (AssetDatabase.LoadAssetAtPath(path, typeof(Node)) != null) i++;
+            while (AssetDatabase.LoadAssetAtPath(path, typeof(JungleNode)) != null) i++;
             node.name = $"{name}_{nodeType.Name}_{i.ToString()}";
             
             // Build node and populate graph view properties
@@ -211,8 +211,8 @@ namespace Jungle
             
             // Add new node instance to list
             Undo.RecordObject(this, $"Added {node.name} to tree");
-            var nodesList = new List<Node>();
-            nodes ??= Array.Empty<Node>();
+            var nodesList = new List<JungleNode>();
+            nodes ??= Array.Empty<JungleNode>();
             nodesList.AddRange(nodes.ToList());
             nodesList.Add(node);
             nodes = nodesList.ToArray();
@@ -231,7 +231,7 @@ namespace Jungle
         /// </summary>
         /// <param name="original"></param>
         /// <returns></returns>
-        public Node DuplicateNode(Node original)
+        public JungleNode DuplicateNode(JungleNode original)
         {
             var node = Instantiate(original);
             if (node == null) return null;
@@ -249,7 +249,7 @@ namespace Jungle
             // Create unique file name
             var i = 0;
             var path = $"{AssetDatabase.GetAssetPath(this)}/{name}_{original.GetType().Name}_{i.ToString()}.asset";
-            while (AssetDatabase.LoadAssetAtPath(path, typeof(Node)) != null) i++;
+            while (AssetDatabase.LoadAssetAtPath(path, typeof(JungleNode)) != null) i++;
             node.name = $"{name}_{original.GetType().Name}_{i.ToString()}";
             
             // Build node and populate graph view properties
@@ -280,7 +280,7 @@ namespace Jungle
         /// 
         /// </summary>
         /// <param name="node"></param>
-        public void DeleteNode(Node node)
+        public void DeleteNode(JungleNode node)
         {
             var query = nodes.ToList();
             if (!query.Contains(node)) return;
@@ -297,7 +297,7 @@ namespace Jungle
         /// <param name="node"></param>
         /// <param name="connect"></param>
         /// <param name="portIndex"></param>
-        public void ConnectNodes(Node node, Node connect, byte portIndex)
+        public void ConnectNodes(JungleNode node, JungleNode connect, byte portIndex)
         {
             Undo.RecordObject(node, $"Added edge to {node.name}");
             node.MakeConnection(connect, portIndex);
@@ -309,7 +309,7 @@ namespace Jungle
         /// <param name="node"></param>
         /// <param name="disconnect"></param>
         /// <param name="portIndex"></param>
-        public void DisconnectNodes(Node node, Node disconnect, byte portIndex)
+        public void DisconnectNodes(JungleNode node, JungleNode disconnect, byte portIndex)
         {
             Undo.RecordObject(node, $"Removed edge from {node.name}");
             node.RemoveConnection(disconnect, portIndex);
@@ -318,17 +318,17 @@ namespace Jungle
     }
 
 #if UNITY_EDITOR
-    [CustomEditor(typeof(Tree))]
+    [CustomEditor(typeof(JungleTree))]
     public class TreeEditor : Editor
     {
         #region Variables
 
-        private static bool _prerequisiteFoldoutOpen = true;
+        private static bool _prerequisiteFoldoutOpen;
         private static bool _informationFoldoutOpen = true;
-        private static bool _debugFoldDownOpen;
+        private static bool _debugFoldDownOpen = true;
         private List<string> sceneLinkOptions;
         private int selectedSceneIndex;
-        private Tree instance;
+        private JungleTree instance;
 
         private SerializedProperty _prerequisiteScenes;
         
@@ -336,7 +336,7 @@ namespace Jungle
 
         private void OnEnable()
         {
-            instance = target as Tree;
+            instance = target as JungleTree;
             _prerequisiteScenes = serializedObject.FindProperty("prerequisiteScenes");
         }
 
@@ -362,7 +362,7 @@ namespace Jungle
                 GUI.enabled = false;
                 EditorGUILayout.LabelField($"Node Count: {instance.nodes?.Length ?? 0}");
                 
-                var treeStatus = instance.State is Tree.TreeState.Ready or Tree.TreeState.Finished
+                var treeStatus = instance.State is JungleTree.TreeState.Ready or JungleTree.TreeState.Finished
                     ? "Ready"
                     : "Running";
                 EditorGUILayout.LabelField($"Tree Status: {treeStatus}");
@@ -398,7 +398,7 @@ namespace Jungle
                 selectedSceneIndex = EditorGUILayout.Popup("Linked Scene", selectedSceneIndex, sceneLinkOptions.ToArray());
             
                 GUILayout.BeginHorizontal();
-                GUI.enabled = instance.State != Tree.TreeState.Running && Application.isPlaying;
+                GUI.enabled = instance.State != JungleTree.TreeState.Running && Application.isPlaying;
                 if (GUILayout.Button("Play"))
                 {
                     // Condition simply checks if a scene is selected and calls the proper method
@@ -411,7 +411,7 @@ namespace Jungle
                         instance.Play(SceneManager.GetSceneAt(selectedSceneIndex - 1));
                     }
                 }
-                GUI.enabled = instance.State == Tree.TreeState.Running && Application.isPlaying;
+                GUI.enabled = instance.State == JungleTree.TreeState.Running && Application.isPlaying;
                 if (GUILayout.Button("Stop"))
                 {
                     instance.Stop();

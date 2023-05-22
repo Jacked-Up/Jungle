@@ -21,7 +21,7 @@ namespace Jungle.Editor
 
         private const int MAXIMUM_DISPLAYED_TREE_NAME = 28;
         
-        private Tree _activeTree;
+        private JungleTree _activeTree;
         private JungleGraphView _graphView;
         private JungleInspectorView _inspectorView;
         private JungleSearchWindow _searchWindow;
@@ -46,12 +46,12 @@ namespace Jungle.Editor
         [OnOpenAsset]
         public static bool OpenAssetCallback(int _, int __)
         {
-            if (Selection.activeObject.GetType() != typeof(Tree))
+            if (Selection.activeObject.GetType() != typeof(JungleTree))
             {
                 return false;
             }
             var editor = GetWindow<JungleEditor>();
-            editor._activeTree = Selection.activeObject as Tree;
+            editor._activeTree = Selection.activeObject as JungleTree;
             editor.PopulateGraphView(editor._activeTree);
             return true;
         }
@@ -105,7 +105,7 @@ namespace Jungle.Editor
             }
         }
 
-        private void PopulateGraphView(Tree tree)
+        private void PopulateGraphView(JungleTree tree)
         {
             if (tree == null)
             {

@@ -6,7 +6,7 @@
         OutputPortNames = new []{ "Begin" },
         OutputPortTypes = new []{ typeof(bool) }
     )]
-    public class RootNode : Node
+    public class RootNode : JungleNode
     {
         public override void Initialize(in object inputValue)
         {

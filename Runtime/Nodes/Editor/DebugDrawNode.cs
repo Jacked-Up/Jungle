@@ -10,7 +10,7 @@ namespace Jungle.Nodes.Editor
         Category = "Editor", 
         Color = Color.Grey
     )]
-    public class DebugDrawNode : Node
+    public class DebugDrawNode : JungleNode
     {
         #region Variables
 

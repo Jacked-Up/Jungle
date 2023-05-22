@@ -8,12 +8,12 @@ namespace Jungle.Nodes.Stop
         Color = Color.Red,
         OutputPortNames = new string[0]
     )]
-    public class StopTreeNode : Node
+    public class StopTreeNode : JungleNode
     {
         #region Variables
 
         [SerializeField] 
-        private List<Tree> nodeTreesToStop = new List<Tree>();
+        private List<JungleTree> nodeTreesToStop = new List<JungleTree>();
 
         #endregion
 

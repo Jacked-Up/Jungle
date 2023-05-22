@@ -9,12 +9,12 @@ namespace Jungle.Nodes.Loop
         Color = Color.Purple,
         OutputPortNames = new []{"Invoke", "Done"}
     )]
-    public class WhileLoopNode : Node
+    public class WhileLoopNode : JungleNode
     {
         #region Variables
 
         [SerializeField]
-        private List<Node> nodes = new List<Node>();
+        private List<JungleNode> nodes = new List<JungleNode>();
 
         #endregion
 

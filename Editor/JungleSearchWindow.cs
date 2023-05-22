@@ -18,12 +18,12 @@ namespace Jungle.Editor
         private struct CategoryCache
         {
             public string CategoryName;
-            public List<Node> Nodes;
+            public List<JungleNode> Nodes;
 
-            public CategoryCache(string categoryName, Node firstNode)
+            public CategoryCache(string categoryName, JungleNode firstNode)
             {
                 CategoryName = categoryName;
-                Nodes = new List<Node> {firstNode};
+                Nodes = new List<JungleNode> {firstNode};
             }
         }
 
@@ -37,11 +37,11 @@ namespace Jungle.Editor
         
         public List<SearchTreeEntry> CreateSearchTree(SearchWindowContext context)
         {
-            var nodeTypes = TypeCache.GetTypesDerivedFrom<Node>();
+            var nodeTypes = TypeCache.GetTypesDerivedFrom<JungleNode>();
             var categories = new List<CategoryCache>();
             nodeTypes.ToList().ForEach(nodeType =>
             {
-                var typeObject = CreateInstance(nodeType) as Node;
+                var typeObject = CreateInstance(nodeType) as JungleNode;
                 if (typeObject == null || typeObject is RootNode) return;
                 var typeCategory = typeObject.Category;
                 if (categories.All(category => category.CategoryName != typeCategory))

@@ -11,7 +11,7 @@ namespace Jungle.Nodes.Object.GameObject
         OutputPortNames = new string[0],
         OutputPortTypes = new Type[0]
     )]
-    public class DestroyGameObjectNode : Node
+    public class DestroyGameObjectNode : JungleNode
     {
         #region Variables
 

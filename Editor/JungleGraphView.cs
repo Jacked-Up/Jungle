@@ -17,7 +17,7 @@ namespace Jungle.Editor
         public Action<JungleNodeView> OnNodeSelected { get; set; }
         
         private readonly Vector2 defaultRootNodePosition = new(100, 120);
-        private Tree _selectedTree;
+        private JungleTree _selectedTree;
 
         #endregion
 
@@ -53,7 +53,7 @@ namespace Jungle.Editor
             AddElement(nodeView);
         }
 
-        public void PopulateGraphView(Tree tree)
+        public void PopulateGraphView(JungleTree tree)
         {
             if (tree == null) return;
             _selectedTree = tree;
@@ -112,7 +112,7 @@ namespace Jungle.Editor
             };
         }
 
-        private JungleNodeView GetNodeView(Node node)
+        private JungleNodeView GetNodeView(JungleNode node)
         {
             if (node == null)
             {

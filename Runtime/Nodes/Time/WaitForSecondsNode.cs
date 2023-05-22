@@ -8,7 +8,7 @@ namespace Jungle.Nodes.Time
         Color = Color.Yellow,
         OutputPortNames = new []{"Elapsed"}
     )]
-    public class WaitForSecondsNode : Node
+    public class WaitForSecondsNode : JungleNode
     {
         #region Variables
 
