@@ -8,7 +8,7 @@ namespace Jungle.Nodes.Object.Camera
         Category = "Object/Camera",
         Color = Color.Teal,
         InputPortName = "Find",
-        InputPortType = typeof(GameObject),
+        InputPortType = typeof(UnityEngine.GameObject),
         OutputPortNames = new []{ "Found" },
         OutputPortTypes = new []{ typeof(UnityEngine.Camera) }
     )]
@@ -26,7 +26,7 @@ namespace Jungle.Nodes.Object.Camera
         
         public override void Initialize(in object inputValue)
         {
-            var gameObject = inputValue as GameObject;
+            var gameObject = inputValue as UnityEngine.GameObject;
             if (gameObject == null)
             {
                 return;

@@ -11,7 +11,7 @@ namespace Jungle.Nodes.Object.Transform
         Category = "Object/Transform",
         Color = Color.Teal,
         InputPortName = "Find",
-        InputPortType = typeof(GameObject),
+        InputPortType = typeof(UnityEngine.GameObject),
         OutputPortNames = new []{ "Found" },
         OutputPortTypes = new []{ typeof(UnityEngine.Transform) }
     )]
@@ -29,7 +29,7 @@ namespace Jungle.Nodes.Object.Transform
         
         public override void Initialize(in object inputValue)
         {
-            var gameObject = inputValue as GameObject;
+            var gameObject = inputValue as UnityEngine.GameObject;
             if (gameObject == null)
             {
                 return;

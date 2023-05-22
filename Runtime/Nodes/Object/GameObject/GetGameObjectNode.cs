@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Jungle.Nodes.Object
+namespace Jungle.Nodes.Object.GameObject
 {
     [Node(
         TitleName = "Get Game Object",
@@ -9,7 +9,7 @@ namespace Jungle.Nodes.Object
         Color = Color.Teal,
         InputPortName = "Find",
         OutputPortNames = new []{ "Found" },
-        OutputPortTypes = new []{ typeof(GameObject) }
+        OutputPortTypes = new []{ typeof(UnityEngine.GameObject) }
     )]
     public class GetGameObjectNode : Node
     {
@@ -22,7 +22,7 @@ namespace Jungle.Nodes.Object
         private bool cacheGameObject;
         
         [NonSerialized] 
-        private GameObject _gameObject;
+        private UnityEngine.GameObject _gameObject;
         
         #endregion
         
@@ -32,7 +32,7 @@ namespace Jungle.Nodes.Object
             {
                 return;
             }
-            _gameObject = GameObject.Find(gameObjectName);
+            _gameObject = UnityEngine.GameObject.Find(gameObjectName);
             
 #if UNITY_EDITOR
             if (_gameObject == null)

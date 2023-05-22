@@ -235,6 +235,16 @@ namespace Jungle
         {
             var node = Instantiate(original);
             if (node == null) return null;
+
+            // Delete all existing connections
+            foreach (var port in node.OutputPorts)
+            {
+                var portList = node.OutputPorts.ToList();
+                foreach (var connection in port.connections)
+                {
+                    node.RemoveConnection(connection, (byte)portList.IndexOf(port));
+                }
+            }
             
             // Create unique file name
             var i = 0;

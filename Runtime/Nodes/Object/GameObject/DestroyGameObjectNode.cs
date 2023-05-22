@@ -1,0 +1,34 @@
+﻿using System;
+
+namespace Jungle.Nodes.Object.GameObject
+{
+    [Node(
+        TitleName = "Destroy Game Object",
+        Category = "Object",
+        Color = Color.Red,
+        InputPortName = "Destroy",
+        InputPortType = typeof(UnityEngine.GameObject),
+        OutputPortNames = new string[0],
+        OutputPortTypes = new Type[0]
+    )]
+    public class DestroyGameObjectNode : Node
+    {
+        #region Variables
+
+        private UnityEngine.GameObject gameObject;
+
+        #endregion
+        
+        public override void Initialize(in object inputValue)
+        {
+            gameObject = inputValue as UnityEngine.GameObject;
+        }
+
+        public override bool Execute(out PortCall[] call)
+        {
+            Destroy(gameObject);
+            call = Array.Empty<PortCall>();
+            return true;
+        }
+    }
+}
