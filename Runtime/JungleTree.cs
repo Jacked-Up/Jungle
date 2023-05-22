@@ -367,7 +367,7 @@ namespace Jungle
                     : "Running";
                 EditorGUILayout.LabelField($"Tree Status: {treeStatus}");
                 
-                if (instance.PlayTime != 0f)
+                if (instance.State == JungleTree.TreeState.Running)
                 {
                     EditorGUILayout.LabelField($"Play Time: {Math.Round(Time.unscaledTime - instance.PlayTime, 1)}s");
                 }
@@ -388,7 +388,10 @@ namespace Jungle
             if (_debugFoldDownOpen)
             {
                 GUI.enabled = Application.isPlaying;
-                sceneLinkOptions = new List<string>() {"None"};
+                sceneLinkOptions = new List<string>()
+                {
+                    "None"
+                };
                 var sceneCount = SceneManager.sceneCount;
                 var sceneNames = new string[sceneCount];
                 for (var i = 0; i < sceneCount; i++) 
