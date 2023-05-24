@@ -404,7 +404,8 @@ namespace Jungle
                 if (!Application.isPlaying)
                 {
                     GUI.enabled = true;
-                    EditorGUILayout.HelpBox("You can only debug node trees while in play mode", MessageType.Info);
+                    EditorGUILayout.HelpBox("You can only debug Jungle Trees while the editor" +
+                                            " is in play mode.", MessageType.Info);
                 }
             }
 

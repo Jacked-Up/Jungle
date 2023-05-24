@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -18,8 +17,7 @@ namespace Jungle.Nodes.Application
     {
         #region Variables
 
-        [SerializeField] 
-        private string urlToOpen = "https://www.jackedup.xyz/jungle";
+        
 
         #endregion
         

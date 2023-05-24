@@ -202,7 +202,7 @@ namespace Jungle
             GUI.enabled = false;
             foreach (var tree in instance.RunningTrees)
             {
-                EditorGUILayout.ObjectField(tree, typeof(JungleNode));
+                //EditorGUILayout.ObjectField(tree, typeof(JungleNode));
             }
             Repaint();
         }
