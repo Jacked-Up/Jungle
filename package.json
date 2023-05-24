@@ -9,5 +9,11 @@
     "name": "Jacked Up Studios LLC",
     "email": "support@jackedup.xyz",
     "url": "https://www.jackedup.xyz/jungle"
+  },
+  "dependencies": {
+    "com.unity.ugui": "1.0.0",
+    "com.unity.textmeshpro": "3.0.6",
+    "com.unity.timeline": "1.6.5",
+    "com.unity.inputsystem": "1.5.1"
   }
 }
