@@ -37,6 +37,11 @@ namespace Jungle
         /// <summary>
         /// 
         /// </summary>
+        public MethodList RevertAction { get; private set; } = new();
+
+        /// <summary>
+        /// 
+        /// </summary>
         public Scene RequisiteScene { get; private set; }
 
         /// <summary>
@@ -118,6 +123,10 @@ namespace Jungle
             JungleRuntime.Singleton.StopTree(this);
             PlayTime = 0f;
             State = TreeState.Finished;
+            
+            // Invoke revert methods
+            RevertAction?.InvokeAll();
+            RevertAction = new MethodList();
         }
         
         /// <summary>
@@ -138,7 +147,7 @@ namespace Jungle
                         if (node.OutputPorts.Length != 0)
                         {
                             Debug.LogError($"[{name}] {node.name} attempted to call an output port that is " +
-                                           $"out of the index range");
+                                           "out of the index range.");
                         }
 #endif
                         continue;
@@ -158,6 +167,25 @@ namespace Jungle
             if (ExecutingNodes.Count == 0) State = TreeState.Finished;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="method"></param>
+        public void AddRevertAction(Action method)
+        {
+            RevertAction ??= new MethodList();
+            RevertAction.AddAction(method);
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="method"></param>
+        public void RemoveRevertAction(Action method)
+        {
+            RevertAction?.RemoveAction(method);
+        }
+        
         private void HandlePlay()
         {
             PlayTime = Time.unscaledTime;
@@ -306,6 +334,57 @@ namespace Jungle
 #endif
     }
 
+    /// <summary>
+    /// Class for managing and invoking a list of actions.
+    /// </summary>
+    public class MethodList
+    {
+        /// <summary>
+        /// Invoke list.
+        /// </summary>
+        public List<Action> Actions { get; private set; }
+
+        /// <summary>
+        /// Adds a method to the invoke list.
+        /// </summary>
+        /// <param name="method">Method to add.</param>
+        public void AddAction(Action method)
+        {
+            Actions ??= new List<Action>();
+            if (Actions.Contains(method))
+            {
+                RemoveAction(method);
+            }
+            Actions.Add(method);
+        }
+
+        /// <summary>
+        /// Removes a method from the invoke list.
+        /// </summary>
+        /// <param name="method">Method to remove.</param>
+        public void RemoveAction(Action method)
+        {
+            Actions ??= new List<Action>();
+            if (!Actions.Contains(method))
+            {
+                return;
+            }
+            Actions.Remove(method);
+        }
+        
+        /// <summary>
+        /// Invokes all of the methods.
+        /// </summary>
+        public void InvokeAll()
+        {
+            Actions ??= new List<Action>();
+            foreach (var method in Actions)
+            {
+                method?.Invoke();
+            }
+        }
+    }
+    
 #if UNITY_EDITOR
     [CustomEditor(typeof(JungleTree))]
     public class TreeEditor : Editor
