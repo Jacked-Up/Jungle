@@ -198,9 +198,19 @@ namespace Jungle.Editor
         
         public override List<UnityEditor.Experimental.GraphView.Port> GetCompatiblePorts(UnityEditor.Experimental.GraphView.Port startPort, NodeAdapter _)
         {
-            return ports.ToList().Where(endPort => endPort.direction != startPort.direction 
-                                                   && endPort.node != startPort.node 
-                                                   && endPort.portType == startPort.portType).ToList();
+            // If the port type is null, this means that the node has some kind of issue internally.
+            // It is safest to just not allow any connections until the problem is fixed
+            if (startPort.portType == typeof(Error))
+            {
+                return null;
+            }
+            
+            // Otherwise the compatible port must not be the same connection direction and the same
+            // connection type
+            var compatiblePorts = ports.ToList().Where(endPort => endPort.direction != startPort.direction 
+                                                                  && endPort.node != startPort.node 
+                                                                  && endPort.portType == startPort.portType);
+            return compatiblePorts.ToList();
         }
     }
 }

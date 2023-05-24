@@ -4,7 +4,7 @@
         Category = "HIDDEN", 
         Color = Color.Green,
         OutputPortNames = new []{ "Begin" },
-        OutputPortTypes = new []{ typeof(bool) }
+        OutputPortTypes = new []{ typeof(None) }
     )]
     public class RootNode : JungleNode
     {

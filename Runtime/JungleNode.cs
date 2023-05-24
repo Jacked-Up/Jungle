@@ -269,7 +269,7 @@ namespace Jungle
         /// <summary>
         /// 
         /// </summary>
-        public Type InputPortType { get; set; } = typeof(bool);
+        public Type InputPortType { get; set; } = typeof(None);
 
         /// <summary>
         /// 
@@ -279,7 +279,7 @@ namespace Jungle
         /// <summary>
         /// 
         /// </summary>
-        public Type[] OutputPortTypes { get; set; } = {typeof(bool)};
+        public Type[] OutputPortTypes { get; set; } = { typeof(None) };
 
         /// <summary>
         /// The nodes input port
@@ -342,8 +342,13 @@ namespace Jungle
     /// <summary>
     /// 
     /// </summary>
-    public struct Error { }
+    public struct None { }
     
+    /// <summary>
+    /// 
+    /// </summary>
+    public struct Error { }
+
 #if UNITY_EDITOR
     /// <summary>
     /// Details about the node in the Jungle editor like GUID, position, and view name
