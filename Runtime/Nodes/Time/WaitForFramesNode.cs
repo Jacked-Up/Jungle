@@ -5,7 +5,7 @@ namespace Jungle.Nodes.Time
 {
     [Node(TitleName = "Wait For Frames", 
         Category = "Time",
-        Color = Color.Yellow, 
+        Color = Color.Purple, 
         OutputPortNames = new []{"Elapsed"}
     )]
     public class WaitForFramesNode : JungleNode

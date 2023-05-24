@@ -37,17 +37,6 @@ namespace Jungle
         /// <summary>
         /// 
         /// </summary>
-        public Scene[] PrerequisiteScenes
-        {
-            get => prerequisiteScenes;
-            set => prerequisiteScenes = value;
-        }
-        [SerializeField] [HideInInspector]
-        private Scene[] prerequisiteScenes = Array.Empty<Scene>();
-        
-        /// <summary>
-        /// 
-        /// </summary>
         public Scene RequisiteScene { get; private set; }
 
         /// <summary>
@@ -323,41 +312,33 @@ namespace Jungle
     {
         #region Variables
 
-        private static bool _prerequisiteFoldoutOpen;
-        private static bool _informationFoldoutOpen = true;
-        private static bool _debugFoldDownOpen = true;
+        private static bool InformationFoldoutOpen
+        {
+            get => EditorPrefs.GetBool("JungleInfoFoldoutOpen", true);
+            set => EditorPrefs.SetBool("JungleInfoFoldoutOpen", value);
+        }
+        
+        private static bool DebugFoldDownOpen
+        {
+            get => EditorPrefs.GetBool("JungleDebugFoldoutOpen", true);
+            set => EditorPrefs.SetBool("JungleDebugFoldoutOpen", value);
+        }
+        
         private List<string> sceneLinkOptions;
         private int selectedSceneIndex;
         private JungleTree instance;
-
-        private SerializedProperty _prerequisiteScenes;
         
         #endregion
 
         private void OnEnable()
         {
             instance = target as JungleTree;
-            _prerequisiteScenes = serializedObject.FindProperty("prerequisiteScenes");
         }
 
         public override void OnInspectorGUI()
         {
-            _prerequisiteFoldoutOpen = EditorGUILayout.Foldout(_prerequisiteFoldoutOpen, new GUIContent("Prerequisites"));
-            if (_prerequisiteFoldoutOpen)
-            {
-                serializedObject.Update();
-                EditorGUILayout.PropertyField(_prerequisiteScenes);
-                serializedObject.ApplyModifiedProperties();
-            }
-            
-            GUILayout.Space(2.5f);
-            EditorGUI.DrawRect(EditorGUILayout.GetControlRect(false, 1), EditorGUIUtility.isProSkin 
-                ? new Color(0.7f, 0.7f, 0.7f, 0.5f) 
-                : new Color(0.3f, 0.3f, 0.3f, 0.5f));
-            GUILayout.Space(2.5f);
-            
-            _informationFoldoutOpen = EditorGUILayout.Foldout(_informationFoldoutOpen, new GUIContent("Information"));
-            if (_informationFoldoutOpen)
+            InformationFoldoutOpen = EditorGUILayout.Foldout(InformationFoldoutOpen, new GUIContent("Information"));
+            if (InformationFoldoutOpen)
             {
                 GUI.enabled = false;
                 EditorGUILayout.LabelField($"Node Count: {instance.nodes?.Length ?? 0}");
@@ -384,8 +365,8 @@ namespace Jungle
                 : new Color(0.3f, 0.3f, 0.3f, 0.5f));
             GUILayout.Space(2.5f);
             
-            _debugFoldDownOpen = EditorGUILayout.Foldout(_debugFoldDownOpen, new GUIContent("Debug"));
-            if (_debugFoldDownOpen)
+            DebugFoldDownOpen = EditorGUILayout.Foldout(DebugFoldDownOpen, new GUIContent("Debug"));
+            if (DebugFoldDownOpen)
             {
                 GUI.enabled = Application.isPlaying;
                 sceneLinkOptions = new List<string>()
