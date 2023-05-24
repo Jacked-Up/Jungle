@@ -37,16 +37,6 @@ namespace Jungle
         /// <summary>
         /// 
         /// </summary>
-        public MethodList RevertAction { get; private set; } = new();
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public Scene RequisiteScene { get; private set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
         public float PlayTime { get; private set; }
 
         /// <summary>
@@ -72,43 +62,35 @@ namespace Jungle
             Finished
         }
         
+        private ActionsList revertActions;
+        
         #endregion
 
         /// <summary>
-        /// Initializes the node tree for execution
+        /// 
         /// </summary>
-        public void Play()
-        {
-            if (State == TreeState.Running) return;
-            if (!JungleRuntime.Singleton.PlayTree(this))
-            {
-#if UNITY_EDITOR
-                Debug.LogError($"[{name}] Failed to initialize and play");
-#endif
-                return;
-            }
-            HandlePlay();
-        }
-
-        /// <summary>
-        /// Initializes the node tree for execution and links to a scene
-        /// </summary>
-        /// <param name="linkedScene">If the linked scene is unloaded while the tree is executing, execution will
-        /// automatically halt</param>
-        public void Play(Scene linkedScene)
+        /// <param name="link"></param>
+        public void Play(Scene? link = null)
         {
             if (State == TreeState.Running)
             {
                 return;
             }
-            if (!JungleRuntime.Singleton.PlayTree(this, linkedScene))
+
+            if (JungleRuntime.Singleton.RunningTrees.Contains(this))
             {
-#if UNITY_EDITOR
-                Debug.LogError($"[{name}] Failed to initialize and play");
-#endif
                 return;
             }
-            HandlePlay();
+            JungleRuntime.Singleton.StartTree(this, link);
+            
+            PlayTime = Time.unscaledTime;
+            ExecutingNodes = new List<JungleNode>
+            {
+                rootNode
+            };
+            // The root node is at index zero
+            ExecutingNodes[0].Initialize(new None());
+            State = TreeState.Running;
         }
 
         /// <summary>
@@ -125,8 +107,8 @@ namespace Jungle
             State = TreeState.Finished;
             
             // Invoke revert methods
-            RevertAction?.InvokeAll();
-            RevertAction = new MethodList();
+            revertActions?.InvokeAll();
+            revertActions = new ActionsList();
         }
         
         /// <summary>
@@ -164,36 +146,28 @@ namespace Jungle
             // Populate executing nodes with new query ONLY if it has changed
             // I believe this prevents the list from redundantly reallocating new memory. I could be wrong
             if (!ExecutingNodes.Equals(query)) ExecutingNodes = query;
-            if (ExecutingNodes.Count == 0) State = TreeState.Finished;
+            if (ExecutingNodes.Count == 0) Stop();
         }
 
         /// <summary>
-        /// 
+        /// Adds an action to be invoked when the Jungle Tree execution ends or is stopped.
         /// </summary>
-        /// <param name="method"></param>
-        public void AddRevertAction(Action method)
+        /// <param name="action">Action to add to the invoke list.</param>
+        public void AddRevertAction(Action action)
         {
-            RevertAction ??= new MethodList();
-            RevertAction.AddAction(method);
+            revertActions ??= new ActionsList();
+            revertActions.AddAction(action);
         }
         
         /// <summary>
-        /// 
+        /// Removed an action from the revert invoke list.
         /// </summary>
-        /// <param name="method"></param>
-        public void RemoveRevertAction(Action method)
+        /// <param name="action">Action to be removed from the invoke list.</param>
+        public void RemoveRevertAction(Action action)
         {
-            RevertAction?.RemoveAction(method);
+            revertActions?.RemoveAction(action);
         }
-        
-        private void HandlePlay()
-        {
-            PlayTime = Time.unscaledTime;
-            ExecutingNodes = new List<JungleNode> {rootNode};
-            ExecutingNodes[0].Initialize(true);
-            State = TreeState.Running;
-        }
-        
+
 #if UNITY_EDITOR
         /// <summary>
         /// 
@@ -337,7 +311,7 @@ namespace Jungle
     /// <summary>
     /// Class for managing and invoking a list of actions.
     /// </summary>
-    public class MethodList
+    public class ActionsList
     {
         /// <summary>
         /// Invoke list.

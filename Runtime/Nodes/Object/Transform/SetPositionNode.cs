@@ -40,13 +40,32 @@ namespace Jungle.Nodes.Object.Transform
         [NonSerialized] 
         private UnityEngine.Transform _transform;
 
+        [NonSerialized]
+        private Vector3 _originalPosition;
+        
         #endregion
         
         public override void Initialize(in object inputValue)
         {
             _transform = inputValue as UnityEngine.Transform;
+            _originalPosition = space == Space.World 
+                ? _transform.position
+                : _transform.localPosition;
+            tree.AddRevertAction(RevertPosition);
         }
 
+        private void RevertPosition()
+        {
+            if (space == Space.World)
+            {
+                _transform.position = _originalPosition;
+            }
+            else if (space == Space.Local)
+            {
+                _transform.localPosition = _originalPosition;
+            }
+        }
+        
         public override bool Execute(out PortCall[] call)
         {                
             call = Array.Empty<PortCall>();

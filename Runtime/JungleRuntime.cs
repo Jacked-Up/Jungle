@@ -23,26 +23,24 @@ namespace Jungle
             get;
             private set;
         }
-        
+
         /// <summary>
-        /// List of executing node trees. (Includes both persistent and non-persistent trees)
+        /// 
         /// </summary>
         public List<JungleTree> RunningTrees
         {
             get
             {
-                var combinedList = new List<JungleTree>();
-                _persistentRunningTrees ??= new List<JungleTree>();
-                combinedList.AddRange(_persistentRunningTrees);
-                _nonPersistentRunningTrees ??= new List<JungleTree>();
-                combinedList.AddRange(_nonPersistentRunningTrees);
-                return combinedList;
+                var query = new List<JungleTree>();
+                foreach (var entry in _running)
+                {
+                    query.Add(entry.Tree);
+                }
+                return query;
             }
         }
-
-        private List<JungleTree> _persistentRunningTrees = new();
-        private List<JungleTree> _nonPersistentRunningTrees = new();
-        private List<Scene> _sceneQuery = new();
+        
+        private List<TreeEntry> _running = new();
         
         #endregion
         
@@ -51,7 +49,7 @@ namespace Jungle
             if (Singleton != null)
             {
 #if UNITY_EDITOR
-                Debug.LogError("[Jungle Runtime] A Jungle runtime was instantiated while another instance already existed");
+                Debug.LogError("[Jungle Runtime] A Jungle runtime was instantiated while another instance already existed.", gameObject);
 #endif
                 enabled = false;
                 return;
@@ -67,47 +65,23 @@ namespace Jungle
         private void OnDisable()
         {
             SceneManager.sceneUnloaded -= SceneUnloadedCallback;
-            foreach (var runningTree in RunningTrees)
+            foreach (var entry in new List<TreeEntry>(_running))
             {
-                StopTree(runningTree);
+                StopTree(entry.Tree);
             }
         }
 
         private void Update()
         {
-            var query = new List<JungleTree>();
-            foreach (var nodeTree in RunningTrees)
+            foreach (var entry in new List<TreeEntry>(_running))
             {
-                if (nodeTree.State == JungleTree.TreeState.Finished)
+                if (entry.Tree.State == JungleTree.TreeState.Finished)
                 {
-                    query.Add(nodeTree);
+                    StopTree(entry.Tree);
                     continue;
                 }
-                nodeTree.Update();
+                entry.Tree.Update();
             }
-            query.ForEach(nodeTree =>
-            {
-                StopTree(nodeTree);
-            });
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="tree"></param>
-        /// <returns></returns>
-        public bool PlayTree(JungleTree tree)
-        {
-            _persistentRunningTrees ??= new List<JungleTree>();
-            if (RunningTrees.Contains(tree))
-            {
-#if UNITY_EDITOR
-                Debug.LogWarning($"[Jungle Runtime] Attempt to start {tree.name} but it was already running");
-#endif
-                return false;
-            }
-            _persistentRunningTrees.Add(tree);
-            return true;
         }
 
         /// <summary>
@@ -115,73 +89,79 @@ namespace Jungle
         /// </summary>
         /// <param name="tree"></param>
         /// <param name="linkedScene"></param>
-        /// <returns></returns>
-        public bool PlayTree(JungleTree tree, Scene linkedScene)
+        public void StartTree(JungleTree tree, Scene? linkedScene = null)
         {
-            _nonPersistentRunningTrees ??= new List<JungleTree>();
-            _sceneQuery ??= new List<Scene>();
-            _nonPersistentRunningTrees.Add(tree);
-            _sceneQuery.Add(linkedScene);
-            return true;
+            var entry = new TreeEntry(tree, linkedScene);
+
+            _running ??= new List<TreeEntry>();
+            if (_running.Contains(entry))
+            {
+                return;
+            }
+            _running.Add(entry);
         }
         
         /// <summary>
         /// 
         /// </summary>
         /// <param name="tree"></param>
-        /// <returns></returns>
-        public bool StopTree(JungleTree tree)
+        public void StopTree(JungleTree tree)
         {
-            _persistentRunningTrees ??= new List<JungleTree>();
-            _nonPersistentRunningTrees ??= new List<JungleTree>();
-            if (!RunningTrees.Contains(tree))
+            if (_running == null || _running.Count == 0)
             {
-                return false;
+                return;
             }
-            if (_persistentRunningTrees.Contains(tree))
+            for (var i = 0; i < _running.Count; i++)
             {
-                _persistentRunningTrees.Remove(tree);
+                if (_running[i].Tree != tree)
+                {
+                    continue;
+                }
+                _running.RemoveAt(i);
+                tree.Stop();
+                break;
             }
-            else if (_nonPersistentRunningTrees.Contains(tree))
-            {
-                _nonPersistentRunningTrees.Remove(tree);
-            }
-            tree.Stop();
-            return true;
         }
         
         private void SceneUnloadedCallback(Scene unloadedScene)
         {
-            _nonPersistentRunningTrees ??= new List<JungleTree>();
-            _sceneQuery ??= new List<Scene>();
-            
-            var query = new List<JungleTree>();
-            var query2 = new List<Scene>();
-            foreach (var scene in _sceneQuery)
+            var query = new List<TreeEntry>(_running);
+            foreach (var entry in query)
             {
-                if (scene != unloadedScene) continue;
-                var index = _sceneQuery.IndexOf(scene);
-                query.Add(_nonPersistentRunningTrees[index]);
-                query2.Add(scene);
-            }
-            foreach (var tree in query)
-            {
-                var stopped = StopTree(tree);
-#if UNITY_EDITOR
-                if (stopped)
+                if (entry.Link == null)
                 {
-                    Debug.Log($"[{tree.name}] Tree was stopped prematurely");
+                    continue;
                 }
-#endif
-                _nonPersistentRunningTrees.Remove(tree);
-            }
-            foreach (var request in query2)
-            {
-                _sceneQuery.Remove(request);
+                if (entry.Link == unloadedScene)
+                {
+                    StopTree(entry.Tree);
+                }
             }
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    public struct TreeEntry
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public JungleTree Tree { get; private set; }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        public Scene? Link { get; private set; }
+
+        public TreeEntry(JungleTree tree, Scene? link = null)
+        {
+            Tree = tree;
+            Link = link;
+        }
+    }
+    
 #if UNITY_EDITOR
     [CustomEditor(typeof(JungleRuntime))]
     public class JungleRuntimeEditor : Editor
