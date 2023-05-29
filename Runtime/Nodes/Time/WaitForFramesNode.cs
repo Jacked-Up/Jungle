@@ -20,11 +20,6 @@ namespace Jungle.Nodes.Time
 
         #endregion
 
-        private void OnValidate()
-        {
-            if (frames < 0) frames = 0;
-        }
-
         public override void Initialize(in object inputValue)
         {
             _frameIndex = 0;
@@ -40,6 +35,11 @@ namespace Jungle.Nodes.Time
             }
             call = new[] {new PortCall(0, true)};
             return true;
+        }
+        
+        private void OnValidate()
+        {
+            frames = (int)Mathf.Clamp(frames, 1, Mathf.Infinity);
         }
     }
     

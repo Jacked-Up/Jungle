@@ -55,7 +55,10 @@ namespace Jungle.Editor
 
         public void PopulateGraphView(JungleTree tree)
         {
-            if (tree == null) return;
+            if (tree == null)
+            {
+                return;
+            }
             _selectedTree = tree;
 
             graphViewChanged -= GraphViewChangedCallback;
@@ -74,6 +77,10 @@ namespace Jungle.Editor
             // Creates node view and edges
             foreach (var node in _selectedTree.nodes)
             {
+                if (node == null)
+                {
+                    continue;
+                }
                 var nodeView = new JungleNodeView(node)
                 {
                     NodeSelectedCallback = OnNodeSelected
@@ -83,6 +90,10 @@ namespace Jungle.Editor
             foreach (var node in _selectedTree.nodes)
             {
                 var nodeView = GetNodeView(node);
+                // This is a case the only occurs when the nodes
+                // script has been deleted
+                if (nodeView == null) continue;
+                
                 for (var i = 0; i < nodeView.OutputPortViews.Count; i++)
                 {
                     // If this condition is met, it means the node has no connections

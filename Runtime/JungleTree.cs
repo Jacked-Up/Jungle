@@ -103,6 +103,7 @@ namespace Jungle
                 return;
             }
             JungleRuntime.Singleton.StopTree(this);
+            ExecutingNodes = new List<JungleNode>();
             PlayTime = 0f;
             State = TreeState.Finished;
             
@@ -116,7 +117,10 @@ namespace Jungle
         /// </summary>
         public void Update()
         {
-            if (State == TreeState.Finished) return;
+            if (State == TreeState.Finished)
+            {
+                return;
+            }
             var query = new List<JungleNode>(ExecutingNodes);
             foreach (var node in ExecutingNodes)
             {
@@ -141,7 +145,10 @@ namespace Jungle
                     }
                 }
                 // Remove from query if the node is finished executing
-                if (finished) query.Remove(node);
+                if (finished)
+                {
+                    query.Remove(node);
+                }
             }
             // Populate executing nodes with new query ONLY if it has changed
             // I believe this prevents the list from redundantly reallocating new memory. I could be wrong
@@ -196,7 +203,7 @@ namespace Jungle
             node.NodeProperties = new NodeProperties
             {
                 guid = GUID.Generate().ToString(),
-                notes = string.Empty,
+                comments = string.Empty,
                 position = position
             };
             
@@ -248,7 +255,7 @@ namespace Jungle
             node.NodeProperties = new NodeProperties
             {
                 guid = GUID.Generate().ToString(),
-                notes = node.NodeProperties.notes,
+                comments = node.NodeProperties.comments,
                 position = original.NodeProperties.position + new Vector2(35, 35)
             };
             
@@ -457,8 +464,8 @@ namespace Jungle
                 if (!Application.isPlaying)
                 {
                     GUI.enabled = true;
-                    EditorGUILayout.HelpBox("You can only debug Jungle Trees while the editor" +
-                                            " is in play mode.", MessageType.Info);
+                    EditorGUILayout.HelpBox("Jungle Trees can only be debugged while the editor is in" +
+                                            " play mode.", MessageType.Info);
                 }
             }
 

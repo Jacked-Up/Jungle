@@ -1,5 +1,8 @@
 ﻿using System;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Jungle.Nodes.Time
 {
@@ -23,11 +26,6 @@ namespace Jungle.Nodes.Time
 
         #endregion
 
-        private void OnValidate()
-        {
-            duration = Mathf.Clamp(duration, 0f, Mathf.Infinity);
-        }
-
         public override void Initialize(in object inputValue)
         {
             _startTime = scaledTime
@@ -49,16 +47,21 @@ namespace Jungle.Nodes.Time
             call = Array.Empty<PortCall>();
             return false;
         }
+        
+        private void OnValidate()
+        {
+            duration = Mathf.Clamp(duration, 0.001f, Mathf.Infinity);
+        }
     }
 
 #if UNITY_EDITOR
-    [UnityEditor.CustomEditor(typeof(WaitForSecondsNode))]
+    [CustomEditor(typeof(WaitForSecondsNode))]
     public class WaitForSecondsNodeEditor : UnityEditor.Editor
     {
         #region Variables
 
-        private UnityEditor.SerializedProperty _duration;
-        private UnityEditor.SerializedProperty _scaledTime;
+        private SerializedProperty _duration;
+        private SerializedProperty _scaledTime;
 
         #endregion
 
@@ -71,8 +74,8 @@ namespace Jungle.Nodes.Time
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
-            UnityEditor.EditorGUILayout.PropertyField(_duration);
-            UnityEditor.EditorGUILayout.PropertyField(_scaledTime);
+            EditorGUILayout.PropertyField(_duration);
+            EditorGUILayout.PropertyField(_scaledTime);
             serializedObject.ApplyModifiedProperties();
         }
     }

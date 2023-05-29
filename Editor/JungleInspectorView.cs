@@ -20,21 +20,31 @@ namespace Jungle.Editor
             Clear();
             Object.DestroyImmediate(_nodeInspector);
             _nodeInspector = UnityEditor.Editor.CreateEditor(nodeView.NodeObject);
+            if (_nodeInspector == null)
+            {
+                return;
+            }
             var container = new IMGUIContainer(() =>
             {
-                if (_nodeInspector.target == null) return;
+                if (_nodeInspector.target == null)
+                {
+                    return;
+                }
                 
                 var node = (JungleNode)_nodeInspector.target;
                 var properties = node.NodeProperties;
-                GUILayout.Label("Notes:");
-                var notes = GUILayout.TextArea(properties.notes, 300);
+
+                GUI.enabled = _nodeInspector.target is not RootNode;
+                GUILayout.Label("Comments:");
+                var notes = GUILayout.TextArea(properties.comments, 300);
                 node.NodeProperties = new NodeProperties
                 {
                     guid = properties.guid,
-                    notes = notes,
+                    comments = notes,
                     position = properties.position
                 };
-                    
+                GUI.enabled = true;
+                
                 GUILayout.Space(1);
                 var lineRect = EditorGUILayout.GetControlRect(false, 1);
                 EditorGUI.DrawRect(lineRect, EditorGUIUtility.isProSkin 

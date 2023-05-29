@@ -8,15 +8,15 @@ using UnityEditor;
 namespace Jungle.Nodes.Scene
 {
     [Node(
-        TitleName = "Unload Scene",
+        TitleName = "Reload Scene",
         Category = "Scene",
         Color = Color.Orange,
-        InputPortName = "Unload",
+        InputPortName = "Reload",
         InputPortType = typeof(UnityEngine.SceneManagement.Scene),
-        OutputPortNames = new []{ "Unloaded" },
-        OutputPortTypes = new []{ typeof(None) }
+        OutputPortNames = new []{ "Reloaded" },
+        OutputPortTypes = new []{ typeof(UnityEngine.SceneManagement.Scene) }
     )]
-    public class UnloadSceneNode : JungleNode
+    public class ReloadSceneNode : JungleNode
     {
         #region Variables
 
@@ -43,10 +43,10 @@ namespace Jungle.Nodes.Scene
 
         public override bool Execute(out PortCall[] call)
         {
+            call = Array.Empty<PortCall>();
             operation ??= SceneManager.UnloadSceneAsync(_scene);
             if (!operation.isDone)
             {
-                call = Array.Empty<PortCall>();
                 return false;
             }
             call = new[]
@@ -58,8 +58,8 @@ namespace Jungle.Nodes.Scene
     }
     
 #if UNITY_EDITOR
-    [CustomEditor(typeof(UnloadSceneNode))]
-    public class UnloadSceneNodeEditor : UnityEditor.Editor
+    [CustomEditor(typeof(ReloadSceneNode))]
+    public class ReloadSceneNodeEditor : UnityEditor.Editor
     {
         #region Variables
 

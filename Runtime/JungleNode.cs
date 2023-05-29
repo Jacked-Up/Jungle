@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Jungle
 {
@@ -364,7 +365,7 @@ namespace Jungle
         /// <summary>
         /// The contextual name of the node in the graph view
         /// </summary>
-        public string notes;
+        [FormerlySerializedAs("notes")] public string comments;
 
         /// <summary>
         /// Position of the node inside the graph view

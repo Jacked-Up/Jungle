@@ -9,7 +9,7 @@ using UnityEngine.UIElements;
 
 namespace Jungle.Editor
 {
-    public class JungleNodeView : UnityEditor.Experimental.GraphView.Node
+    public class JungleNodeView : Node
     {
         #region Variables
 
@@ -42,7 +42,7 @@ namespace Jungle.Editor
             var notesLabel = mainContainer.Q<Label>("notes-label");
             if (!isRootNode)
             {
-                var nodeNotes = nodeReference.NodeProperties.notes;
+                var nodeNotes = nodeReference.NodeProperties.comments;
                 if (!string.IsNullOrEmpty(nodeNotes))
                 {
                     using var reader = new StringReader(nodeNotes);
@@ -109,12 +109,18 @@ namespace Jungle.Editor
         
         public override void SetPosition(Rect position)
         {
+            if (NodeObject == null)
+            {
+                JungleDebug.Log("JungleNodeView", "Failed to set position!", null);
+                return;
+            }
+            
             base.SetPosition(position);
             Undo.RecordObject(NodeObject, $"Set {NodeObject.name} position");
             var nodeProperties = new NodeProperties
             {
                 guid = NodeObject.NodeProperties.guid,
-                notes = NodeObject.NodeProperties.notes,
+                comments = NodeObject.NodeProperties.comments,
                 position = new Vector2(position.xMin, position.yMin)
             };
             NodeObject.NodeProperties = nodeProperties;

@@ -8,15 +8,15 @@ using UnityEditor;
 namespace Jungle.Nodes.Scene
 {
     [Node(
-        TitleName = "Unload Scene",
+        TitleName = "Set Active Scene",
         Category = "Scene",
         Color = Color.Orange,
-        InputPortName = "Unload",
+        InputPortName = "Set Active",
         InputPortType = typeof(UnityEngine.SceneManagement.Scene),
-        OutputPortNames = new []{ "Unloaded" },
+        OutputPortNames = new []{ "Next" },
         OutputPortTypes = new []{ typeof(None) }
     )]
-    public class UnloadSceneNode : JungleNode
+    public class SetActiveSceneNode : JungleNode
     {
         #region Variables
 
@@ -31,24 +31,26 @@ namespace Jungle.Nodes.Scene
         public override void Initialize(in object inputValue)
         {
             _scene = (UnityEngine.SceneManagement.Scene) inputValue;
-            
 #if UNITY_EDITOR
             if (!_scene.IsValid())
             {
                 Debug.LogFormat(LogType.Error, LogOption.NoStacktrace, tree,
-                    $"[{name}] Failed to unload scene because the input scene by name \"{_scene.name}\" was invalid.");
+                    $"[{name}] Failed to set active scene because the input scene by name \"{_scene.name}\" was invalid.");
+            }
+#endif
+            
+            var result = SceneManager.SetActiveScene(_scene);
+#if UNITY_EDITOR
+            if (!result)
+            {
+                Debug.LogFormat(LogType.Error, LogOption.NoStacktrace, tree,
+                    $"[{name}] Failed to set active scene.");
             }
 #endif
         }
 
         public override bool Execute(out PortCall[] call)
         {
-            operation ??= SceneManager.UnloadSceneAsync(_scene);
-            if (!operation.isDone)
-            {
-                call = Array.Empty<PortCall>();
-                return false;
-            }
             call = new[]
             {
                 new PortCall(0, new None())
@@ -58,8 +60,8 @@ namespace Jungle.Nodes.Scene
     }
     
 #if UNITY_EDITOR
-    [CustomEditor(typeof(UnloadSceneNode))]
-    public class UnloadSceneNodeEditor : UnityEditor.Editor
+    [CustomEditor(typeof(SetActiveSceneNode))]
+    public class SetActiveSceneNodeEditor : UnityEditor.Editor
     {
         #region Variables
 

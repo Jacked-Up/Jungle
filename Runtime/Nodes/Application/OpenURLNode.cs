@@ -15,7 +15,7 @@ namespace Jungle.Nodes.Application
     {
         #region Variables
 
-        [SerializeField] 
+        [SerializeField] [TextArea(1, 2)]
         private string urlToOpen = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
 
         #endregion
