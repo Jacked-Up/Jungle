@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 #if UNITY_EDITOR
 using UnityEditor;
-using UnityEngine.SceneManagement;
 #endif
 
 namespace Jungle
@@ -467,6 +467,8 @@ namespace Jungle
                     EditorGUILayout.HelpBox("Jungle Trees can only be debugged while the editor is in" +
                                             " play mode.", MessageType.Info);
                 }
+
+                EditorGUILayout.HelpBox("This Jungle Tree failed to validate.", MessageType.Error);
             }
 
             Repaint();

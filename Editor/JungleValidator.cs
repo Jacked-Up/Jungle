@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.Compilation;
+using UnityEngine;
 
 namespace Jungle.Editor
 {
@@ -12,44 +14,6 @@ namespace Jungle.Editor
 
         private const string SEARCH_FILTER 
             = "t:JungleTree";
-
-        public struct ValidationReport
-        {
-            public bool Failed => TreeErrors != null || NodeErrors != null;
-            
-            public readonly JungleTree Tree; 
-            public readonly JungleNode Node;
-            public readonly List<TreeError> TreeErrors;
-            public readonly List<NodeError> NodeErrors;
-
-            public ValidationReport(JungleTree tree, JungleNode node, List<TreeError> treeErrors,
-                List<NodeError> nodeErrors)
-            {
-                Tree = tree;
-                Node = node;
-                TreeErrors = treeErrors;
-                NodeErrors = nodeErrors;
-            }
-            
-            public struct TreeError
-            {
-                public ErrorType Type;
-                
-                public enum ErrorType
-                {
-                    MissingOrNullNode
-                }
-            }
-            public struct NodeError
-            {
-                public ErrorType Type;
-                
-                public enum ErrorType
-                {
-                    ConnectionTypeMismatch
-                }
-            }
-        }
 
         #endregion
         
@@ -75,21 +39,24 @@ namespace Jungle.Editor
         public static ValidationReport Validate(JungleTree tree)
         {
             var treeAssetPath = AssetDatabase.GetAssetPath(tree);
-            var nodesAsset = AssetDatabase.LoadAllAssetsAtPath(treeAssetPath);
+            var treeSubAssets = AssetDatabase.LoadAllAssetsAtPath(treeAssetPath);
+            var report = new ValidationReport(tree, null, null);
             
-            foreach (var asset in nodesAsset)
+            foreach (var subAsset in treeSubAssets)
             {
-                if (asset == null)
+                // This USUALLY means that the developer deleted the node script
+                if (subAsset == null)
                 {
                     //report.NodeErrors = true;
                     continue;
                 }
-                if (asset.GetType() != typeof(JungleNode))
+                if (subAsset.GetType() != typeof(JungleNode))
                 {
+                    
                     //report.TreeErrors = true;
                     continue;
                 }
-                var node = asset as JungleNode;
+                var node = subAsset as JungleNode;
                 foreach (var port in node.OutputPorts)
                 {
                     foreach (var connection in port.connections)
@@ -102,7 +69,19 @@ namespace Jungle.Editor
                 }
             }
             
-            return new ValidationReport();
+            return report;
+        }
+
+        [MenuItem("Window/Jungle/Validate All Jungle Trees")]
+        public static void ValidateAll()
+        {
+            
+        }
+
+        public static bool AllJungleTreesValid()
+        {
+            var jungleTrees = GetAllJungleTrees();
+            return jungleTrees.All(jungleTree => !Validate(jungleTree).Failed);
         }
         
         public static List<JungleTree> GetAllJungleTrees()
@@ -122,6 +101,44 @@ namespace Jungle.Editor
             });
 
             return jungleTreeAssets;
+        }
+    }
+    
+    [Serializable]
+    public struct ValidationReport
+    {
+        public bool Failed => TreeErrors != null || NodeErrors != null;
+            
+        public readonly JungleTree Tree; 
+        public readonly List<TreeError> TreeErrors;
+        public readonly List<NodeError> NodeErrors;
+
+        public ValidationReport(JungleTree tree, List<TreeError> treeErrors,
+            List<NodeError> nodeErrors)
+        {
+            Tree = tree;
+            TreeErrors = treeErrors;
+            NodeErrors = nodeErrors;
+        }
+            
+        public struct TreeError
+        {
+            public ErrorType Type;
+                
+            public enum ErrorType
+            {
+                MissingOrNullNode
+            }
+        }
+        public struct NodeError
+        {
+            public JungleNode Node;
+            public ErrorType Type;
+                
+            public enum ErrorType
+            {
+                ConnectionTypeMismatch
+            }
         }
     }
 }

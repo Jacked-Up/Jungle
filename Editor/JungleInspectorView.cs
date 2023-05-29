@@ -54,7 +54,8 @@ namespace Jungle.Editor
 
                 if (Application.isPlaying)
                 {
-                    EditorGUILayout.HelpBox("All changes made in play-mode will not revert!", MessageType.Warning);
+                    EditorGUILayout.HelpBox("Any and all changes made in play mode will not revert!"
+                        , MessageType.Warning);
                 }
                 _nodeInspector.OnInspectorGUI();
             });
