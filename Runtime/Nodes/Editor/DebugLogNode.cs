@@ -55,13 +55,5 @@ namespace Jungle.Nodes.Editor
             };
             return true;
         }
-
-        public override void Validate(in bool tryFix, out List<string> issues)
-        {
-            issues = new List<string>
-            {
-                "This is a test of the jungle node validation"
-            };
-        }
     }
 }

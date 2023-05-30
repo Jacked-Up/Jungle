@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using NUnit.Framework;
 using UnityEditor;
-using UnityEditor.Compilation;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace Jungle.Editor
 {
@@ -24,10 +21,12 @@ namespace Jungle.Editor
         
         static JungleValidator()
         {
+            /*
             // This is a just a heads up for developers when any validation
             // issues are detected after compilation.
             CompilationPipeline.compilationFinished += _ =>
             {
+                return;
                 var jungleTrees = GetAllJungleTrees();
                 var reports = jungleTrees.Select(Validate).Where(report => report.Failed).ToList();
                 if (reports.Count != 0)
@@ -35,6 +34,7 @@ namespace Jungle.Editor
                     JungleDebug.Error("Jungle Validator", $"{reports.Count} validation issues detected.");
                 }
             };
+            */
         }
         
         public static ValidationReport Validate(JungleTree tree)
@@ -134,9 +134,10 @@ namespace Jungle.Editor
         
         private static JungleValidatorEditor _instance;
         private ValidationReport[] _reports;
-
+        
         private string _searchQuery;
         private Vector2 _scrollView;
+        private int _openFoldout = -1;
         
         private bool OnlyShowIssues
         {
@@ -155,6 +156,7 @@ namespace Jungle.Editor
         private void OnEnable()
         {
             _reports = Array.Empty<ValidationReport>();
+            _openFoldout = -1;
         }
 
         [MenuItem("Window/Jungle/Open Validator")]
@@ -277,8 +279,17 @@ namespace Jungle.Editor
                 }
                 GUILayout.BeginVertical(EditorStyles.helpBox);
                 GUILayout.BeginHorizontal(!reportsToShow[i].Failed ? okStyle : issueStyle);
-                GUILayout.Label($"{(i + 1).ToString()}:");
-                GUILayout.Label(reportsToShow[i].tree.name, EditorStyles.boldLabel);
+                
+                var foldout = EditorGUILayout.Foldout(_openFoldout == i, $" {reportsToShow[i].tree.name}");
+                if (foldout && _openFoldout != i)
+                {
+                    _openFoldout = i;
+                }
+                else if (!foldout && _openFoldout == i)
+                {
+                    _openFoldout = -1;
+                }
+                
                 GUILayout.FlexibleSpace();
                 if (GUILayout.Button("Select", GUILayout.Width(52.5f)))
                 {
@@ -304,37 +315,40 @@ namespace Jungle.Editor
                 }
                 GUI.enabled = true;
                 GUILayout.EndHorizontal();
-                if (!reportsToShow[i].Failed)
+                if (_openFoldout == i)
                 {
-                    GUILayout.Label("- No issues found");
-                }
-                else
-                {
-                    if (reportsToShow[i].treeIssues != null && reportsToShow[i].treeIssues.Count != 0)
+                    if (!reportsToShow[i].Failed)
                     {
-                        GUILayout.Label("Tree Issues:");
-                        GUILayout.BeginHorizontal();
-                        GUILayout.Space(5);
-                        GUILayout.BeginVertical();
-                        foreach (var issue in reportsToShow[i].treeIssues)
-                        {
-                            GUILayout.Label($"- {issue}", EditorStyles.wordWrappedLabel);
-                        }
-                        GUILayout.EndVertical();
-                        GUILayout.EndHorizontal();
+                        GUILayout.Label("- No issues found");
                     }
-                    if (reportsToShow[i].nodeIssues != null && reportsToShow[i].nodeIssues.Count != 0)
+                    else
                     {
-                        GUILayout.Label("Node Issues:");
-                        GUILayout.BeginHorizontal();
-                        GUILayout.Space(5);
-                        GUILayout.BeginVertical();
-                        foreach (var issue in reportsToShow[i].nodeIssues)
+                        if (reportsToShow[i].treeIssues != null && reportsToShow[i].treeIssues.Count != 0)
                         {
-                            GUILayout.Label($"- {issue}", EditorStyles.wordWrappedLabel);
+                            GUILayout.Label("Tree Issues:");
+                            GUILayout.BeginHorizontal();
+                            GUILayout.Space(5);
+                            GUILayout.BeginVertical();
+                            foreach (var issue in reportsToShow[i].treeIssues)
+                            {
+                                GUILayout.Label($"- {issue}", EditorStyles.wordWrappedLabel);
+                            }
+                            GUILayout.EndVertical();
+                            GUILayout.EndHorizontal();
                         }
-                        GUILayout.EndVertical();
-                        GUILayout.EndHorizontal();
+                        if (reportsToShow[i].nodeIssues != null && reportsToShow[i].nodeIssues.Count != 0)
+                        {
+                            GUILayout.Label("Node Issues:");
+                            GUILayout.BeginHorizontal();
+                            GUILayout.Space(5);
+                            GUILayout.BeginVertical();
+                            foreach (var issue in reportsToShow[i].nodeIssues)
+                            {
+                                GUILayout.Label($"- {issue}", EditorStyles.wordWrappedLabel);
+                            }
+                            GUILayout.EndVertical();
+                            GUILayout.EndHorizontal();
+                        }
                     }
                 }
                 GUILayout.EndVertical();
