@@ -63,7 +63,7 @@ namespace Jungle
         }
         
         private ActionsList revertActions;
-        
+
         #endregion
 
         /// <summary>
@@ -467,8 +467,6 @@ namespace Jungle
                     EditorGUILayout.HelpBox("Jungle Trees can only be debugged while the editor is in" +
                                             " play mode.", MessageType.Info);
                 }
-
-                EditorGUILayout.HelpBox("This Jungle Tree failed to validate.", MessageType.Error);
             }
 
             Repaint();
