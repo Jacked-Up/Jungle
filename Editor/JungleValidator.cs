@@ -18,6 +18,11 @@ namespace Jungle.Editor
 
         #endregion
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tree"></param>
+        /// <returns></returns>
         public static ValidationReport Validate(JungleTree tree)
         {
             var report = new ValidationReport(tree, null, null);
@@ -61,6 +66,10 @@ namespace Jungle.Editor
             return report;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tree"></param>
         public static void AutoFix(JungleTree tree)
         {
             foreach (var node in tree.nodes)
@@ -68,13 +77,11 @@ namespace Jungle.Editor
                 node.Validate(true, out var data);
             }
         }
-        
-        public static bool AllJungleTreesValid()
-        {
-            var jungleTrees = GetAllJungleTrees();
-            return jungleTrees.All(jungleTree => !Validate(jungleTree).Failed);
-        }
-        
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public static JungleTree[] GetAllJungleTrees()
         {
             var jungleTreeAssets = new List<JungleTree>();
@@ -247,14 +254,14 @@ namespace Jungle.Editor
 
             _scrollView = GUILayout.BeginScrollView(_scrollView);
             
-            if ((reportsToShow.Count == 0 && !string.IsNullOrEmpty(_searchQuery)) 
-                || (reportsToShow.Count == 0 && onlyShowIssues))
+            if (_reports == null || _reports.Length == 0)
             {
-                GUILayout.Label("No Results");
+                GUILayout.Label("No Reports to Show. Try Refreshing?", EditorStyles.boldLabel);
             }
-            else if (reportsToShow.Count == 0)
+            else if ((reportsToShow.Count == 0 && !string.IsNullOrEmpty(_searchQuery)) 
+                     || (reportsToShow.Count == 0 && onlyShowIssues))
             {
-                GUILayout.Label("Nothing to Show... Refresh?");
+                GUILayout.Label("No Results", EditorStyles.boldLabel);
             }
             
             var okStyle = new GUIStyle(EditorStyles.helpBox)

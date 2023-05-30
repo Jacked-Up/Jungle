@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using System.Linq;
+using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 
@@ -21,8 +22,9 @@ namespace Jungle.Editor
         public void OnPreprocessBuild(BuildReport report)
         {
             // No point in a warning if all the trees validate
-            if (JungleValidator.AllJungleTreesValid())
-            {
+            var jungleTrees = JungleValidator.GetAllJungleTrees();
+            if (jungleTrees.All(jungleTree => !JungleValidator.Validate(jungleTree).Failed))
+            { 
                 return;
             }
             
