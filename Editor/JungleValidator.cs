@@ -9,7 +9,6 @@ namespace Jungle.Editor
     /// <summary>
     /// 
     /// </summary>
-    [InitializeOnLoad]
     public static class JungleValidator
     {
         #region Variables
@@ -18,25 +17,7 @@ namespace Jungle.Editor
             = "t:JungleTree";
 
         #endregion
-        
-        static JungleValidator()
-        {
-            /*
-            // This is a just a heads up for developers when any validation
-            // issues are detected after compilation.
-            CompilationPipeline.compilationFinished += _ =>
-            {
-                return;
-                var jungleTrees = GetAllJungleTrees();
-                var reports = jungleTrees.Select(Validate).Where(report => report.Failed).ToList();
-                if (reports.Count != 0)
-                {
-                    JungleDebug.Error("Jungle Validator", $"{reports.Count} validation issues detected.");
-                }
-            };
-            */
-        }
-        
+
         public static ValidationReport Validate(JungleTree tree)
         {
             var report = new ValidationReport(tree, null, null);
@@ -82,7 +63,10 @@ namespace Jungle.Editor
 
         public static void AutoFix(JungleTree tree)
         {
-            
+            foreach (var node in tree.nodes)
+            {
+                node.Validate(true, out var data);
+            }
         }
         
         public static bool AllJungleTreesValid()
@@ -141,7 +125,7 @@ namespace Jungle.Editor
         
         private bool OnlyShowIssues
         {
-            get => EditorPrefs.GetBool("Jungle_OnlyShowIssues", false);
+            get => EditorPrefs.GetBool("Jungle_OnlyShowIssues", true);
             set => EditorPrefs.SetBool("Jungle_OnlyShowIssues", value);
         }
         
@@ -162,18 +146,23 @@ namespace Jungle.Editor
         [MenuItem("Window/Jungle/Open Validator")]
         public static void OpenWindow()
         {
-            var jungleTrees = JungleValidator.GetAllJungleTrees();
-            var jungleTreeReports = jungleTrees.Select(JungleValidator.Validate).ToArray();
-            ShowReport(jungleTreeReports);
+            _instance = GetWindow<JungleValidatorEditor>
+            (
+                false,
+                "Jungle Validator"
+            );
+            RefreshReports();
         }
 
-        public static void ShowReport(ValidationReport[] reports)
+        public static void RefreshReports()
         {
             _instance = GetWindow<JungleValidatorEditor>
             (
                 false,
                 "Jungle Validator"
             );
+            var jungleTrees = JungleValidator.GetAllJungleTrees();
+            var reports = jungleTrees.Select(JungleValidator.Validate).ToArray();
             _instance._reports = reports;
         }
 
@@ -181,23 +170,38 @@ namespace Jungle.Editor
         {
             GUILayout.BeginVertical();
 
-            // A the case a tree no longer exists, we should clear the report cache
+            // A the case a tree no longer exists, we should refresh the report cache
             // Usually occurs when the Jungle Tree file is deleted from the project
-            foreach (var report in _reports)
+            if (_reports.Any(report => report.tree == null))
             {
-                if (report.tree != null)
-                {
-                    continue;
-                }
-                _reports = Array.Empty<ValidationReport>();
-                break;
+                RefreshReports();
             }
             
             GUILayout.BeginHorizontal();
             GUILayout.Button("?", GUILayout.Width(20f));
-            GUI.enabled = false;
-            GUILayout.Button("Auto-fix All");
+            
+            GUI.enabled = _reports.Any(report => report.Failed);
+            if (GUILayout.Button("Auto-Fix All"))
+            {
+                if (ShowAutoFixDialog)
+                {
+                    var decision = EditorUtility.DisplayDialogComplex("Jungle Validator",
+                        $"Are you sure you want to auto-fix all Jungle Trees?" +
+                        "\n\nThis could cause irreversible damage.",
+                        "Yes", "No", "Yes, Don't Ask Again");
+                    if (decision == 2)
+                    {
+                        ShowAutoFixDialog = false;
+                    }
+                }
+                foreach (var report in _reports)
+                {
+                    JungleValidator.AutoFix(report.tree);
+                }
+                RefreshReports();
+            }
             GUI.enabled = true;
+            
             GUILayout.FlexibleSpace();
             OnlyShowIssues = GUILayout.Toggle(OnlyShowIssues, "Only Show Issues");
             var onlyShowIssues = OnlyShowIssues;
@@ -303,15 +307,21 @@ namespace Jungle.Editor
                     {
                         var decision = EditorUtility.DisplayDialogComplex("Jungle Validator",
                             $"Are you sure you want to auto-fix {reportsToShow[i].tree.name}?" +
-                            "\n\nThis could cause irreversible changes.",
+                            "\n\nThis could cause irreversible damage.",
                             "Yes", "No", "Yes, Don't Ask Again");
+                        if (decision == 1)
+                        {
+                            GUILayout.EndHorizontal();
+                            GUILayout.EndVertical();
+                            continue;
+                        }
                         if (decision == 2)
                         {
                             ShowAutoFixDialog = false;
                         }
                     }
                     JungleValidator.AutoFix(reportsToShow[i].tree);
-                    OpenWindow();
+                    RefreshReports();
                 }
                 GUI.enabled = true;
                 GUILayout.EndHorizontal();
