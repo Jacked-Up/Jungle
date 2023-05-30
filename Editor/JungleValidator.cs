@@ -5,6 +5,7 @@ using NUnit.Framework;
 using UnityEditor;
 using UnityEditor.Compilation;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Jungle.Editor
 {
@@ -23,51 +24,55 @@ namespace Jungle.Editor
         
         static JungleValidator()
         {
+            // This is a just a heads up for developers when any validation
+            // issues are detected after compilation.
             CompilationPipeline.compilationFinished += _ =>
             {
                 var jungleTrees = GetAllJungleTrees();
-                var reports = new List<ValidationReport>();
-                foreach (var jungleTree in jungleTrees)
+                var reports = jungleTrees.Select(Validate).Where(report => report.Failed).ToList();
+                if (reports.Count != 0)
                 {
-                    var report = Validate(jungleTree);
-                    // If the validation did not fail then we dont care to see the report
-                    if (!report.Failed)
-                    {
-                        continue;
-                    }
-                    reports.Add(report);
+                    JungleDebug.Error("Jungle Validator", $"{reports.Count} validation issues detected.");
                 }
             };
         }
         
         public static ValidationReport Validate(JungleTree tree)
         {
-            var treeAssetPath = AssetDatabase.GetAssetPath(tree);
-            var treeSubAssets = AssetDatabase.LoadAllAssetsAtPath(treeAssetPath);
             var report = new ValidationReport(tree, null, null);
             
-            foreach (var subAsset in treeSubAssets)
+            var assetPath = AssetDatabase.GetAssetPath(tree);
+            var subAssets = AssetDatabase.LoadAllAssetsAtPath(assetPath);
+
+            foreach (var asset in subAssets)
             {
+                // We can ignore the tree asset
+                if (asset == tree)
+                {
+                    continue;
+                }
+                
                 // This USUALLY means that the developer deleted the node script
-                if (subAsset == null)
+                if (asset == null)
                 {
-                    //report.NodeErrors = true;
+                    report.nodeIssues ??= new List<string>();
+                    report.nodeIssues.Add("Script for node is missing/deleted");
                     continue;
                 }
-                if (subAsset.GetType() != typeof(JungleNode))
+                if (!asset.GetType().IsSubclassOf(typeof(JungleNode)))
                 {
-                    //report.TreeErrors = true;
+                    report.nodeIssues ??= new List<string>();
+                    report.nodeIssues.Add($"{asset.name} does not inherit from the correct base class");
                     continue;
                 }
-                var node = subAsset as JungleNode;
-                foreach (var port in node.OutputPorts)
+                var jungleNode = asset as JungleNode;
+                jungleNode.Validate(false, out var issues);
+                if (issues != null && issues.Count != 0)
                 {
-                    foreach (var connection in port.connections)
+                    report.nodeIssues ??= new List<string>();
+                    foreach (var issue in issues)
                     {
-                        if (connection.InputInfo.PortType != port.PortType)
-                        {
-                            //report.NodeErrors = true;
-                        }
+                        report.nodeIssues.Add($"[{jungleNode.name}] {issue}");
                     }
                 }
             }
@@ -75,6 +80,11 @@ namespace Jungle.Editor
             return report;
         }
 
+        public static void AutoFix(JungleTree tree)
+        {
+            
+        }
+        
         public static bool AllJungleTreesValid()
         {
             var jungleTrees = GetAllJungleTrees();
@@ -104,38 +114,17 @@ namespace Jungle.Editor
     [Serializable]
     public struct ValidationReport
     {
-        public bool Failed => TreeErrors != null || NodeErrors != null;
+        public bool Failed => treeIssues != null || nodeIssues != null;
             
-        public JungleTree Tree; 
-        public List<TreeError> TreeErrors;
-        public List<NodeError> NodeErrors;
+        public JungleTree tree; 
+        public List<string> treeIssues;
+        public List<string> nodeIssues;
 
-        public ValidationReport(JungleTree tree, List<TreeError> treeErrors,
-            List<NodeError> nodeErrors)
+        public ValidationReport(JungleTree tree, List<string> treeIssues, List<string> nodeIssues)
         {
-            Tree = tree;
-            TreeErrors = treeErrors;
-            NodeErrors = nodeErrors;
-        }
-            
-        public struct TreeError
-        {
-            public ErrorType Type;
-                
-            public enum ErrorType
-            {
-                MissingOrNullNode
-            }
-        }
-        public struct NodeError
-        {
-            public JungleNode Node;
-            public ErrorType Type;
-                
-            public enum ErrorType
-            {
-                ConnectionTypeMismatch
-            }
+            this.tree = tree;
+            this.treeIssues = treeIssues;
+            this.nodeIssues = nodeIssues;
         }
     }
 
@@ -155,6 +144,12 @@ namespace Jungle.Editor
             set => EditorPrefs.SetBool("Jungle_OnlyShowIssues", value);
         }
         
+        private bool ShowAutoFixDialog
+        {
+            get => EditorPrefs.GetBool("Jungle_ShowAutoFixDialog", true);
+            set => EditorPrefs.SetBool("Jungle_ShowAutoFixDialog", value);
+        }
+        
         #endregion
 
         private void OnEnable()
@@ -163,7 +158,7 @@ namespace Jungle.Editor
         }
 
         [MenuItem("Window/Jungle/Open Validator")]
-        private static void OpenWindow()
+        public static void OpenWindow()
         {
             var jungleTrees = JungleValidator.GetAllJungleTrees();
             var jungleTreeReports = jungleTrees.Select(JungleValidator.Validate).ToArray();
@@ -188,7 +183,7 @@ namespace Jungle.Editor
             // Usually occurs when the Jungle Tree file is deleted from the project
             foreach (var report in _reports)
             {
-                if (report.Tree != null)
+                if (report.tree != null)
                 {
                     continue;
                 }
@@ -198,7 +193,9 @@ namespace Jungle.Editor
             
             GUILayout.BeginHorizontal();
             GUILayout.Button("?", GUILayout.Width(20f));
-            GUILayout.Label("Status: No Issues", EditorStyles.boldLabel);
+            GUI.enabled = false;
+            GUILayout.Button("Auto-fix All");
+            GUI.enabled = true;
             GUILayout.FlexibleSpace();
             OnlyShowIssues = GUILayout.Toggle(OnlyShowIssues, "Only Show Issues");
             var onlyShowIssues = OnlyShowIssues;
@@ -221,7 +218,7 @@ namespace Jungle.Editor
                 {
                     continue;
                 }
-                if (report.Tree == null)
+                if (report.tree == null)
                 {
                     continue;
                 }
@@ -232,7 +229,7 @@ namespace Jungle.Editor
                 var query = new List<ValidationReport>();
                 foreach (var report in reportsToShow)
                 {
-                    var treeName = report.Tree.name.ToLower().Replace(" ", string.Empty);
+                    var treeName = report.tree.name.ToLower().Replace(" ", string.Empty);
                     if (!treeName.Contains(_searchQuery.ToLower().Replace(" ", string.Empty)))
                     {
                         continue;
@@ -243,37 +240,104 @@ namespace Jungle.Editor
             }
 
             _scrollView = GUILayout.BeginScrollView(_scrollView);
-            if (reportsToShow.Count == 0 && !string.IsNullOrEmpty(_searchQuery))
+            
+            if ((reportsToShow.Count == 0 && !string.IsNullOrEmpty(_searchQuery)) 
+                || (reportsToShow.Count == 0 && onlyShowIssues))
             {
                 GUILayout.Label("No Results");
             }
             else if (reportsToShow.Count == 0)
             {
-                GUILayout.Label("Nothing to Show...");
+                GUILayout.Label("Nothing to Show... Refresh?");
             }
             
+            var okStyle = new GUIStyle(EditorStyles.helpBox)
+            {
+                normal =
+                {
+                    background = MakeBackgroundTexture(EditorGUIUtility.isProSkin 
+                        ? new Color(0f, 1f, 0.25f, 0.125f)
+                        : new Color(0.5f, 1f, 0f, 0.35f))
+                }
+            };
+            var issueStyle = new GUIStyle(EditorStyles.helpBox)
+            {
+                normal =
+                {
+                    background = MakeBackgroundTexture(EditorGUIUtility.isProSkin 
+                        ? new Color(1f, 0f, 0f, 0.125f)
+                        : new Color(1f, 0f, 0f, 0.35f))
+                }
+            };
             for (var i = 0; i < reportsToShow.Count; i++) 
             {
                 if (onlyShowIssues && !reportsToShow[i].Failed)
                 {
                     continue;
                 }
-                GUILayout.BeginHorizontal(EditorStyles.helpBox);
+                GUILayout.BeginVertical(EditorStyles.helpBox);
+                GUILayout.BeginHorizontal(!reportsToShow[i].Failed ? okStyle : issueStyle);
                 GUILayout.Label($"{(i + 1).ToString()}:");
-                GUILayout.Label(reportsToShow[i].Tree.name);
+                GUILayout.Label(reportsToShow[i].tree.name, EditorStyles.boldLabel);
                 GUILayout.FlexibleSpace();
-                if (GUILayout.Button("Open", GUILayout.Width(45f)))
+                if (GUILayout.Button("Select", GUILayout.Width(52.5f)))
                 {
-                    EditorGUIUtility.PingObject(reportsToShow[i].Tree);
-                    Selection.activeObject = reportsToShow[i].Tree;
+                    EditorGUIUtility.PingObject(reportsToShow[i].tree);
+                    Selection.activeObject = reportsToShow[i].tree;
                 }
-                GUI.enabled = false;
+                GUI.enabled = reportsToShow[i].Failed;
                 if (GUILayout.Button("Fix", GUILayout.Width(42.5f)))
                 {
-                        
+                    if (ShowAutoFixDialog)
+                    {
+                        var decision = EditorUtility.DisplayDialogComplex("Jungle Validator",
+                            $"Are you sure you want to auto-fix {reportsToShow[i].tree.name}?" +
+                            "\n\nThis could cause irreversible changes.",
+                            "Yes", "No", "Yes, Don't Ask Again");
+                        if (decision == 2)
+                        {
+                            ShowAutoFixDialog = false;
+                        }
+                    }
+                    JungleValidator.AutoFix(reportsToShow[i].tree);
+                    OpenWindow();
                 }
                 GUI.enabled = true;
                 GUILayout.EndHorizontal();
+                if (!reportsToShow[i].Failed)
+                {
+                    GUILayout.Label("- No issues found");
+                }
+                else
+                {
+                    if (reportsToShow[i].treeIssues != null && reportsToShow[i].treeIssues.Count != 0)
+                    {
+                        GUILayout.Label("Tree Issues:");
+                        GUILayout.BeginHorizontal();
+                        GUILayout.Space(5);
+                        GUILayout.BeginVertical();
+                        foreach (var issue in reportsToShow[i].treeIssues)
+                        {
+                            GUILayout.Label($"- {issue}", EditorStyles.wordWrappedLabel);
+                        }
+                        GUILayout.EndVertical();
+                        GUILayout.EndHorizontal();
+                    }
+                    if (reportsToShow[i].nodeIssues != null && reportsToShow[i].nodeIssues.Count != 0)
+                    {
+                        GUILayout.Label("Node Issues:");
+                        GUILayout.BeginHorizontal();
+                        GUILayout.Space(5);
+                        GUILayout.BeginVertical();
+                        foreach (var issue in reportsToShow[i].nodeIssues)
+                        {
+                            GUILayout.Label($"- {issue}", EditorStyles.wordWrappedLabel);
+                        }
+                        GUILayout.EndVertical();
+                        GUILayout.EndHorizontal();
+                    }
+                }
+                GUILayout.EndVertical();
                 GUILayout.Space(2.5f);
             }
             GUILayout.EndScrollView();
@@ -292,6 +356,14 @@ namespace Jungle.Editor
             }
             GUILayout.EndHorizontal();
             GUILayout.EndVertical();
+        }
+        
+        private Texture2D MakeBackgroundTexture(Color color)
+        {
+            var texture = new Texture2D(1, 1);
+            texture.SetPixel(0, 0, color);
+            texture.Apply();
+            return texture;
         }
     }
 }

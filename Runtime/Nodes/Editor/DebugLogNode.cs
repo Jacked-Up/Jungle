@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace Jungle.Nodes.Editor
 {
@@ -53,6 +54,14 @@ namespace Jungle.Nodes.Editor
                 new PortCall(0, true)
             };
             return true;
+        }
+
+        public override void Validate(in bool tryFix, out List<string> issues)
+        {
+            issues = new List<string>
+            {
+                "This is a test of the jungle node validation"
+            };
         }
     }
 }

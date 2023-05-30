@@ -35,6 +35,7 @@ namespace Jungle.Editor
             {
                 return;
             }
+            JungleValidatorEditor.OpenWindow();
             throw new BuildFailedException("Jungle has cancelled the build due to Jungle Tree validation errors");
         }
     }

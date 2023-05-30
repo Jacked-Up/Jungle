@@ -61,6 +61,17 @@ namespace Jungle
         /// <param name="call">List of calls to send to connected nodes.</param>
         /// <returns>True if the node is finished executing and false if not.</returns>
         public abstract bool Execute(out PortCall[] call);
+
+        /// <summary>
+        /// This method is called by the Jungle validator while generating a report. Override this method to call out
+        /// issues in your nodes.
+        /// </summary>
+        /// <param name="tryFix">True if the validator requested the tree to auto-fix.</param>
+        /// <param name="issues">List of issues to report in the validator window. Set null/empty if there are no issues.</param>
+        public virtual void Validate(in bool tryFix, out List<string> issues)
+        {
+            issues = null;
+        }
         
 #if UNITY_EDITOR
         /// <summary>
