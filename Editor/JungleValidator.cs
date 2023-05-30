@@ -284,13 +284,13 @@ namespace Jungle.Editor
             };
             for (var i = 0; i < reportsToShow.Count; i++) 
             {
-                if (onlyShowIssues && !reportsToShow[i].Failed)
-                {
-                    continue;
-                }
                 GUILayout.BeginVertical(EditorStyles.helpBox);
                 GUILayout.BeginHorizontal(!reportsToShow[i].Failed ? okStyle : issueStyle);
                 
+                if (_openFoldout == -1 && reportsToShow[i].Failed)
+                {
+                    _openFoldout = i;
+                }
                 var foldout = EditorGUILayout.Foldout(_openFoldout == i, $" {reportsToShow[i].tree.name}");
                 if (foldout && _openFoldout != i)
                 {

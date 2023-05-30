@@ -24,6 +24,8 @@ namespace Jungle.Editor
         private static string UIFileAssetPath 
             => AssetDatabase.GetAssetPath(Resources.Load("JungleNodeView"));
         
+        private float _lastDrawTime;
+        
         #endregion
 
         public JungleNodeView(JungleNode nodeReference) : base(UIFileAssetPath)
@@ -130,6 +132,30 @@ namespace Jungle.Editor
         {
             base.OnSelected();
             NodeSelectedCallback?.Invoke(this);
+        }
+
+        public void UpdateDrawActiveBar(bool state)
+        {
+            var element = mainContainer.Q<VisualElement>("active-bar");
+            if (element == null)
+            {
+                return;
+            }
+            if (!Application.isPlaying)
+            {
+                element.transform.scale = Vector3.zero;
+                return;
+            }
+            
+            if (EditorApplication.timeSinceStartup - _lastDrawTime < 0.1f && !state)
+            {
+                return;
+            }
+            _lastDrawTime = (float)EditorApplication.timeSinceStartup;
+                
+            element.transform.scale = state
+                ? Vector3.one
+                : Vector3.zero;
         }
     }
 }

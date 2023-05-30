@@ -123,6 +123,18 @@ namespace Jungle.Editor
             };
         }
 
+        public void UpdateDrawActiveBar()
+        {
+            foreach (var node in _selectedTree.nodes)
+            {
+                if (node == null)
+                {
+                    continue;
+                }
+                GetNodeView(node).UpdateDrawActiveBar(_selectedTree.ExecutingNodes.Contains(node));
+            }
+        }
+
         private JungleNodeView GetNodeView(JungleNode node)
         {
             if (node == null)

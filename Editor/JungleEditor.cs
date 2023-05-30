@@ -103,6 +103,9 @@ namespace Jungle.Editor
                     ? $"{_activeTree.name[..(MAXIMUM_DISPLAYED_TREE_NAME - 2)]}..." 
                     : _activeTree.name;
             }
+            
+            _graphView.UpdateDrawActiveBar();
+            if (Application.isPlaying) Repaint();
         }
 
         private void PopulateGraphView(JungleTree tree)
