@@ -66,30 +66,29 @@ namespace Jungle.Editor
             graphViewChanged += GraphViewChangedCallback;
 
             // Add root node if one does not already exist
-            if (_selectedTree.rootNode == null)
+            if (_selectedTree.nodes == null || _selectedTree.nodes.Length == 0)
             {
                 var root = _selectedTree.CreateNode(typeof(RootNode), defaultRootNodePosition) as RootNode;
-                _selectedTree.rootNode = root;
                 EditorUtility.SetDirty(_selectedTree);
                 AssetDatabase.SaveAssets();
             }
             
             // Creates node view and edges
-            foreach (var node in _selectedTree.nodes)
+            foreach (var nodeInfo in _selectedTree.nodes)
             {
-                if (node == null)
+                if (nodeInfo.node == null)
                 {
                     continue;
                 }
-                var nodeView = new JungleNodeView(node)
+                var nodeView = new JungleNodeView(nodeInfo.node)
                 {
                     NodeSelectedCallback = OnNodeSelected
                 };
                 AddElement(nodeView);
             }
-            foreach (var node in _selectedTree.nodes)
+            foreach (var nodeInfo in _selectedTree.nodes)
             {
-                var nodeView = GetNodeView(node);
+                var nodeView = GetNodeView(nodeInfo.node);
                 // This is a case the only occurs when the nodes
                 // script has been deleted
                 if (nodeView == null) continue;
@@ -125,13 +124,13 @@ namespace Jungle.Editor
 
         public void UpdateDrawActiveBar()
         {
-            foreach (var node in _selectedTree.nodes)
+            foreach (var nodeInfo in _selectedTree.nodes)
             {
-                if (node == null)
+                if (nodeInfo.node == null)
                 {
                     continue;
                 }
-                GetNodeView(node).UpdateDrawActiveBar(_selectedTree.ExecutingNodes.Contains(node));
+                GetNodeView(nodeInfo.node).UpdateDrawActiveBar(_selectedTree.ExecutingNodes.Contains(nodeInfo.node));
             }
         }
 
@@ -141,7 +140,7 @@ namespace Jungle.Editor
             {
                 return null;
             }
-            var nodeView = GetNodeByGuid(node.NodeProperties.guid);
+            var nodeView = GetNodeByGuid(node.tree.GetData(node).guid);
             return nodeView as JungleNodeView;
         }
         

@@ -73,22 +73,6 @@ namespace Jungle
         }
         
 #if UNITY_EDITOR
-        /// <summary>
-        /// Jungle editor properties of the node.
-        /// *Strongly recommended to not touch this.
-        /// </summary>
-        public NodeProperties NodeProperties
-        {
-            get => nodeProperties;
-            set
-            {
-                nodeProperties = value;
-                UnityEditor.EditorUtility.SetDirty(this);
-            }
-        }
-        [SerializeField] [HideInInspector] 
-        private NodeProperties nodeProperties;
-
         private NodeAttribute NodeInfo
             => (NodeAttribute) GetType().GetCustomAttributes(typeof(NodeAttribute), true)[0];
 
@@ -359,28 +343,4 @@ namespace Jungle
     /// 
     /// </summary>
     public struct Error { }
-
-#if UNITY_EDITOR
-    /// <summary>
-    /// Details about the node in the Jungle editor like GUID, position, and view name
-    /// </summary>
-    [Serializable]
-    public struct NodeProperties
-    {
-        /// <summary>
-        /// The unique GUID of the node
-        /// </summary>
-        public string guid;
-
-        /// <summary>
-        /// The contextual name of the node in the graph view
-        /// </summary>
-        public string comments;
-
-        /// <summary>
-        /// Position of the node inside the graph view
-        /// </summary>
-        public Vector2 position;
-    }
-#endif
 }

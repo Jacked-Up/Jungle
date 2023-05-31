@@ -4,7 +4,6 @@
         <ui:VisualElement name="title" style="margin-left: 10px; margin-right: 10px; margin-top: 5px; margin-bottom: 5px;">
             <ui:VisualElement name="active-bar" picking-mode="Ignore" style="background-color: rgb(255, 217, 0); height: 2px; border-top-left-radius: 5px; border-bottom-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px;" />
             <ui:Label tabindex="-1" text="My Node" display-tooltip-when-elided="true" name="title-label" style="-unity-font-style: bold; font-size: 16px; align-self: stretch; margin-bottom: 0; padding-bottom: 0; padding-top: 0; padding-right: 0; padding-left: 0;" />
-            <ui:Label name="notes-label" text="Node" enable-rich-text="false" class="unity-text-element unity-label" style="-unity-font-style: normal; align-items: stretch; align-self: stretch; justify-content: center; -unity-text-align: upper-left; font-size: 10px; margin-top: 0; margin-bottom: 0;" />
             <ui:VisualElement name="title-button-container">
                 <ui:VisualElement name="collapse-button">
                     <ui:VisualElement name="icon" />

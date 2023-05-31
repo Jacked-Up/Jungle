@@ -1,4 +1,5 @@
-﻿using Jungle.Nodes;
+﻿using System.Linq;
+using Jungle.Nodes;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -32,16 +33,18 @@ namespace Jungle.Editor
                 }
                 
                 var node = (JungleNode)_nodeInspector.target;
-                var properties = node.NodeProperties;
+                var data = node.tree.GetData(node);
 
                 GUI.enabled = _nodeInspector.target is not RootNode;
                 GUILayout.Label("Comments:");
-                var notes = GUILayout.TextArea(properties.comments, 300);
-                node.NodeProperties = new NodeProperties
+                var comments = GUILayout.TextArea(data.comments, 300);
+                node.tree.nodes[node.tree.nodes.ToList().IndexOf(node.tree.GetData(node))] = new JungleTree.NodeData
                 {
-                    guid = properties.guid,
-                    comments = notes,
-                    position = properties.position
+                    node = data.node,
+                    name = data.name,
+                    guid = data.guid,
+                    comments = comments,
+                    graphPosition = data.graphPosition
                 };
                 GUI.enabled = true;
                 

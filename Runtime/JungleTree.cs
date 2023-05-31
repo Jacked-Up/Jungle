@@ -21,24 +21,48 @@ namespace Jungle
         /// 
         /// </summary>
         [HideInInspector]
-        public JungleNode rootNode;
+        public NodeData[] nodes = Array.Empty<NodeData>();
 
         /// <summary>
         /// 
         /// </summary>
-        [HideInInspector]
-        public JungleNode[] nodes = Array.Empty<JungleNode>();
-
+        /// <param name="node"></param>
+        /// <returns></returns>
+        public NodeData GetData(JungleNode node)
+        {
+            foreach (var info in nodes)
+            {
+                if (info.node != node)
+                {
+                    continue;
+                }
+                return info;
+            }
+            return new NodeData();
+        }
+        
+        [Serializable]
+        public struct NodeData
+        {
+            public JungleNode node;
+#if UNITY_EDITOR
+            public string name;
+            public string guid;
+            public string comments;
+            public Vector2 graphPosition;
+#endif
+        }
+        
         /// <summary>
         /// 
         /// </summary>
         public List<JungleNode> ExecutingNodes { get; private set; } = new();
-
+        
         /// <summary>
         /// 
         /// </summary>
         public float PlayTime { get; private set; }
-
+        
         /// <summary>
         /// 
         /// </summary>
@@ -86,7 +110,7 @@ namespace Jungle
             PlayTime = Time.unscaledTime;
             ExecutingNodes = new List<JungleNode>
             {
-                rootNode
+                nodes[0].node
             };
             // The root node is at index zero
             ExecutingNodes[0].Initialize(new None());
@@ -194,25 +218,27 @@ namespace Jungle
             
             // Create unique file name
             var i = 0;
-            var path = $"{AssetDatabase.GetAssetPath(this)}/{name}_{nodeType.Name}_{i.ToString()}.asset";
+            var path = $"{AssetDatabase.GetAssetPath(this)}/{nodeType.Name}_{i.ToString()}.asset";
             while (AssetDatabase.LoadAssetAtPath(path, typeof(JungleNode)) != null) i++;
-            node.name = $"{name}_{nodeType.Name}_{i.ToString()}";
+            node.name = $"{nodeType.Name}_{i.ToString()}";
             
             // Build node and populate graph view properties
             node.tree = this;
-            node.NodeProperties = new NodeProperties
+            var nodeInfo = new NodeData
             {
+                node = node,
+                name = node.name,
                 guid = GUID.Generate().ToString(),
                 comments = string.Empty,
-                position = position
+                graphPosition = position
             };
             
             // Add new node instance to list
             Undo.RecordObject(this, $"Added {node.name} to tree");
-            var nodesList = new List<JungleNode>();
-            nodes ??= Array.Empty<JungleNode>();
+            var nodesList = new List<NodeData>();
+            nodes ??= Array.Empty<NodeData>();
             nodesList.AddRange(nodes.ToList());
-            nodesList.Add(node);
+            nodesList.Add(nodeInfo);
             nodes = nodesList.ToArray();
             
             // Add new node instance to this node tree asset
@@ -252,17 +278,19 @@ namespace Jungle
             
             // Build node and populate graph view properties
             node.tree = this;
-            node.NodeProperties = new NodeProperties
+            var nodeInfo = new NodeData
             {
+                node = node,
+                name = node.name,
                 guid = GUID.Generate().ToString(),
-                comments = node.NodeProperties.comments,
-                position = original.NodeProperties.position + new Vector2(35, 35)
+                comments = GetData(original).comments,
+                graphPosition = GetData(original).graphPosition + new Vector2(35, 35)
             };
             
             // Add new node instance to list
             Undo.RecordObject(this, $"Added {node.name} to tree");
             var query = nodes.ToList();
-            query.Add(node);
+            query.Add(nodeInfo);
             nodes = query.ToArray();
             
             // Add new node instance to this node tree asset
@@ -281,9 +309,12 @@ namespace Jungle
         public void DeleteNode(JungleNode node)
         {
             var query = nodes.ToList();
-            if (!query.Contains(node)) return;
+            if (!query.Contains(GetData(node)))
+            {
+                return;
+            }
             Undo.RecordObject(this, $"Deleted {node.name} from tree");
-            query.Remove(node);
+            query.Remove(GetData(node));
             Undo.DestroyObjectImmediate(node);
             nodes = query.ToArray();
             AssetDatabase.SaveAssets();

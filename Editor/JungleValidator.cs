@@ -72,9 +72,9 @@ namespace Jungle.Editor
         /// <param name="tree"></param>
         public static void AutoFix(JungleTree tree)
         {
-            foreach (var node in tree.nodes)
+            foreach (var nodeData in tree.nodes)
             {
-                node.Validate(true, out var data);
+                nodeData.node.Validate(true, out var data);
             }
         }
 

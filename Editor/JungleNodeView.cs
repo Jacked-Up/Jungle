@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Linq;
 using Jungle.Nodes;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
@@ -31,7 +31,10 @@ namespace Jungle.Editor
         public JungleNodeView(JungleNode nodeReference) : base(UIFileAssetPath)
         {
             // NEED TO DETECT THIS ERROR
-            if (nodeReference == null) return;
+            if (nodeReference == null)
+            {
+                return;
+            }
             
             // Sets the node object to the reference and returns true if the node reference
             // is of type RootNode
@@ -39,32 +42,11 @@ namespace Jungle.Editor
 
             // Set color of node in the Jungle Editor
             AddToClassList(nodeReference.NodeColor.ToString().ToLower());
-
-            // A wonderful nest of grossness :)
-            var notesLabel = mainContainer.Q<Label>("notes-label");
-            if (!isRootNode)
-            {
-                var nodeNotes = nodeReference.NodeProperties.comments;
-                if (!string.IsNullOrEmpty(nodeNotes))
-                {
-                    using var reader = new StringReader(nodeNotes);
-                    var firstLine = reader.ReadLine();
-                    if (!string.IsNullOrEmpty(firstLine))
-                    {
-                        notesLabel.text = firstLine.Length < 26 
-                            ? firstLine 
-                            : $"{firstLine[..23]}...";
-                    }
-                }
-                else notesLabel.RemoveFromHierarchy();
-            }
-            // Special stylization for root node type
-            else
+            
+            if (isRootNode)
             {
                 outputContainer.transform.position = new Vector3(0, -25, 0);
-                notesLabel.RemoveFromHierarchy();
             }
-
             if (!isRootNode) HandleInputPortViews();
             HandleOutputPortViews(isRootNode);
         }
@@ -73,8 +55,8 @@ namespace Jungle.Editor
         {
             NodeObject = reference;
             title = reference.TitleName;
-            viewDataKey = reference.NodeProperties.guid;
-            var graphPosition = reference.NodeProperties.position;
+            viewDataKey = reference.tree.GetData(reference).guid;
+            var graphPosition = reference.tree.GetData(reference).graphPosition;
             style.left = graphPosition.x;
             style.top = graphPosition.y;
             
@@ -113,19 +95,22 @@ namespace Jungle.Editor
         {
             if (NodeObject == null)
             {
-                JungleDebug.Log("JungleNodeView", "Failed to set position!", null);
+                JungleDebug.Log("JungleNodeView", "Failed to set position!");
                 return;
             }
             
             base.SetPosition(position);
-            Undo.RecordObject(NodeObject, $"Set {NodeObject.name} position");
-            var nodeProperties = new NodeProperties
+            Undo.RecordObject(NodeObject.tree, $"Set {NodeObject.name} position");
+            var node = NodeObject;
+            var data = node.tree.GetData(node);
+            node.tree.nodes[node.tree.nodes.ToList().IndexOf(node.tree.GetData(node))] = new JungleTree.NodeData
             {
-                guid = NodeObject.NodeProperties.guid,
-                comments = NodeObject.NodeProperties.comments,
-                position = new Vector2(position.xMin, position.yMin)
+                node = data.node,
+                name = data.name,
+                guid = data.guid,
+                comments = data.comments,
+                graphPosition = new Vector2(position.xMin, position.yMin)
             };
-            NodeObject.NodeProperties = nodeProperties;
         }
 
         public override void OnSelected()
