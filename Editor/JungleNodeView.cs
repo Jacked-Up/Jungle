@@ -40,29 +40,9 @@ namespace Jungle.Editor
             // Set color of node in the Jungle Editor
             AddToClassList(nodeReference.NodeColor.ToString().ToLower());
 
-            // A wonderful nest of grossness :)
-            var notesLabel = mainContainer.Q<Label>("notes-label");
-            if (!isRootNode)
-            {
-                var nodeNotes = nodeReference.NodeProperties.comments;
-                if (!string.IsNullOrEmpty(nodeNotes))
-                {
-                    using var reader = new StringReader(nodeNotes);
-                    var firstLine = reader.ReadLine();
-                    if (!string.IsNullOrEmpty(firstLine))
-                    {
-                        notesLabel.text = firstLine.Length < 26 
-                            ? firstLine 
-                            : $"{firstLine[..23]}...";
-                    }
-                }
-                else notesLabel.RemoveFromHierarchy();
-            }
-            // Special stylization for root node type
-            else
+            if (isRootNode)
             {
                 outputContainer.transform.position = new Vector3(0, -25, 0);
-                notesLabel.RemoveFromHierarchy();
             }
 
             if (!isRootNode) HandleInputPortViews();
