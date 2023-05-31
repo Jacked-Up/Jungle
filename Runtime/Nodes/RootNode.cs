@@ -3,7 +3,7 @@
     [Node(TitleName = "Start", 
         Category = "HIDDEN", 
         Color = Color.Green,
-        OutputPortNames = new []{ "Begin" },
+        OutputPortNames = new []{ "" },
         OutputPortTypes = new []{ typeof(None) }
     )]
     public class RootNode : JungleNode
@@ -15,7 +15,10 @@
         
         public override bool Execute(out PortCall[] call)
         {
-            call = new[] {new PortCall(0, true)};
+            call = new[]
+            {
+                new PortCall(0, new None())
+            };
             return true;
         }
     }

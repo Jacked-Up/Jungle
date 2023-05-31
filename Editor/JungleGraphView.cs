@@ -66,10 +66,13 @@ namespace Jungle.Editor
             graphViewChanged += GraphViewChangedCallback;
 
             // Add root node if one does not already exist
-            if (_selectedTree.rootNode == null)
+            if (_selectedTree.nodes == null || _selectedTree.nodes.Length == 0)
             {
                 var root = _selectedTree.CreateNode(typeof(RootNode), defaultRootNodePosition) as RootNode;
-                _selectedTree.rootNode = root;
+                _selectedTree.nodes = new JungleNode[]
+                {
+                    root
+                };
                 EditorUtility.SetDirty(_selectedTree);
                 AssetDatabase.SaveAssets();
             }

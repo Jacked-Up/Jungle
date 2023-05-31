@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using Jungle.Nodes;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
@@ -13,6 +12,8 @@ namespace Jungle.Editor
     {
         #region Variables
 
+        private const float MINIMUM_ACTIVE_DRAW_TIME = 0.5f; 
+        
         public JungleNode NodeObject;
 
         public UnityEditor.Experimental.GraphView.Port InputPortView { get; private set; }
@@ -31,8 +32,11 @@ namespace Jungle.Editor
         public JungleNodeView(JungleNode nodeReference) : base(UIFileAssetPath)
         {
             // NEED TO DETECT THIS ERROR
-            if (nodeReference == null) return;
-            
+            if (nodeReference == null)
+            {
+                return;
+            }
+
             // Sets the node object to the reference and returns true if the node reference
             // is of type RootNode
             var isRootNode = HandleNodeObject(nodeReference);
@@ -42,11 +46,13 @@ namespace Jungle.Editor
 
             if (isRootNode)
             {
-                outputContainer.transform.position = new Vector3(0, -25, 0);
+                //outputContainer.transform.position = new Vector3(0, -25, 0);
             }
 
             if (!isRootNode) HandleInputPortViews();
             HandleOutputPortViews(isRootNode);
+            
+            UpdateDrawActiveBar(false);
         }
 
         private bool HandleNodeObject(JungleNode reference)
@@ -67,7 +73,7 @@ namespace Jungle.Editor
             
             InputPortView = InstantiatePort(Orientation.Horizontal, Direction.Input,
                 UnityEditor.Experimental.GraphView.Port.Capacity.Multi, port.PortType);
-            InputPortView.portName = $"{port.PortName} <size=10><b>({port.PortType.Name})</b></size>";
+            InputPortView.portName = $"<size=10><b>({port.PortType.Name})</b></size> {port.PortName}";
             
             inputContainer.Add(InputPortView);
         }
@@ -79,10 +85,7 @@ namespace Jungle.Editor
             {
                 var newPortView = InstantiatePort(Orientation.Horizontal, Direction.Output,
                     UnityEditor.Experimental.GraphView.Port.Capacity.Multi, port.PortType);
-                newPortView.portName = $"<size=10><b>({port.PortType.Name})</b></size> ";
-                newPortView.portName += !isRootNode 
-                    ? port.PortName 
-                    : string.Empty;
+                newPortView.portName = $"{port.PortName} <size=10><b>({port.PortType.Name})</b></size>";
 
                 OutputPortViews.Add(newPortView);
                 outputContainer.Add(newPortView);
@@ -114,26 +117,24 @@ namespace Jungle.Editor
             NodeSelectedCallback?.Invoke(this);
         }
 
-        public void UpdateDrawActiveBar(bool state)
+        public void UpdateDrawActiveBar(bool active)
         {
             var element = mainContainer.Q<VisualElement>("active-bar");
-            if (element == null)
-            {
-                return;
-            }
             if (!Application.isPlaying)
             {
                 element.transform.scale = Vector3.zero;
                 return;
             }
             
-            if (EditorApplication.timeSinceStartup - _lastDrawTime < 0.1f && !state)
+            // This is so that any nodes that finish execution immediately will still visualize
+            // when they're active for a set period of time
+            if (EditorApplication.timeSinceStartup - _lastDrawTime < MINIMUM_ACTIVE_DRAW_TIME && !active)
             {
                 return;
             }
             _lastDrawTime = (float)EditorApplication.timeSinceStartup;
                 
-            element.transform.scale = state
+            element.transform.scale = active
                 ? Vector3.one
                 : Vector3.zero;
         }

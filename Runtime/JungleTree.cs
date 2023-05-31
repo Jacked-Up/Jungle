@@ -16,12 +16,6 @@ namespace Jungle
     public class JungleTree : ScriptableObject
     {
         #region Variables
-        
-        /// <summary>
-        /// 
-        /// </summary>
-        [HideInInspector]
-        public JungleNode rootNode;
 
         /// <summary>
         /// 
@@ -86,7 +80,8 @@ namespace Jungle
             PlayTime = Time.unscaledTime;
             ExecutingNodes = new List<JungleNode>
             {
-                rootNode
+                // This is the index of the root node
+                nodes[0]
             };
             // The root node is at index zero
             ExecutingNodes[0].Initialize(new None());
