@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Jungle.Nodes;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 #if UNITY_EDITOR
@@ -71,21 +72,16 @@ namespace Jungle
                 return;
             }
 
-            if (JungleRuntime.Singleton.RunningTrees.Contains(this))
-            {
-                return;
-            }
-            JungleRuntime.Singleton.StartTree(this, link);
-            
             PlayTime = Time.unscaledTime;
             ExecutingNodes = new List<JungleNode>
             {
-                // This is the index of the root node
-                nodes[0]
+                // Finds the index of the root node. Should always be zero, but just in case
+                nodes[nodes.ToList().IndexOf(nodes.First(node => node is RootNode))]
             };
-            // The root node is at index zero
             ExecutingNodes[0].Initialize(new None());
             State = TreeState.Running;
+            
+            JungleRuntime.Singleton.StartTree(this, link);
         }
 
         /// <summary>
@@ -97,14 +93,16 @@ namespace Jungle
             {
                 return;
             }
-            JungleRuntime.Singleton.StopTree(this);
-            ExecutingNodes = new List<JungleNode>();
+            
             PlayTime = 0f;
+            ExecutingNodes = new List<JungleNode>();
             State = TreeState.Finished;
             
             // Invoke revert methods
             revertActions?.InvokeAll();
             revertActions = new ActionsList();
+            
+            JungleRuntime.Singleton.StopTree(this);
         }
         
         /// <summary>

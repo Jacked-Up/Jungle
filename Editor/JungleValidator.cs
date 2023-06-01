@@ -13,8 +13,7 @@ namespace Jungle.Editor
     {
         #region Variables
 
-        private const string SEARCH_FILTER 
-            = "t:JungleTree";
+        private const string SEARCH_FILTER = "t:JungleTree";
 
         #endregion
 
@@ -97,7 +96,7 @@ namespace Jungle.Editor
                     jungleTreeAssets.Add(asset);
                 }
             });
-
+            
             return jungleTreeAssets.ToArray();
         }
     }
@@ -129,11 +128,19 @@ namespace Jungle.Editor
         private string _searchQuery;
         private Vector2 _scrollView;
         private int _openFoldout = -1;
+        private bool _readyForRefresh;
+        private float _lastAssetCheckTime;
         
         private bool OnlyShowIssues
         {
             get => EditorPrefs.GetBool("Jungle_OnlyShowIssues", true);
             set => EditorPrefs.SetBool("Jungle_OnlyShowIssues", value);
+        }
+        
+        private bool AutoRefresh
+        {
+            get => EditorPrefs.GetBool("Jungle_AutoRefresh", true);
+            set => EditorPrefs.SetBool("Jungle_AutoRefresh", value);
         }
         
         private bool ShowAutoFixDialog
@@ -150,7 +157,7 @@ namespace Jungle.Editor
             _openFoldout = -1;
         }
 
-        [MenuItem("Window/Jungle/Open Validator")]
+        [MenuItem("Window/Jungle/Open Jungle Validator")]
         public static void OpenWindow()
         {
             _instance = GetWindow<JungleValidatorEditor>
@@ -177,13 +184,29 @@ namespace Jungle.Editor
         {
             GUILayout.BeginVertical();
 
+            var newJungleTreeAssets = false;
+            if (!_readyForRefresh)
+            {
+                // This check waits at least 1/4th of a second before performing an asset check
+                // Otherwise the check would be performed wayyyyy to frequently
+                if (EditorApplication.timeSinceStartup - _lastAssetCheckTime > 0.25f)
+                {
+                    newJungleTreeAssets = _reports.Length != JungleValidator.GetAllJungleTrees().Length;
+                    _lastAssetCheckTime = (float) EditorApplication.timeSinceStartup;
+                }
+            }
+            
             // A the case a tree no longer exists, we should refresh the report cache
             // Usually occurs when the Jungle Tree file is deleted from the project
             if (_reports.Any(report => report.tree == null))
             {
                 RefreshReports();
             }
-            
+            else if (newJungleTreeAssets && AutoRefresh)
+            {
+                RefreshReports();
+            }
+
             GUILayout.BeginHorizontal();
             GUILayout.Button("?", GUILayout.Width(20f));
             
@@ -381,10 +404,15 @@ namespace Jungle.Editor
             GUILayout.Space(2.5f);
             GUILayout.BeginHorizontal();
             EditorGUILayout.HelpBox("Click refresh to view/update the validation report.", MessageType.Info);
-            if (GUILayout.Button("Refresh", GUILayout.Height(37.5f), GUILayout.Width(100f)))
+            EditorGUILayout.BeginVertical();
+            AutoRefresh = GUILayout.Toggle(AutoRefresh, "Auto Refresh");
+            GUI.enabled = !AutoRefresh;
+            if (GUILayout.Button("Refresh", GUILayout.Height(21f), GUILayout.Width(100f)))
             {
                 OpenWindow();
             }
+            GUI.enabled = true;
+            GUILayout.EndVertical();
             GUILayout.EndHorizontal();
             GUILayout.EndVertical();
         }
