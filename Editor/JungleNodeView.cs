@@ -73,7 +73,12 @@ namespace Jungle.Editor
             
             InputPortView = InstantiatePort(Orientation.Horizontal, Direction.Input,
                 UnityEditor.Experimental.GraphView.Port.Capacity.Multi, port.PortType);
-            InputPortView.portName = $"<size=10><b>({port.PortType.Name})</b></size> {port.PortName}";
+            
+            var portTypeName = port.PortType != typeof(Error)
+                ? port.PortType.Name
+                : nameof(Error).ToUpper();
+            
+            InputPortView.portName = $"<b><size=10><i>({portTypeName})</i></size> {port.PortName}</b>";
             
             inputContainer.Add(InputPortView);
         }
@@ -85,7 +90,12 @@ namespace Jungle.Editor
             {
                 var newPortView = InstantiatePort(Orientation.Horizontal, Direction.Output,
                     UnityEditor.Experimental.GraphView.Port.Capacity.Multi, port.PortType);
-                newPortView.portName = $"{port.PortName} <size=10><b>({port.PortType.Name})</b></size>";
+
+                var portTypeName = port.PortType != typeof(Error)
+                    ? port.PortType.Name
+                    : nameof(Error).ToUpper();
+                
+                newPortView.portName = $"<b>{port.PortName} <size=10><i>({portTypeName})</i></size></b>";
 
                 OutputPortViews.Add(newPortView);
                 outputContainer.Add(newPortView);

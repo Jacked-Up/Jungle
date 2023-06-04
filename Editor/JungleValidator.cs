@@ -51,6 +51,8 @@ namespace Jungle.Editor
                     continue;
                 }
                 var jungleNode = asset as JungleNode;
+                if (jungleNode == null) continue;
+                
                 jungleNode.Validate(false, out var issues);
                 if (issues != null && issues.Count != 0)
                 {
@@ -59,6 +61,26 @@ namespace Jungle.Editor
                     {
                         report.nodeIssues.Add($"[{jungleNode.name}] {issue}");
                     }
+                }
+                if (jungleNode.tree == null)
+                {
+                    report.nodeIssues.Add($"{jungleNode.name} does not have a Jungle Tree");
+                }
+                
+                var validNames = jungleNode.OutputInfo.Count(info => info.PortName is not "ERROR" or null);
+                var validTypes = jungleNode.OutputInfo.Count(info => info.PortType != typeof(Error));
+
+                if (validNames < validTypes)
+                {
+                    report.nodeIssues ??= new List<string>();
+                    report.nodeIssues.Add($"{jungleNode.GetType()} has declared more output port types than " +
+                                          "output port names");
+                }
+                else if (validNames > validTypes)
+                {
+                    report.nodeIssues ??= new List<string>();
+                    report.nodeIssues.Add($"{jungleNode.GetType()} has declared more output port names than " +
+                                          "output port types");
                 }
             }
             
@@ -141,6 +163,12 @@ namespace Jungle.Editor
         {
             get => EditorPrefs.GetBool("Jungle_AutoRefresh", true);
             set => EditorPrefs.SetBool("Jungle_AutoRefresh", value);
+        }
+        
+        private bool CollapseIssues
+        {
+            get => EditorPrefs.GetBool("Jungle_CollapseIssues", true);
+            set => EditorPrefs.SetBool("Jungle_CollapseIssues", value);
         }
         
         private bool ShowAutoFixDialog
@@ -233,13 +261,15 @@ namespace Jungle.Editor
             GUI.enabled = true;
             
             GUILayout.FlexibleSpace();
-            OnlyShowIssues = GUILayout.Toggle(OnlyShowIssues, "Only Show Issues");
-            var onlyShowIssues = OnlyShowIssues;
+            CollapseIssues = GUILayout.Toggle(CollapseIssues, "Collapse Issues");
+            var collapseIssues = CollapseIssues;
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
             GUILayout.Space(5);
-            _searchQuery = GUILayout.TextField(_searchQuery, EditorStyles.toolbarSearchField);
-            GUILayout.Space(5);
+            _searchQuery = GUILayout.TextField(_searchQuery, EditorStyles.toolbarSearchField, GUILayout.MaxWidth(300f));
+            GUILayout.FlexibleSpace();
+            OnlyShowIssues = GUILayout.Toggle(OnlyShowIssues, "Issues Only", GUILayout.Width(82.5f));
+            var onlyShowIssues = OnlyShowIssues;
             GUILayout.EndHorizontal();
             GUILayout.Space(2.5f);
             EditorGUI.DrawRect(EditorGUILayout.GetControlRect(false, 1), EditorGUIUtility.isProSkin 
@@ -382,9 +412,28 @@ namespace Jungle.Editor
                             GUILayout.BeginHorizontal();
                             GUILayout.Space(5);
                             GUILayout.BeginVertical();
-                            foreach (var issue in reportsToShow[i].nodeIssues)
+                            for (var j = 0; j < reportsToShow[i].nodeIssues.Count; j++)
                             {
+                                var issue = reportsToShow[i].nodeIssues[j];
+                                var issueCopies = 0;
+                                if (collapseIssues)
+                                {
+                                    issueCopies = reportsToShow[i].nodeIssues.Count(nodeIssue => issue == nodeIssue);
+                                    if (issueCopies > 1)
+                                    {
+                                        var firstCopyIndex = reportsToShow[i].nodeIssues
+                                            .IndexOf(reportsToShow[i].nodeIssues.First(iss => iss == issue));
+                                        if (firstCopyIndex < j) continue;
+                                    }
+                                }
+                                GUILayout.BeginHorizontal();
                                 GUILayout.Label($"- {issue}", EditorStyles.wordWrappedLabel);
+                                if (collapseIssues && issueCopies > 1)
+                                {
+                                    GUILayout.FlexibleSpace();
+                                    GUILayout.Label($"({issueCopies})", EditorStyles.boldLabel);
+                                }
+                                GUILayout.EndHorizontal();
                             }
                             GUILayout.EndVertical();
                             GUILayout.EndHorizontal();
@@ -404,7 +453,8 @@ namespace Jungle.Editor
             GUILayout.Space(2.5f);
             GUILayout.BeginHorizontal();
             EditorGUILayout.HelpBox("Click refresh to view/update the validation report.", MessageType.Info);
-            EditorGUILayout.BeginVertical();
+            GUILayout.FlexibleSpace();
+            GUILayout.BeginVertical();
             AutoRefresh = GUILayout.Toggle(AutoRefresh, "Auto Refresh");
             GUI.enabled = !AutoRefresh;
             if (GUILayout.Button("Refresh", GUILayout.Height(21f), GUILayout.Width(100f)))

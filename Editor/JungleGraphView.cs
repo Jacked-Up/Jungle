@@ -228,7 +228,7 @@ namespace Jungle.Editor
             // It is safest to just not allow any connections until the problem is fixed
             if (startPort.portType == typeof(Error))
             {
-                return null;
+                return new List<UnityEditor.Experimental.GraphView.Port>();
             }
             
             // Otherwise the compatible port must not be the same connection direction and the same

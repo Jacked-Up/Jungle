@@ -285,12 +285,18 @@ namespace Jungle
         /// <summary>
         /// 
         /// </summary>
-        public string[] OutputPortNames { get; set; } = {"Next"};
+        public string[] OutputPortNames { get; set; } =
+        {
+            "Next"
+        };
 
         /// <summary>
         /// 
         /// </summary>
-        public Type[] OutputPortTypes { get; set; } = { typeof(None) };
+        public Type[] OutputPortTypes { get; set; } =
+        {
+            typeof(None)
+        };
 
         /// <summary>
         /// The nodes input port
@@ -307,40 +313,41 @@ namespace Jungle
                 // In the case the developer has set a number of output port names that does not equal the number of 
                 // output port types, and vice versa, pick the largest array and create default name/type to
                 // prevent errors
-                var queryCount = OutputPortNames.Length == OutputPortTypes.Length
+                var outputPortCount = OutputPortNames.Length == OutputPortTypes.Length
                     ? OutputPortNames.Length
                     : OutputPortNames.Length > OutputPortTypes.Length 
                         ? OutputPortNames.Length 
                         : OutputPortTypes.Length;
-                var query = new List<PortInfo>();
-                for (var i = 0; i < queryCount; i++)
+                
+                var infoList = new List<PortInfo>();
+                for (var i = 0; i < outputPortCount; i++)
                 {
-                    var portName = i < OutputPortNames.Length
+                    var portName = !(i > OutputPortNames.Length - 1)
                         ? OutputPortNames[i]
                         : "ERROR";
-                    var portType = i < OutputPortTypes.Length
+                    var portType = !(i > OutputPortTypes.Length - 1)
                         ? OutputPortTypes[i]
                         : typeof(Error);
-                    query.Add(new PortInfo(portName, portType));
+                    infoList.Add(new PortInfo(portName, portType));
                 }
-                return query.ToArray();
+                return infoList.ToArray();
             }
         }
 
         /// <summary>
-        /// Contains info about the ports name and value type
+        /// Contains info about the ports name and value type.
         /// </summary>
         public struct PortInfo
         {
             /// <summary>
             /// 
             /// </summary>
-            public string PortName { get; private set; }
+            public string PortName { get; }
             
             /// <summary>
             /// 
             /// </summary>
-            public Type PortType { get; private set; }
+            public Type PortType { get; }
 
             public PortInfo(string portName, Type portType)
             {
@@ -351,12 +358,12 @@ namespace Jungle
     }
 
     /// <summary>
-    /// 
+    /// Default Jungle node type.
     /// </summary>
     public struct None { }
     
     /// <summary>
-    /// 
+    /// Error state for Jungle node ports.
     /// </summary>
     public struct Error { }
 
