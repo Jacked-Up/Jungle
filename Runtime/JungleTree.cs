@@ -57,8 +57,9 @@ namespace Jungle
             Finished
         }
         
-        private ActionsList revertActions;
-
+        private ActionsList _revertActions;
+        private float _lastPlayTime;
+        
         #endregion
 
         /// <summary>
@@ -72,7 +73,7 @@ namespace Jungle
                 return;
             }
 
-            PlayTime = Time.unscaledTime;
+            _lastPlayTime = Time.unscaledTime;
             ExecutingNodes = new List<JungleNode>
             {
                 // Finds the index of the root node. Should always be zero, but just in case
@@ -94,13 +95,13 @@ namespace Jungle
                 return;
             }
             
-            PlayTime = 0f;
+            _lastPlayTime = 0f;
             ExecutingNodes = new List<JungleNode>();
             State = TreeState.Finished;
             
             // Invoke revert methods
-            revertActions?.InvokeAll();
-            revertActions = new ActionsList();
+            _revertActions?.InvokeAll();
+            _revertActions = new ActionsList();
             
             JungleRuntime.Singleton.StopTree(this);
         }
@@ -114,6 +115,8 @@ namespace Jungle
             {
                 return;
             }
+            PlayTime = Time.unscaledTime - _lastPlayTime;
+            
             var query = new List<JungleNode>(ExecutingNodes);
             foreach (var node in ExecutingNodes)
             {
@@ -155,8 +158,8 @@ namespace Jungle
         /// <param name="action">Action to add to the invoke list.</param>
         public void AddRevertAction(Action action)
         {
-            revertActions ??= new ActionsList();
-            revertActions.AddAction(action);
+            _revertActions ??= new ActionsList();
+            _revertActions.AddAction(action);
         }
         
         /// <summary>
@@ -165,7 +168,7 @@ namespace Jungle
         /// <param name="action">Action to be removed from the invoke list.</param>
         public void RemoveRevertAction(Action action)
         {
-            revertActions?.RemoveAction(action);
+            _revertActions?.RemoveAction(action);
         }
 
 #if UNITY_EDITOR
@@ -403,7 +406,7 @@ namespace Jungle
                 
                 if (instance.State == JungleTree.TreeState.Running)
                 {
-                    EditorGUILayout.LabelField($"Play Time: {Math.Round(Time.unscaledTime - instance.PlayTime, 1)}s");
+                    EditorGUILayout.LabelField($"Play Time: {Math.Round(instance.PlayTime, 1)}s");
                 }
                 else
                 {

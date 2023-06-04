@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 #if UNITY_EDITOR
@@ -180,10 +181,38 @@ namespace Jungle
         public override void OnInspectorGUI()
         {
             GUI.enabled = false;
+            
+            GUILayout.BeginVertical(EditorStyles.helpBox);
+
+            GUI.enabled = true;
+            GUILayout.Label("Running Tree(s)", EditorStyles.boldLabel, GUILayout.MaxWidth(450));
+            GUILayout.Space(5);
+            GUI.enabled = false;
+            
+            if (instance.RunningTrees.Count == 0)
+            {
+                GUI.enabled = true;
+                GUILayout.Label("...");
+                GUI.enabled = false;
+            }
+            
             foreach (var tree in instance.RunningTrees)
             {
-                //EditorGUILayout.ObjectField(tree, typeof(JungleNode));
+                GUILayout.BeginHorizontal();
+                GUI.enabled = true;
+                if (GUILayout.Button("X"))
+                {
+                    tree.Stop();
+                    continue;
+                }
+                GUI.enabled = false;
+                EditorGUILayout.ObjectField(tree, typeof(JungleNode), GUILayout.MaxWidth(300));
+                GUILayout.FlexibleSpace();
+                GUILayout.Label($"{Math.Round(tree.PlayTime, 0)}s");
+                GUILayout.EndHorizontal();
             }
+            
+            GUILayout.EndVertical();
             Repaint();
         }
     }
