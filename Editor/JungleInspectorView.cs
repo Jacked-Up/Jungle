@@ -34,7 +34,7 @@ namespace Jungle.Editor
                 var node = (JungleNode)_nodeInspector.target;
                 var properties = node.NodeProperties;
 
-                GUI.enabled = _nodeInspector.target is not RootNode;
+                GUI.enabled = _nodeInspector.target is not StartNode;
                 GUILayout.Label("Comments:");
                 var notes = GUILayout.TextArea(properties.comments, 300);
                 node.NodeProperties = new NodeProperties

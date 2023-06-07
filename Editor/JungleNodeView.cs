@@ -44,7 +44,7 @@ namespace Jungle.Editor
             // Set color of node in the Jungle Editor
             AddToClassList(nodeReference.NodeColor.ToString().ToLower());
 
-            if (nodeReference.GetType() != typeof(RootNode))
+            if (nodeReference.GetType() != typeof(StartNode))
             {
                 HandleInputPortViews();
             }

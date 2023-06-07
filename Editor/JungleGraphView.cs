@@ -77,7 +77,7 @@ namespace Jungle.Editor
             // Add root node if one does not already exist
             if (_selectedTree.nodes == null || _selectedTree.nodes.Length == 0)
             {
-                var root = _selectedTree.CreateNode(typeof(RootNode), defaultRootNodePosition) as RootNode;
+                var root = _selectedTree.CreateNode(typeof(StartNode), defaultRootNodePosition) as StartNode;
                 _selectedTree.nodes = new JungleNode[]
                 {
                     root
@@ -152,7 +152,7 @@ namespace Jungle.Editor
                 {
                     if (element is JungleNodeView nodeView)
                     {
-                        if (nodeView.NodeObject.GetType() != typeof(RootNode))
+                        if (nodeView.NodeObject.GetType() != typeof(StartNode))
                         {
                             _selectedTree.DeleteNode(nodeView.NodeObject);
                         }
@@ -217,7 +217,7 @@ namespace Jungle.Editor
             if (arg.commandName == "Duplicate")
             {
                 // Duplicating the root node is forbidden
-                if (SelectedNodeView.NodeObject is RootNode)
+                if (SelectedNodeView.NodeObject is StartNode)
                 {
                     return;
                 }

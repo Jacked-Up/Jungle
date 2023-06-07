@@ -78,7 +78,7 @@ namespace Jungle
             RunningNodes = new List<JungleNode>
             {
                 // Finds the index of the root node. Should always be zero, but just in case
-                nodes[nodes.ToList().IndexOf(nodes.First(node => node is RootNode))]
+                nodes[nodes.ToList().IndexOf(nodes.First(node => node is StartNode))]
             };
             RunningNodes[0].Initialize(new None());
             State = TreeState.Running;

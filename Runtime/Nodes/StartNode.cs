@@ -6,7 +6,7 @@
         OutputPortNames = new []{ "" },
         OutputPortTypes = new []{ typeof(None) }
     )]
-    public class RootNode : JungleNode
+    public class StartNode : JungleNode
     {
         public override void Initialize(in object inputValue)
         {
@@ -24,7 +24,7 @@
     }
 
 #if UNITY_EDITOR
-    [UnityEditor.CustomEditor(typeof(RootNode))]
+    [UnityEditor.CustomEditor(typeof(StartNode))]
     public class RootNodeEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI() { }

@@ -42,7 +42,7 @@ namespace Jungle.Editor
             nodeTypes.ToList().ForEach(nodeType =>
             {
                 var typeObject = CreateInstance(nodeType) as JungleNode;
-                if (typeObject == null || typeObject is RootNode) return;
+                if (typeObject == null || typeObject is StartNode) return;
                 var typeCategory = typeObject.Category;
                 if (categories.All(category => category.CategoryName != typeCategory))
                 {
