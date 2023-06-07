@@ -11,22 +11,22 @@ namespace Jungle.Editor
     public class JungleNodeView : Node
     {
         #region Variables
-
-        private const float MINIMUM_ACTIVE_DRAW_TIME = 0.5f; 
+        
+        private const float MINIMUM_ACTIVE_BAR_TIME = 0.5f; 
         
         public JungleNode NodeObject;
 
-        public UnityEditor.Experimental.GraphView.Port InputPortView { get; private set; }
-
-        public List<UnityEditor.Experimental.GraphView.Port> OutputPortViews { get; private set; }
+        public Port InputPortView { get; private set; }
+        
+        public List<Port> OutputPortViews { get; private set; }
 
         public Action<JungleNodeView> NodeSelectedCallback;
 
         private static string UIFileAssetPath 
             => AssetDatabase.GetAssetPath(Resources.Load("JungleNodeView"));
         
-        private float _lastDrawTime;
-        
+        private float _lastDrawTime = -1f;
+
         #endregion
 
         public JungleNodeView(JungleNode nodeReference) : base(UIFileAssetPath)
@@ -39,23 +39,25 @@ namespace Jungle.Editor
 
             // Sets the node object to the reference and returns true if the node reference
             // is of type RootNode
-            var isRootNode = HandleNodeObject(nodeReference);
+            HandleNodeObject(nodeReference);
 
             // Set color of node in the Jungle Editor
             AddToClassList(nodeReference.NodeColor.ToString().ToLower());
 
-            if (isRootNode)
+            if (nodeReference.GetType() != typeof(RootNode))
             {
-                //outputContainer.transform.position = new Vector3(0, -25, 0);
+                HandleInputPortViews();
             }
-
-            if (!isRootNode) HandleInputPortViews();
-            HandleOutputPortViews(isRootNode);
-            
-            UpdateDrawActiveBar(false);
+            HandleOutputPortViews();
         }
 
-        private bool HandleNodeObject(JungleNode reference)
+        public void UpdateNodeView()
+        {
+            UpdateActiveBar();
+            UpdateErrorIcon();
+        }
+        
+        private void HandleNodeObject(JungleNode reference)
         {
             NodeObject = reference;
             title = reference.TitleName;
@@ -63,8 +65,6 @@ namespace Jungle.Editor
             var graphPosition = reference.NodeProperties.position;
             style.left = graphPosition.x;
             style.top = graphPosition.y;
-            
-            return reference.GetType() == typeof(RootNode);
         }
 
         private void HandleInputPortViews()
@@ -72,7 +72,7 @@ namespace Jungle.Editor
             var port = NodeObject.InputInfo;
             
             InputPortView = InstantiatePort(Orientation.Horizontal, Direction.Input,
-                UnityEditor.Experimental.GraphView.Port.Capacity.Multi, port.PortType);
+                Port.Capacity.Multi, port.PortType);
             
             var portTypeName = port.PortType != typeof(Error)
                 ? port.PortType.Name
@@ -83,13 +83,13 @@ namespace Jungle.Editor
             inputContainer.Add(InputPortView);
         }
 
-        private void HandleOutputPortViews(bool isRootNode)
+        private void HandleOutputPortViews()
         {
-            OutputPortViews = new List<UnityEditor.Experimental.GraphView.Port>();
+            OutputPortViews = new List<Port>();
             foreach (var port in NodeObject.OutputInfo)
             {
-                var newPortView = InstantiatePort(Orientation.Horizontal, Direction.Output,
-                    UnityEditor.Experimental.GraphView.Port.Capacity.Multi, port.PortType);
+                var newPortView = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Multi,
+                    port.PortType);
 
                 var portTypeName = port.PortType != typeof(Error)
                     ? port.PortType.Name
@@ -101,12 +101,49 @@ namespace Jungle.Editor
                 outputContainer.Add(newPortView);
             }
         }
-        
+
+        private void UpdateActiveBar()
+        {
+            var activeBarElement = mainContainer.Q<VisualElement>("active-bar");
+            
+            // The node cannot be active while in play mode
+            if (!Application.isPlaying)
+            {
+                activeBarElement.visible = false;
+                return;
+            }
+            
+            // This is so that any nodes that finish execution immediately will still visualize
+            // when they're active for a set period of time
+            if (_lastDrawTime == -1f && NodeObject.IsRunning)
+            {
+                _lastDrawTime = (float)EditorApplication.timeSinceStartup;
+                activeBarElement.visible = true;
+            }
+            if (EditorApplication.timeSinceStartup - _lastDrawTime < MINIMUM_ACTIVE_BAR_TIME)
+            {
+                return;
+            }
+            _lastDrawTime = -1f;
+            activeBarElement.visible = false;
+        }
+
+        private void UpdateErrorIcon()
+        {
+            var element = mainContainer.Q<VisualElement>("error-icon");
+            if (Application.isPlaying)
+            {
+                element.visible = false;
+                return;
+            }
+            
+            element.visible = true;
+        }
+
         public override void SetPosition(Rect position)
         {
             if (NodeObject == null)
             {
-                JungleDebug.Log("JungleNodeView", "Failed to set position!", null);
                 return;
             }
             
@@ -125,28 +162,6 @@ namespace Jungle.Editor
         {
             base.OnSelected();
             NodeSelectedCallback?.Invoke(this);
-        }
-
-        public void UpdateDrawActiveBar(bool active)
-        {
-            var element = mainContainer.Q<VisualElement>("active-bar");
-            if (!Application.isPlaying)
-            {
-                element.transform.scale = Vector3.zero;
-                return;
-            }
-            
-            // This is so that any nodes that finish execution immediately will still visualize
-            // when they're active for a set period of time
-            if (EditorApplication.timeSinceStartup - _lastDrawTime < MINIMUM_ACTIVE_DRAW_TIME && !active)
-            {
-                return;
-            }
-            _lastDrawTime = (float)EditorApplication.timeSinceStartup;
-                
-            element.transform.scale = active
-                ? Vector3.one
-                : Vector3.zero;
         }
     }
 }

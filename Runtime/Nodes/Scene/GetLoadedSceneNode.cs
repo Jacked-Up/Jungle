@@ -55,7 +55,7 @@ namespace Jungle.Nodes.Scene
 #if UNITY_EDITOR
                     if (!_scene.IsValid())
                     {
-                        Debug.LogFormat(LogType.Error, LogOption.NoStacktrace, tree,
+                        Debug.LogFormat(LogType.Error, LogOption.NoStacktrace, Tree,
                             $"[{name}] Failed to get scene by name \"{sceneName}\".");
                     }
 #endif
@@ -65,7 +65,7 @@ namespace Jungle.Nodes.Scene
 #if UNITY_EDITOR
                     if (!_scene.IsValid())
                     {
-                        Debug.LogFormat(LogType.Error, LogOption.NoStacktrace, tree,
+                        Debug.LogFormat(LogType.Error, LogOption.NoStacktrace, Tree,
                             $"[{name}] Failed to get scene at index {sceneIndex.ToString()}.");
                     }
 #endif

@@ -25,7 +25,7 @@ namespace Jungle.Nodes.Loop
 
         public override bool Execute(out PortCall[] call)
         {
-            if (tree.ExecutingNodes.Any(executingNode => nodes.Any(node => node == executingNode)))
+            if (Tree.RunningNodes.Any(executingNode => nodes.Any(node => node == executingNode)))
             {
                 call = new[] {new PortCall(0, true)};
                 return false;

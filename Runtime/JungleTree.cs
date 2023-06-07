@@ -13,7 +13,8 @@ namespace Jungle
     /// <summary>
     /// 
     /// </summary>
-    [Serializable] [CreateAssetMenu(fileName = "Node Tree", menuName = "Jungle Node Tree")]
+    [Serializable]
+    [CreateAssetMenu(fileName = "My Jungle Tree 0", menuName = "Jungle Tree", order = 81)]
     public class JungleTree : ScriptableObject
     {
         #region Variables
@@ -27,7 +28,7 @@ namespace Jungle
         /// <summary>
         /// 
         /// </summary>
-        public List<JungleNode> ExecutingNodes { get; private set; } = new();
+        public List<JungleNode> RunningNodes { get; private set; } = new();
 
         /// <summary>
         /// 
@@ -74,12 +75,12 @@ namespace Jungle
             }
 
             _lastPlayTime = Time.unscaledTime;
-            ExecutingNodes = new List<JungleNode>
+            RunningNodes = new List<JungleNode>
             {
                 // Finds the index of the root node. Should always be zero, but just in case
                 nodes[nodes.ToList().IndexOf(nodes.First(node => node is RootNode))]
             };
-            ExecutingNodes[0].Initialize(new None());
+            RunningNodes[0].Initialize(new None());
             State = TreeState.Running;
             
             JungleRuntime.Singleton.StartTree(this, link);
@@ -96,7 +97,7 @@ namespace Jungle
             }
             
             _lastPlayTime = 0f;
-            ExecutingNodes = new List<JungleNode>();
+            RunningNodes = new List<JungleNode>();
             State = TreeState.Finished;
             
             // Invoke revert methods
@@ -117,8 +118,8 @@ namespace Jungle
             }
             PlayTime = Time.unscaledTime - _lastPlayTime;
             
-            var query = new List<JungleNode>(ExecutingNodes);
-            foreach (var node in ExecutingNodes)
+            var query = new List<JungleNode>(RunningNodes);
+            foreach (var node in RunningNodes)
             {
                 var finished = node.Execute(out var portCalls);
                 foreach (var call in portCalls)
@@ -148,8 +149,8 @@ namespace Jungle
             }
             // Populate executing nodes with new query ONLY if it has changed
             // I believe this prevents the list from redundantly reallocating new memory. I could be wrong
-            if (!ExecutingNodes.Equals(query)) ExecutingNodes = query;
-            if (ExecutingNodes.Count == 0) Stop();
+            if (!RunningNodes.Equals(query)) RunningNodes = query;
+            if (RunningNodes.Count == 0) Stop();
         }
 
         /// <summary>
@@ -195,7 +196,7 @@ namespace Jungle
             node.name = $"{name}_{nodeType.Name}_{i.ToString()}";
             
             // Build node and populate graph view properties
-            node.tree = this;
+            node.Tree = this;
             node.NodeProperties = new NodeProperties
             {
                 guid = GUID.Generate().ToString(),
@@ -247,7 +248,7 @@ namespace Jungle
             node.name = $"{name}_{original.GetType().Name}_{i.ToString()}";
             
             // Build node and populate graph view properties
-            node.tree = this;
+            node.Tree = this;
             node.NodeProperties = new NodeProperties
             {
                 guid = GUID.Generate().ToString(),

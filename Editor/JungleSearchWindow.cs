@@ -108,7 +108,7 @@ namespace Jungle.Editor
                 window.rootVisualElement.ChangeCoordinatesTo(window.rootVisualElement.parent,
                     context.screenMousePosition - window.position.position);
             var graphViewMousePosition = graphView.contentViewContainer.WorldToLocal(editorWindowMousePosition);
-            graphView.CreateNodeAndView(searchTreeEntry.userData.GetType(), graphViewMousePosition);
+            graphView.CreateNode(searchTreeEntry.userData.GetType(), graphViewMousePosition);
             return true;
         }
     }

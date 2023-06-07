@@ -51,7 +51,7 @@ namespace Jungle.Nodes.Object.Transform
             _originalPosition = space == Space.World 
                 ? _transform.position
                 : _transform.localPosition;
-            tree.AddRevertAction(RevertPosition);
+            Tree.AddRevertAction(RevertPosition);
         }
 
         private void RevertPosition()

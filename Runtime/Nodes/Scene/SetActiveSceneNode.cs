@@ -34,7 +34,7 @@ namespace Jungle.Nodes.Scene
 #if UNITY_EDITOR
             if (!_scene.IsValid())
             {
-                Debug.LogFormat(LogType.Error, LogOption.NoStacktrace, tree,
+                Debug.LogFormat(LogType.Error, LogOption.NoStacktrace, Tree,
                     $"[{name}] Failed to set active scene because the input scene by name \"{_scene.name}\" was invalid.");
             }
 #endif
@@ -43,7 +43,7 @@ namespace Jungle.Nodes.Scene
 #if UNITY_EDITOR
             if (!result)
             {
-                Debug.LogFormat(LogType.Error, LogOption.NoStacktrace, tree,
+                Debug.LogFormat(LogType.Error, LogOption.NoStacktrace, Tree,
                     $"[{name}] Failed to set active scene.");
             }
 #endif

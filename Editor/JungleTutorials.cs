@@ -45,7 +45,7 @@ namespace Jungle.Editor
         [MenuItem("Window/Jungle/Tutorials/Reset Tutorial Dialogs")]
         public static void ResetAllTutorialRequests()
         {
-            JungleDebug.Log("Jungle Tutorials", "The Jungle tutorial dialog states have been reset.");
+            //JungleDebug.Log("Jungle Tutorials", "The Jungle tutorial dialog states have been reset.");
             EditorPrefs.SetBool(SHOWN_EDITOR_KEY, false);
         }
     }

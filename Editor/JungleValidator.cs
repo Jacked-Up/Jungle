@@ -62,7 +62,7 @@ namespace Jungle.Editor
                         report.nodeIssues.Add($"[{jungleNode.name}] {issue}");
                     }
                 }
-                if (jungleNode.tree == null)
+                if (jungleNode.Tree == null)
                 {
                     report.nodeIssues.Add($"{jungleNode.name} does not have a Jungle Tree");
                 }
@@ -196,7 +196,7 @@ namespace Jungle.Editor
             RefreshReports();
         }
 
-        public static void RefreshReports()
+        private static void RefreshReports()
         {
             _instance = GetWindow<JungleValidatorEditor>
             (
@@ -210,13 +210,20 @@ namespace Jungle.Editor
 
         private void OnGUI()
         {
+            if (Application.isPlaying)
+            {
+                EditorGUILayout.HelpBox("You can only validate Jungle Trees and Jungle Nodes in edit mode.",
+                    MessageType.Info);
+                return;
+            }
+            
             GUILayout.BeginVertical();
 
             var newJungleTreeAssets = false;
             if (!_readyForRefresh)
             {
                 // This check waits at least 1/4th of a second before performing an asset check
-                // Otherwise the check would be performed wayyyyy to frequently
+                // Otherwise the check would be performed wayyyyy too frequently
                 if (EditorApplication.timeSinceStartup - _lastAssetCheckTime > 0.25f)
                 {
                     newJungleTreeAssets = _reports.Length != JungleValidator.GetAllJungleTrees().Length;

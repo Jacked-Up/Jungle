@@ -12,15 +12,12 @@ namespace Jungle.Editor
 
         private const string TAB_ICON_DARK_FILE_PATH = 
             "Icons/JungleEditorIconDark";
-        
         private const string TAB_ICON_LIGHT_FILE_PATH = 
             "Icons/JungleEditorIconLight";
-        
         public const string STYLE_SHEET_FILE_PATH =
             "Packages/com.jackedupstudios.jungle/Editor/UI/JungleEditorStyle.uss";
-
         private const int MAXIMUM_DISPLAYED_TREE_NAME = 28;
-        
+
         private JungleTree _activeTree;
         private JungleGraphView _graphView;
         private JungleInspectorView _inspectorView;
@@ -104,7 +101,7 @@ namespace Jungle.Editor
                     : _activeTree.name;
             }
             
-            _graphView.UpdateDrawActiveBar();
+            _graphView.UpdateAllNodeViews();
             if (Application.isPlaying) Repaint();
         }
 

@@ -17,16 +17,41 @@ namespace Jungle
         /// Reference to the tree which this node is apart of.
         /// Recommended to never touch this.
         /// </summary>
+        public JungleTree Tree
+        {
+            get => tree;
+            set
+            {
+                if (tree != null)
+                {
+                    if (tree == value)
+                    {
+                        return;
+                    }
+#if UNITY_EDITOR
+                    Debug.LogFormat(LogType.Warning, LogOption.NoStacktrace, tree,
+                        $"[{name}] You cannot set the Jungle Tree reference after it has already been set.");
+#endif
+                    return;
+                }
+                tree = value;
+            }
+        }
         [SerializeField] [HideInInspector] 
-        public JungleTree tree;
+        private JungleTree tree;
         
         /// <summary>
         /// Array of the output ports on this node.
         /// </summary>
-        public Port[] OutputPorts => outputPorts;
+        public JunglePort[] OutputPorts => outputPorts;
         [SerializeField] [HideInInspector] 
-        private Port[] outputPorts = Array.Empty<Port>();
-        
+        private JunglePort[] outputPorts = Array.Empty<JunglePort>();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool IsRunning => Tree.RunningNodes.Contains(this);
+
         /// <summary>
         /// Jungle editor available node colors.
         /// </summary>
@@ -124,7 +149,7 @@ namespace Jungle
         /// <param name="portIndex"></param>
         public void MakeConnection(JungleNode node, byte portIndex)
         {
-            if (node.tree != tree)
+            if (node.Tree != Tree)
             {
                 // You cannot connect nodes from different trees
                 return;
@@ -141,12 +166,12 @@ namespace Jungle
                 }
                 var repairedPortsList = OutputInfo.Select(info =>
                 {
-                    return new Port(Array.Empty<JungleNode>(), info.PortType);
+                    return new JunglePort(Array.Empty<JungleNode>(), info.PortType);
                 }).ToArray();
                 outputPorts = repairedPortsList;
             }
             // Output ports type mismatch error
-            var newPortsList = new List<Port>();
+            var newPortsList = new List<JunglePort>();
             for (var i = 0; i < OutputInfo.Length; i++)
             {
                 var portType = OutputInfo[i].PortType;
@@ -159,7 +184,7 @@ namespace Jungle
                 var connections = i == portIndex 
                     ? new List<JungleNode>(OutputPorts[i].connections) {node}.ToArray()
                     : OutputPorts[i].connections;
-                newPortsList.Add(new Port(connections, portType));
+                newPortsList.Add(new JunglePort(connections, portType));
             }
             outputPorts = newPortsList.ToArray();
             UnityEditor.EditorUtility.SetDirty(this);
@@ -176,14 +201,14 @@ namespace Jungle
             {
                 return;
             }
-            var outputPortsQuery = new List<Port>(OutputPorts);
+            var outputPortsQuery = new List<JunglePort>(OutputPorts);
             var outputPort = OutputPorts[portIndex];
             var connections = new List<JungleNode>(outputPort.connections);
             if (connections.Contains(node))
             {
                 connections.Remove(node);
             }
-            outputPortsQuery[portIndex] = new Port(connections.ToArray(), outputPort.PortType);
+            outputPortsQuery[portIndex] = new JunglePort(connections.ToArray(), outputPort.PortType);
             outputPorts = outputPortsQuery.ToArray();
             UnityEditor.EditorUtility.SetDirty(this);
         }
@@ -194,7 +219,7 @@ namespace Jungle
     /// Base port class. Used for both input and output ports
     /// </summary>
     [Serializable]
-    public struct Port
+    public struct JunglePort
     {
         /// <summary>
         /// List of the nodes that are connected to this port
@@ -221,7 +246,7 @@ namespace Jungle
         [SerializeField] [HideInInspector] 
         private string portType;
 
-        public Port(JungleNode[] connections, Type portType)
+        public JunglePort(JungleNode[] connections, Type portType)
         {
             connections ??= Array.Empty<JungleNode>();
             this.connections = connections;
