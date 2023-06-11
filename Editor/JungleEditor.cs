@@ -72,7 +72,7 @@ namespace Jungle.Editor
             }
             var window = GetWindow<JungleEditor>();
             window.EditTree = Selection.activeObject as JungleTree;
-            window.TryRepaintGraphView();
+            window.RepaintGraphView();
             return true;
         }
 
@@ -102,23 +102,23 @@ namespace Jungle.Editor
                 _inspectorView.UpdateSelection(nodeView);
             };
             _graphView.Initialize(this, _searchView);
-            TryRepaintGraphView();
+            RepaintGraphView();
         }
 
         private void OnGUI()
         {
-            JungleTreeValidateCallback();
-            TryRepaintNodeViews();
+            RepaintNodeViews();
             Repaint();
         }
 
-        private void TryRepaintGraphView()
+        private void RepaintGraphView()
         {
             _graphView?.UpdateGraphView();
-            TryRepaintNodeViews();
+            RepaintTitle();
+            RepaintNodeViews();
         }
 
-        private void TryRepaintNodeViews()
+        private void RepaintNodeViews()
         {
             _graphView?.UpdateNodeViews();
         }
@@ -147,15 +147,15 @@ namespace Jungle.Editor
             return _graphView.contentViewContainer.WorldToLocal(mousePosition);
         }
 
-        private void JungleTreeValidateCallback()
+        private void RepaintTitle()
         {
             var titleLabel = rootVisualElement.Q<Label>("tree-name-label");
-            if (titleLabel == null) return;
+            if (titleLabel == null || EditTree == null) return;
             // Ensures the name displayed can be no longer than the maximum length
             // If it is too long, this removes the extra text and adds a "..." bit
-            titleLabel.text = _editTree.name.Length > MAXIMUM_DISPLAYED_TREE_NAME 
-                ? $"{_editTree.name[..(MAXIMUM_DISPLAYED_TREE_NAME - 2)]}..." 
-                : _editTree.name;
+            titleLabel.text = EditTree.name.Length > MAXIMUM_DISPLAYED_TREE_NAME 
+                ? $"{EditTree.name[..(MAXIMUM_DISPLAYED_TREE_NAME - 2)]}..." 
+                : EditTree.name;
         }
     }
 }
