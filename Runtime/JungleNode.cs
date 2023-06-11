@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Jungle
 {
     /// <summary>
-    /// Base node class inherited by all Jungle sequencer nodes.
+    /// Base node class inherited by all Jungle nodes.
     /// </summary>
     [Serializable] [Node]
     public abstract class JungleNode : ScriptableObject, INode
@@ -14,8 +14,7 @@ namespace Jungle
         #region Variables
 
         /// <summary>
-        /// Reference to the tree which this node is apart of.
-        /// Recommended to never touch this.
+        /// Reference to this nodes Jungle Tree.
         /// </summary>
         public JungleTree Tree
         {
@@ -24,10 +23,7 @@ namespace Jungle
             {
                 if (tree != null)
                 {
-                    if (tree == value)
-                    {
-                        return;
-                    }
+                    if (tree == value) return;
 #if UNITY_EDITOR
                     Debug.LogFormat(LogType.Warning, LogOption.NoStacktrace, tree,
                         $"[{name}] You cannot set the Jungle Tree reference after it has already been set.");
@@ -48,12 +44,12 @@ namespace Jungle
         private JunglePort[] outputPorts = Array.Empty<JunglePort>();
 
         /// <summary>
-        /// 
+        /// True if the node is actively being executed by the Jungle Tree.
         /// </summary>
         public bool IsRunning => Tree.RunningNodes.Contains(this);
 
         /// <summary>
-        /// Jungle editor available node colors.
+        /// List of Jungle Node view colors.
         /// </summary>
         public enum Color
         {

@@ -18,18 +18,18 @@ namespace Jungle
     public class JungleTree : ScriptableObject
     {
         #region Variables
-
+        
         /// <summary>
         /// 
         /// </summary>
         [HideInInspector]
         public JungleNode[] nodes = Array.Empty<JungleNode>();
-
+        
         /// <summary>
         /// 
         /// </summary>
         public List<JungleNode> RunningNodes { get; private set; } = new();
-
+        
         /// <summary>
         /// 
         /// </summary>
@@ -308,6 +308,13 @@ namespace Jungle
         {
             Undo.RecordObject(node, $"Removed edge from {node.name}");
             node.RemoveConnection(disconnect, portIndex);
+        }
+        
+        public delegate void JungleTreeValidateCallback();
+        public event JungleTreeValidateCallback OnJungleTreeValidate;
+        private void OnValidate()
+        {
+            OnJungleTreeValidate?.Invoke();
         }
 #endif
     }

@@ -18,18 +18,41 @@ namespace Jungle.Editor
             "Packages/com.jackedupstudios.jungle/Editor/UI/JungleEditorStyle.uss";
         private const int MAXIMUM_DISPLAYED_TREE_NAME = 28;
 
-        private JungleTree _activeTree;
-        private JungleGraphView _graphView;
-        private JungleInspectorView _inspectorView;
-        private JungleSearchWindow _searchWindow;
-        
-        private enum DebugType
+        public JungleTree EditTree
         {
-            Log,
-            Warning,
-            Error
+            get
+            {
+                // We can just return the cache if one is available
+                if (_editTree != null) return _editTree;
+                
+                // If no cache is available, we can just look for the last selected for convenience
+                var lastEditTreeInstanceID = EditorPrefs.GetInt("Jungle_LastEditTreeInstanceID", -1);
+                var jungleTreeAsset = EditorUtility.InstanceIDToObject(lastEditTreeInstanceID) as JungleTree;
+                if (jungleTreeAsset == null)
+                {
+                    return null;
+                }
+                _editTree = jungleTreeAsset;
+                return _editTree;
+            }
+            private set
+            {
+                if (value == null)
+                {
+                    EditorPrefs.SetInt("Jungle_LastEditTreeInstanceID", -1);
+                    _editTree = null;
+                    return;
+                }
+                EditorPrefs.SetInt("Jungle_LastEditTreeInstanceID", value.GetInstanceID());
+                _editTree = value;
+            }
         }
-        
+        private JungleTree _editTree;
+
+        private JungleInspectorView _inspectorView;
+        private JungleSearchView _searchView;
+        private JungleGraphView _graphView;
+
         #endregion
 
         private void OnEnable()
@@ -47,9 +70,9 @@ namespace Jungle.Editor
             {
                 return false;
             }
-            var editor = GetWindow<JungleEditor>();
-            editor._activeTree = Selection.activeObject as JungleTree;
-            editor.PopulateGraphView(editor._activeTree);
+            var window = GetWindow<JungleEditor>();
+            window.EditTree = Selection.activeObject as JungleTree;
+            window.TryRepaintGraphView();
             return true;
         }
 
@@ -67,6 +90,10 @@ namespace Jungle.Editor
             // Inspector view ------------------------------------------------------------------------------------------
             _inspectorView = rootVisualElement.Q<JungleInspectorView>("inspector-view");
             
+            // Search view ---------------------------------------------------------------------------------------------
+            _searchView = CreateInstance<JungleSearchView>();
+            _searchView.Initialize(this);
+
             // Graph view ----------------------------------------------------------------------------------------------
             _graphView = rootVisualElement.Q<JungleGraphView>("graph-view");
             _graphView.OnNodeSelected = nodeView =>
@@ -74,56 +101,61 @@ namespace Jungle.Editor
                 _graphView.SelectedNodeView = nodeView;
                 _inspectorView.UpdateSelection(nodeView);
             };
-            PopulateGraphView(_activeTree);
-
-            // Search view ---------------------------------------------------------------------------------------------
-            _searchWindow = CreateInstance<JungleSearchWindow>();
-            _searchWindow.Initialize(this, _graphView);
-            _graphView.SetupSearchWindow(_searchWindow); // Sets up callbacks
+            _graphView.Initialize(this, _searchView);
+            TryRepaintGraphView();
         }
 
         private void OnGUI()
         {
-            if (_activeTree == null)
-            {
-                Close();
-            }
-            // Garbage solution to a pointless VISUAL issue
-            // Should later only update on the node trees validation call
-            else
-            {
-                var titleLabel = rootVisualElement.Q<Label>("tree-name-label");
-                if (titleLabel == null) return;
-                // Ensures the name displayed can be no longer than the maximum length
-                // If it is too long, this removes the extra text and adds a "..." bit
-                titleLabel.text = _activeTree.name.Length > MAXIMUM_DISPLAYED_TREE_NAME 
-                    ? $"{_activeTree.name[..(MAXIMUM_DISPLAYED_TREE_NAME - 2)]}..." 
-                    : _activeTree.name;
-            }
-            
-            _graphView.UpdateAllNodeViews();
-            if (Application.isPlaying) Repaint();
+            JungleTreeValidateCallback();
+            TryRepaintNodeViews();
+            Repaint();
         }
 
-        private void PopulateGraphView(JungleTree tree)
+        private void TryRepaintGraphView()
         {
-            if (tree == null)
-            {
-                return;
-            }
-            _graphView.PopulateGraphView(tree);
+            _graphView?.UpdateGraphView();
+            TryRepaintNodeViews();
         }
-        
-        private static void MakeDebug(string message, DebugType type, UnityEngine.Object context = null)
+
+        private void TryRepaintNodeViews()
         {
-            var logType = type switch
-            {
-                DebugType.Log => LogType.Log,
-                DebugType.Warning => LogType.Warning,
-                DebugType.Error => LogType.Error,
-                _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
-            };
-            Debug.LogFormat(logType, LogOption.NoStacktrace, context, $"[Jungle] {message}");
+            _graphView?.UpdateNodeViews();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="nodeType"></param>
+        /// <param name="graphPosition"></param>
+        /// <returns></returns>
+        public bool TryAddNodeToGraph(Type nodeType, Vector2 graphPosition)
+        {
+            _graphView?.CreateNode(nodeType, graphPosition);
+            return _graphView != null;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="screenMousePosition"></param>
+        /// <returns></returns>
+        public Vector2 GetMousePosition(Vector2 screenMousePosition)
+        {
+            var mousePosition = rootVisualElement.ChangeCoordinatesTo(rootVisualElement.parent,
+                screenMousePosition - position.position);
+            return _graphView.contentViewContainer.WorldToLocal(mousePosition);
+        }
+
+        private void JungleTreeValidateCallback()
+        {
+            var titleLabel = rootVisualElement.Q<Label>("tree-name-label");
+            if (titleLabel == null) return;
+            // Ensures the name displayed can be no longer than the maximum length
+            // If it is too long, this removes the extra text and adds a "..." bit
+            titleLabel.text = _editTree.name.Length > MAXIMUM_DISPLAYED_TREE_NAME 
+                ? $"{_editTree.name[..(MAXIMUM_DISPLAYED_TREE_NAME - 2)]}..." 
+                : _editTree.name;
         }
     }
 }
