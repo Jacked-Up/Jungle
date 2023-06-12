@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
@@ -10,6 +12,8 @@ namespace Jungle.Editor
     {
         #region Variables
 
+        private const string SEARCH_FILTER = "t:JungleTree";
+        
         private const string TAB_ICON_DARK_FILE_PATH = 
             "Icons/JungleEditorIconDark";
         private const string TAB_ICON_LIGHT_FILE_PATH = 
@@ -23,27 +27,37 @@ namespace Jungle.Editor
             get
             {
                 // We can just return the cache if one is available
-                if (_editTree != null) return _editTree;
+                if (_editTree != null)
+                {
+                    return _editTree;
+                }
                 
                 // If no cache is available, we can just look for the last selected for convenience
-                var lastEditTreeInstanceID = EditorPrefs.GetInt("Jungle_LastEditTreeInstanceID", -1);
-                var jungleTreeAsset = EditorUtility.InstanceIDToObject(lastEditTreeInstanceID) as JungleTree;
+                var lastActiveGuid = EditorPrefs.GetString("Jungle_LastEditTreeInstanceID", string.Empty);
+                if (string.IsNullOrEmpty(lastActiveGuid))
+                {
+                    return null;
+                }
+                var jungleTreeAsset = GetAllJungleTrees().FirstOrDefault(jungleTree =>
+                {
+                    return AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(jungleTree)) == lastActiveGuid;
+                });
                 if (jungleTreeAsset == null)
                 {
                     return null;
                 }
-                _editTree = jungleTreeAsset;
-                return _editTree;
+                return _editTree = jungleTreeAsset;
             }
             private set
             {
                 if (value == null)
                 {
-                    EditorPrefs.SetInt("Jungle_LastEditTreeInstanceID", -1);
+                    EditorPrefs.SetString("Jungle_LastEditTreeInstanceID", string.Empty);
                     _editTree = null;
                     return;
                 }
-                EditorPrefs.SetInt("Jungle_LastEditTreeInstanceID", value.GetInstanceID());
+                var guid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(value));
+                EditorPrefs.SetString("Jungle_LastEditTreeInstanceID", guid);
                 _editTree = value;
             }
         }
@@ -123,6 +137,17 @@ namespace Jungle.Editor
             _graphView?.UpdateNodeViews();
         }
 
+        private void RepaintTitle()
+        {
+            var titleLabel = rootVisualElement.Q<Label>("tree-name-label");
+            if (titleLabel == null || EditTree == null) return;
+            // Ensures the name displayed can be no longer than the maximum length
+            // If it is too long, this removes the extra text and adds a "..." bit
+            titleLabel.text = EditTree.name.Length > MAXIMUM_DISPLAYED_TREE_NAME 
+                ? $"{EditTree.name[..(MAXIMUM_DISPLAYED_TREE_NAME - 2)]}..." 
+                : EditTree.name;
+        }
+        
         /// <summary>
         /// 
         /// </summary>
@@ -147,15 +172,27 @@ namespace Jungle.Editor
             return _graphView.contentViewContainer.WorldToLocal(mousePosition);
         }
 
-        private void RepaintTitle()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public static JungleTree[] GetAllJungleTrees()
         {
-            var titleLabel = rootVisualElement.Q<Label>("tree-name-label");
-            if (titleLabel == null || EditTree == null) return;
-            // Ensures the name displayed can be no longer than the maximum length
-            // If it is too long, this removes the extra text and adds a "..." bit
-            titleLabel.text = EditTree.name.Length > MAXIMUM_DISPLAYED_TREE_NAME 
-                ? $"{EditTree.name[..(MAXIMUM_DISPLAYED_TREE_NAME - 2)]}..." 
-                : EditTree.name;
+            var jungleTreeAssets = new List<JungleTree>();
+            
+            // This searches through all jungle tree assets inside the project
+            // The search filter should be type "t:JungleTree"
+            AssetDatabase.FindAssets(SEARCH_FILTER).ToList().ForEach(guid =>
+            {
+                var guidToAssetPath = AssetDatabase.GUIDToAssetPath(guid);
+                var asset = AssetDatabase.LoadAssetAtPath<JungleTree>(guidToAssetPath);
+                if (asset != null)
+                {
+                    jungleTreeAssets.Add(asset);
+                }
+            });
+            
+            return jungleTreeAssets.ToArray();
         }
     }
 }

@@ -22,7 +22,7 @@ namespace Jungle.Editor
         public void OnPreprocessBuild(BuildReport report)
         {
             // No point in a warning if all the trees validate
-            var jungleTrees = JungleValidator.GetAllJungleTrees();
+            var jungleTrees = JungleEditor.GetAllJungleTrees();
             if (jungleTrees.All(jungleTree => !JungleValidator.Validate(jungleTree).Failed))
             { 
                 return;

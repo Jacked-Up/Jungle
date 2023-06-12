@@ -13,7 +13,7 @@ namespace Jungle.Editor
     {
         #region Variables
 
-        private const string SEARCH_FILTER = "t:JungleTree";
+
 
         #endregion
 
@@ -98,29 +98,6 @@ namespace Jungle.Editor
                 node.Validate(true, out var data);
             }
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public static JungleTree[] GetAllJungleTrees()
-        {
-            var jungleTreeAssets = new List<JungleTree>();
-            
-            // This searches through all jungle tree assets inside the project
-            // The search filter should be type "t:JungleTree"
-            AssetDatabase.FindAssets(SEARCH_FILTER).ToList().ForEach(guid =>
-            {
-                var guidToAssetPath = AssetDatabase.GUIDToAssetPath(guid);
-                var asset = AssetDatabase.LoadAssetAtPath<JungleTree>(guidToAssetPath);
-                if (asset != null)
-                {
-                    jungleTreeAssets.Add(asset);
-                }
-            });
-            
-            return jungleTreeAssets.ToArray();
-        }
     }
     
     [Serializable]
@@ -203,7 +180,7 @@ namespace Jungle.Editor
                 false,
                 "Jungle Validator"
             );
-            var jungleTrees = JungleValidator.GetAllJungleTrees();
+            var jungleTrees = JungleEditor.GetAllJungleTrees();
             var reports = jungleTrees.Select(JungleValidator.Validate).ToArray();
             _instance._reports = reports;
         }
@@ -226,7 +203,7 @@ namespace Jungle.Editor
                 // Otherwise the check would be performed wayyyyy too frequently
                 if (EditorApplication.timeSinceStartup - _lastAssetCheckTime > 0.25f)
                 {
-                    newJungleTreeAssets = _reports.Length != JungleValidator.GetAllJungleTrees().Length;
+                    newJungleTreeAssets = _reports.Length != JungleEditor.GetAllJungleTrees().Length;
                     _lastAssetCheckTime = (float) EditorApplication.timeSinceStartup;
                 }
             }

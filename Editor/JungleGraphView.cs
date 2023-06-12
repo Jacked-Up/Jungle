@@ -13,10 +13,10 @@ namespace Jungle.Editor
     {
         #region Variables
 
+        private readonly Vector2 DEFAULT_START_NODE_POSITION = new(100, 120);
+        
         public JungleNodeView SelectedNodeView { get; set; }
         public Action<JungleNodeView> OnNodeSelected { get; set; }
-        
-        private readonly Vector2 defaultRootNodePosition = new(100, 120);
 
         private JungleEditor _jungleEditor;
 
@@ -71,7 +71,7 @@ namespace Jungle.Editor
             // Add root node if one does not already exist
             if (jungleTree.nodes == null || jungleTree.nodes.Length == 0)
             {
-                var root = jungleTree.CreateNode(typeof(StartNode), defaultRootNodePosition) as StartNode;
+                var root = jungleTree.CreateNode(typeof(StartNode), DEFAULT_START_NODE_POSITION) as StartNode;
                 jungleTree.nodes = new JungleNode[]
                 {
                     root
