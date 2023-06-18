@@ -6,7 +6,7 @@
             <ui:VisualElement name="title-bar" style="flex-direction: row;">
                 <ui:Label tabindex="-1" text="My Node" display-tooltip-when-elided="true" name="title-label" style="-unity-font-style: bold; font-size: 16px; align-self: stretch; margin-bottom: 0; padding-bottom: 0; padding-top: 0; padding-right: 0; padding-left: 0; justify-content: space-around; -unity-text-align: middle-left;" />
                 <ui:VisualElement name="space" style="height: 0; width: 7.5px;" />
-                <ui:VisualElement name="error-icon" style="background-image: url(&apos;project://database/Packages/com.unity.timeline/Editor/StyleSheets/Images/Shared/TimelineWarning.png?fileID=2800000&amp;guid=1732e542f535d374bbfa7565fc78414e&amp;type=3#TimelineWarning&apos;); width: 16px; height: 16px; justify-content: center; align-items: auto;" />
+                <ui:VisualElement name="error-icon" style="background-image: resource(&apos;Icons/JungleIssueIcon&apos;); width: 16px; height: 16px; justify-content: center; align-items: auto;" />
             </ui:VisualElement>
             <ui:VisualElement name="title-button-container">
                 <ui:VisualElement name="collapse-button">

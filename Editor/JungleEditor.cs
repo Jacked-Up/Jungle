@@ -74,7 +74,7 @@ namespace Jungle.Editor
             var icon = EditorGUIUtility.isProSkin 
                 ? Resources.Load<Texture>(TAB_ICON_DARK_FILE_PATH) 
                 : Resources.Load<Texture>(TAB_ICON_LIGHT_FILE_PATH);
-            titleContent = new GUIContent("Jungle Editor", icon);
+            titleContent = new GUIContent("Jungle Editor*", icon);
         }
 
         [OnOpenAsset]
@@ -103,6 +103,7 @@ namespace Jungle.Editor
             
             // Inspector view ------------------------------------------------------------------------------------------
             _inspectorView = rootVisualElement.Q<JungleInspectorView>("inspector-view");
+            _inspectorView.Initialize(this);
             
             // Search view ---------------------------------------------------------------------------------------------
             _searchView = CreateInstance<JungleSearchView>();
