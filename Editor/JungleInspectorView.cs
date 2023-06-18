@@ -16,27 +16,25 @@ namespace Jungle.Editor
         public void Initialize(JungleEditor editor)
         {
             _jungleEditor = editor;
-            
-            Clear();
-            Add(new IMGUIContainer(() =>
-            {
-                DrawInspectorHeader();
-                DrawInspectorBody();
-                DrawInspectorFooter();
-            }));
+            HandleDrawContainer();
         }
         
         public new class UxmlFactory : UxmlFactory<JungleInspectorView, UxmlTraits> {}
         
         public void UpdateSelection(JungleNodeView nodeView)
         {
-            Clear();
-
+            // Create nodes inspector IF possible
             if (nodeView != null && nodeView.NodeObject != null)
             {
                 nodeInspector = UnityEditor.Editor.CreateEditor(nodeView.NodeObject);
             }
+            else nodeInspector = null;
+            HandleDrawContainer();
+        }
 
+        private void HandleDrawContainer()
+        {
+            Clear();
             Add(new IMGUIContainer(() =>
             {
                 DrawInspectorHeader();
@@ -44,7 +42,7 @@ namespace Jungle.Editor
                 DrawInspectorFooter();
             }));
         }
-
+        
         private void DrawInspectorHeader()
         {
             var selectedNode = nodeInspector != null

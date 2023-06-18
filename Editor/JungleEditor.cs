@@ -87,6 +87,7 @@ namespace Jungle.Editor
             var window = GetWindow<JungleEditor>();
             window.EditTree = Selection.activeObject as JungleTree;
             window.RepaintGraphView();
+            window._inspectorView.UpdateSelection(null);
             return true;
         }
 
