@@ -61,7 +61,8 @@ namespace Jungle
             Blue,
             Purple,
             Violet,
-            Grey
+            Grey,
+            Black
         }
         
         #endregion

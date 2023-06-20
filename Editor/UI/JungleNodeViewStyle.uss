@@ -126,3 +126,11 @@
     border-top-color: rgb(132, 132, 132);
     border-bottom-color: rgb(132, 132, 132);
 }
+
+.black #node-border {
+    background-color: rgb(16, 16, 16);
+    border-left-color: rgb(45, 45, 45);
+    border-right-color: rgb(45, 45, 45);
+    border-top-color: rgb(45, 45, 45);
+    border-bottom-color: rgb(45, 45, 45);
+}
