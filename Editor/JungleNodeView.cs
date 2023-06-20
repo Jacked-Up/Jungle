@@ -58,6 +58,7 @@ namespace Jungle.Editor
         {
             NodeObject = reference;
             title = reference.TitleName;
+            tooltip = reference.Tooltip;
             viewDataKey = reference.NodeProperties.guid;
             var graphPosition = reference.NodeProperties.position;
             style.left = graphPosition.x;

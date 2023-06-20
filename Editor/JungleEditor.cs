@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.Callbacks;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -19,7 +20,7 @@ namespace Jungle.Editor
         private const string TAB_ICON_LIGHT_FILE_PATH = 
             "Icons/JungleEditorIconLight";
         public const string STYLE_SHEET_FILE_PATH =
-            "Packages/com.jackedupstudios.jungle/Editor/UI/JungleEditorStyle.uss";
+            "Packages/com.jackedupsoftware.jungle/Editor/UI/JungleEditorStyle.uss";
         private const int MAXIMUM_DISPLAYED_TREE_NAME = 28;
 
         public JungleTree EditTree
@@ -66,7 +67,8 @@ namespace Jungle.Editor
         private JungleInspectorView _inspectorView;
         private JungleSearchView _searchView;
         private JungleGraphView _graphView;
-
+        private Edge _lastEdgeCandidate;
+        
         #endregion
 
         private void OnEnable()
@@ -118,7 +120,47 @@ namespace Jungle.Editor
 
         private void OnGUI()
         {
-            GetGhostEdgeState();
+            if (EditTree != null)
+            {
+                var foundLastEdgeCandidate = false;
+                
+                foreach (var node in EditTree.nodes)
+                {
+                    var nodeView = _graphView.GetNodeView(node);
+                    foreach (var port in nodeView.OutputPortViews)
+                    {
+                        if (_lastEdgeCandidate == null && port.edgeConnector.edgeDragHelper.edgeCandidate != null)
+                        {
+                            _lastEdgeCandidate = port.edgeConnector.edgeDragHelper.edgeCandidate;
+                            break;
+                        }
+                        else if (port.edgeConnector.edgeDragHelper.edgeCandidate == _lastEdgeCandidate)
+                        {
+                            foundLastEdgeCandidate = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (foundLastEdgeCandidate)
+                {
+                    Debug.Log("Yessir");
+                    _lastEdgeCandidate = null;
+                }
+                
+            }
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             RepaintNodeViews();
             Repaint();
         }
@@ -146,30 +188,14 @@ namespace Jungle.Editor
                 : EditTree.name;
         }
 
-        private void GetGhostEdgeState()
-        {
-            if (_graphView == null || _graphView.SelectedNodeView == null)
-            {
-                return;
-            }
-return;
-            foreach (var outputPortView in _graphView.SelectedNodeView.OutputPortViews)
-            {
-                if (!outputPortView.edgeConnector.edgeDragHelper.edgeCandidate.isGhostEdge)
-                    continue;
-                
-                Debug.Log("A ghost exists");
-            }
-        }
-        
         /// <summary>
         /// 
         /// </summary>
         /// <param name="nodeView"></param>
         public void OnSelectedNode(JungleNodeView nodeView)
         {
-            _graphView.UpdateSelected(nodeView);
-            _inspectorView.UpdateSelection(nodeView);
+            _graphView?.UpdateSelected(nodeView);
+            _inspectorView?.UpdateSelection(nodeView);
         }
         
         /// <summary>
@@ -177,8 +203,8 @@ return;
         /// </summary>
         public void OnDeselectedNode()
         {
-            _graphView.UpdateSelected(null);
-            _inspectorView.UpdateSelection(null);
+            _graphView?.UpdateSelected(null);
+            _inspectorView?.UpdateSelection(null);
         }
         
         /// <summary>

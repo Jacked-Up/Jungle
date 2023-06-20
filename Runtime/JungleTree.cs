@@ -193,7 +193,7 @@ namespace Jungle
             var i = 0;
             var path = $"{AssetDatabase.GetAssetPath(this)}/{name}_{nodeType.Name}_{i.ToString()}.asset";
             while (AssetDatabase.LoadAssetAtPath(path, typeof(JungleNode)) != null) i++;
-            node.name = $"{name}_{nodeType.Name}_{i.ToString()}";
+            node.name = $"{nodeType.Name}_{i.ToString()}";
             
             // Build node and populate graph view properties
             node.Tree = this;
@@ -245,7 +245,7 @@ namespace Jungle
             var i = 0;
             var path = $"{AssetDatabase.GetAssetPath(this)}/{name}_{original.GetType().Name}_{i.ToString()}.asset";
             while (AssetDatabase.LoadAssetAtPath(path, typeof(JungleNode)) != null) i++;
-            node.name = $"{name}_{original.GetType().Name}_{i.ToString()}";
+            node.name = $"{original.GetType().Name}_{i.ToString()}";
             
             // Build node and populate graph view properties
             node.Tree = this;

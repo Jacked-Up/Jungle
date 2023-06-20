@@ -1,8 +1,8 @@
 {
-  "name": "com.jackedupstudios.jungle",
+  "name": "com.jackedupsoftware.jungle",
   "version": "1.0.0",
   "displayName": "Jungle",
-  "description": "A visual node-based sequencer for easily editing content quickly.",
+  "description": "Visual node-based sequencer.",
   "unity": "2021.3",
   "documentationUrl": "https://www.jackedup.xyz/jungle/docs",
   "author": {
@@ -13,7 +13,6 @@
   "dependencies": {
     "com.unity.ugui": "1.0.0",
     "com.unity.textmeshpro": "3.0.6",
-    "com.unity.timeline": "1.6.5",
-    "com.unity.inputsystem": "1.5.1"
+    "com.unity.timeline": "1.6.5"
   }
 }

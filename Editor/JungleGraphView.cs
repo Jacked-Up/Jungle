@@ -168,7 +168,7 @@ namespace Jungle.Editor
             SelectedNodeView = nodeView;
         }
 
-        private JungleNodeView GetNodeView(JungleNode node)
+        public JungleNodeView GetNodeView(JungleNode node)
         {
             if (node == null)
             {
@@ -257,6 +257,7 @@ namespace Jungle.Editor
                 {
                     JungleEditor = _jungleEditor
                 };
+                _jungleEditor.OnSelectedNode(nodeView);
                 AddElement(nodeView);
                 arg.StopPropagation();
             }

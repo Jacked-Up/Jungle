@@ -120,6 +120,11 @@ namespace Jungle
         public string TitleName => NodeInfo.TitleName;
 
         /// <summary>
+        /// 
+        /// </summary>
+        public string Tooltip => NodeInfo.Tooltip;
+        
+        /// <summary>
         /// Category placement of the node inside the create node window.
         /// </summary>
         public string Category => NodeInfo.Category;
@@ -280,17 +285,22 @@ namespace Jungle
     public class NodeAttribute : Attribute
     {
         /// <summary>
-        /// The name the node goes by
+        /// The name the node goes by.
         /// </summary>
         public string TitleName { get; set; } = "Untitled Node";
 
+        /// <summary>
+        /// Tooltip displayed while hovering over the node.
+        /// </summary>
+        public string Tooltip { get; set; } = string.Empty;
+        
         /// <summary>
         /// ...
         /// </summary>
         public string Category { get; set; } = string.Empty;
 
         /// <summary>
-        /// The color of the node in the visual editor
+        /// The color of the node in the visual editor.
         /// </summary>
         public JungleNode.Color Color { get; set; } = JungleNode.Color.Blue;
 
