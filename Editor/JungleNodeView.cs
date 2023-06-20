@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Jungle.Nodes;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
@@ -20,37 +19,35 @@ namespace Jungle.Editor
         
         public List<Port> OutputPortViews { get; private set; }
 
-        public Action<JungleNodeView> NodeSelectedCallback;
-
-        private static string UIFileAssetPath 
-            => AssetDatabase.GetAssetPath(Resources.Load("JungleNodeView"));
+        public JungleEditor JungleEditor { get; set; }
         
         private float _lastDrawTime = -1f;
 
         #endregion
 
-        public JungleNodeView(JungleNode nodeReference) : base(UIFileAssetPath)
+        public JungleNodeView(JungleNode nodeReference) 
+            : base(AssetDatabase.GetAssetPath(Resources.Load("JungleNodeView")))
         {
             // NEED TO DETECT THIS ERROR
             if (nodeReference == null)
             {
                 return;
             }
-
+            
             // Sets the node object to the reference and returns true if the node reference
             // is of type RootNode
             HandleNodeObject(nodeReference);
-
+            
             // Set color of node in the Jungle Editor
             AddToClassList(nodeReference.NodeColor.ToString().ToLower());
-
+            
             if (nodeReference.GetType() != typeof(StartNode))
             {
                 HandleInputPortViews();
             }
             HandleOutputPortViews();
         }
-
+        
         public void UpdateNodeView()
         {
             UpdateActiveBar();
@@ -79,7 +76,6 @@ namespace Jungle.Editor
                 : nameof(Error).ToUpper();
             
             InputPortView.portName = $"<b><size=10><i>({portTypeName})</i></size> {port.PortName}</b>";
-            
             inputContainer.Add(InputPortView);
         }
 
@@ -96,7 +92,6 @@ namespace Jungle.Editor
                     : nameof(Error).ToUpper();
                 
                 newPortView.portName = $"<b>{port.PortName} <size=10><i>({portTypeName})</i></size></b>";
-
                 OutputPortViews.Add(newPortView);
                 outputContainer.Add(newPortView);
             }
@@ -161,7 +156,19 @@ namespace Jungle.Editor
         public override void OnSelected()
         {
             base.OnSelected();
-            NodeSelectedCallback?.Invoke(this);
+            if (JungleEditor != null)
+            {
+                JungleEditor.OnSelectedNode(this);
+            }
+        }
+        
+        public override void OnUnselected()
+        {
+            base.OnUnselected();
+            if (JungleEditor != null)
+            {
+                JungleEditor.OnDeselectedNode();
+            }
         }
     }
 }

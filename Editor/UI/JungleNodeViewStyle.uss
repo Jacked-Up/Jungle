@@ -36,15 +36,11 @@
     border-bottom-right-radius: 10px;
 }
 
-:hover > #selection-border {
+:hover > #node-border {
     border-left-width: 3px;
     border-right-width: 3px;
-    border-top-width: 3px;
+    border-top-width: 5px;
     border-bottom-width: 3px;
-    border-left-color: rgb(0, 105, 255);
-    border-right-color: rgb(0, 105, 255);
-    border-top-color: rgb(0, 105, 255);
-    border-bottom-color: rgb(0, 105, 255);
 }
 
 :selected > #selection-border {

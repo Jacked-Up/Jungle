@@ -112,17 +112,13 @@ namespace Jungle.Editor
 
             // Graph view ----------------------------------------------------------------------------------------------
             _graphView = rootVisualElement.Q<JungleGraphView>("graph-view");
-            _graphView.OnNodeSelected = nodeView =>
-            {
-                _graphView.SelectedNodeView = nodeView;
-                _inspectorView.UpdateSelection(nodeView);
-            };
             _graphView.Initialize(this, _searchView);
             RepaintGraphView();
         }
 
         private void OnGUI()
         {
+            GetGhostEdgeState();
             RepaintNodeViews();
             Repaint();
         }
@@ -138,7 +134,7 @@ namespace Jungle.Editor
         {
             _graphView?.UpdateNodeViews();
         }
-
+        
         private void RepaintTitle()
         {
             var titleLabel = rootVisualElement.Q<Label>("tree-name-label");
@@ -149,6 +145,41 @@ namespace Jungle.Editor
                 ? $"{EditTree.name[..(MAXIMUM_DISPLAYED_TREE_NAME - 2)]}..." 
                 : EditTree.name;
         }
+
+        private void GetGhostEdgeState()
+        {
+            if (_graphView == null || _graphView.SelectedNodeView == null)
+            {
+                return;
+            }
+return;
+            foreach (var outputPortView in _graphView.SelectedNodeView.OutputPortViews)
+            {
+                if (!outputPortView.edgeConnector.edgeDragHelper.edgeCandidate.isGhostEdge)
+                    continue;
+                
+                Debug.Log("A ghost exists");
+            }
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="nodeView"></param>
+        public void OnSelectedNode(JungleNodeView nodeView)
+        {
+            _graphView.UpdateSelected(nodeView);
+            _inspectorView.UpdateSelection(nodeView);
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        public void OnDeselectedNode()
+        {
+            _graphView.UpdateSelected(null);
+            _inspectorView.UpdateSelection(null);
+        }
         
         /// <summary>
         /// 
@@ -158,10 +189,11 @@ namespace Jungle.Editor
         /// <returns></returns>
         public bool TryAddNodeToGraph(Type nodeType, Vector2 graphPosition)
         {
-            _graphView?.CreateNode(nodeType, graphPosition);
+            var nodeView = _graphView?.CreateNode(nodeType, graphPosition);
+            OnSelectedNode(nodeView);
             return _graphView != null;
         }
-
+        
         /// <summary>
         /// 
         /// </summary>
@@ -173,7 +205,7 @@ namespace Jungle.Editor
                 screenMousePosition - position.position);
             return _graphView.contentViewContainer.WorldToLocal(mousePosition);
         }
-
+        
         /// <summary>
         /// 
         /// </summary>

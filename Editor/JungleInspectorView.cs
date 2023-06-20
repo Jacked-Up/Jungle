@@ -4,6 +4,9 @@ using UnityEngine.UIElements;
 
 namespace Jungle.Editor
 {
+    /// <summary>
+    /// Jungle Inspector View.
+    /// </summary>
     public class JungleInspectorView : VisualElement
     {
         #region Variables
@@ -11,16 +14,24 @@ namespace Jungle.Editor
         private JungleEditor _jungleEditor;
         private UnityEditor.Editor nodeInspector;
         
+        public new class UxmlFactory : UxmlFactory<JungleInspectorView, UxmlTraits> {}
+        
         #endregion
-
+        
+        /// <summary>
+        /// Initialize with Jungle editor.
+        /// </summary>
+        /// <param name="editor">Jungle editor reference.</param>
         public void Initialize(JungleEditor editor)
         {
             _jungleEditor = editor;
-            HandleDrawContainer();
+            RepaintGUIContainer();
         }
         
-        public new class UxmlFactory : UxmlFactory<JungleInspectorView, UxmlTraits> {}
-        
+        /// <summary>
+        /// Repaint inspector view with selected nodes editor.
+        /// </summary>
+        /// <param name="nodeView">Node view reference. Can be null.</param>
         public void UpdateSelection(JungleNodeView nodeView)
         {
             // Create nodes inspector IF possible
@@ -29,10 +40,10 @@ namespace Jungle.Editor
                 nodeInspector = UnityEditor.Editor.CreateEditor(nodeView.NodeObject);
             }
             else nodeInspector = null;
-            HandleDrawContainer();
+            RepaintGUIContainer();
         }
-
-        private void HandleDrawContainer()
+        
+        private void RepaintGUIContainer()
         {
             Clear();
             Add(new IMGUIContainer(() =>
@@ -76,7 +87,7 @@ namespace Jungle.Editor
                 : new Color(0.3f, 0.3f, 0.3f, 0.5f));
             GUILayout.Space(5);
         }
-
+        
         private void DrawInspectorBody()
         {
             if (nodeInspector != null && nodeInspector.target != null)
@@ -90,7 +101,7 @@ namespace Jungle.Editor
                 GUI.enabled = true;
             }
         }
-
+        
         private void DrawInspectorFooter()
         {
             var label = _jungleEditor.rootVisualElement.Q<Label>("status-label");
