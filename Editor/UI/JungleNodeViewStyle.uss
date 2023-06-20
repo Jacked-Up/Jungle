@@ -46,7 +46,7 @@
 :selected > #selection-border {
     border-left-width: 3px;
     border-right-width: 3px;
-    border-top-width: 3px;
+    border-top-width: 5px;
     border-bottom-width: 3px;
 }
 
