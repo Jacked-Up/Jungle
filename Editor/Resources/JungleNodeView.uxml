@@ -8,14 +8,9 @@
                 <ui:VisualElement name="space" style="height: 0; width: 7.5px;" />
                 <ui:VisualElement name="error-icon" style="background-image: resource(&apos;Icons/JungleIssueIcon&apos;); width: 16px; height: 16px; justify-content: center; align-items: auto;" />
             </ui:VisualElement>
-            <ui:VisualElement name="title-button-container">
-                <ui:VisualElement name="collapse-button">
-                    <ui:VisualElement name="icon" />
-                </ui:VisualElement>
-            </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="contents">
-            <ui:VisualElement name="input" style="background-color: rgba(45, 45, 45, 0.39); -unity-text-align: upper-left; -unity-font-style: normal;" />
+            <ui:VisualElement name="input" style="background-color: rgba(0, 0, 0, 0.1); -unity-text-align: upper-left; -unity-font-style: normal;" />
             <ui:VisualElement name="output" />
         </ui:VisualElement>
     </ui:VisualElement>
