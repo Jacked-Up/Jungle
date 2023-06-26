@@ -50,7 +50,6 @@ namespace Jungle.Editor
             {
                 DrawInspectorHeader();
                 DrawInspectorBody();
-                DrawInspectorFooter();
             }));
         }
         
@@ -99,23 +98,6 @@ namespace Jungle.Editor
                 GUI.enabled = false;
                 GUILayout.Label("Select a node to edit...");               
                 GUI.enabled = true;
-            }
-        }
-        
-        private void DrawInspectorFooter()
-        {
-            var label = _jungleEditor.rootVisualElement.Q<Label>("status-label");
-            //var icon = _jungleEditor.rootVisualElement.Q("status-icon");
-
-            if (Application.isPlaying)
-            {
-                //icon.Q<Image>("background-image").image = Resources.Load("Icons/JungleIssueIcon") as Texture;
-                label.text = "Any changes made during play mode will persist.";
-            }
-            else
-            {
-                //icon.Q<Image>("background-image").image = Resources.Load("Icons/JungleIssueIcon") as Texture;
-                label.text = "Validated with no issues.";
             }
         }
     }

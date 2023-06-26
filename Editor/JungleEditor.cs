@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEditor.Experimental.GraphView;
@@ -67,7 +68,14 @@ namespace Jungle.Editor
         private JungleInspectorView _inspectorView;
         private JungleSearchView _searchView;
         private JungleGraphView _graphView;
-        private Edge _lastEdgeCandidate;
+
+        private bool _isDraggingEdge;
+        
+        private DragData? _currentData;
+        private struct DragData
+        {
+            public Port DragFromPort;
+        }
         
         #endregion
 
@@ -104,63 +112,19 @@ namespace Jungle.Editor
             var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(STYLE_SHEET_FILE_PATH);
             rootVisualElement.styleSheets.Add(styleSheet);
             
-            // Inspector view ------------------------------------------------------------------------------------------
             _inspectorView = rootVisualElement.Q<JungleInspectorView>("inspector-view");
             _inspectorView.Initialize(this);
             
-            // Search view ---------------------------------------------------------------------------------------------
             _searchView = CreateInstance<JungleSearchView>();
             _searchView.Initialize(this);
 
-            // Graph view ----------------------------------------------------------------------------------------------
             _graphView = rootVisualElement.Q<JungleGraphView>("graph-view");
             _graphView.Initialize(this, _searchView);
             RepaintGraphView();
         }
-
+        
         private void OnGUI()
         {
-            if (EditTree != null)
-            {
-                var foundLastEdgeCandidate = false;
-                
-                foreach (var node in EditTree.nodes)
-                {
-                    var nodeView = _graphView.GetNodeView(node);
-                    foreach (var port in nodeView.OutputPortViews)
-                    {
-                        if (_lastEdgeCandidate == null && port.edgeConnector.edgeDragHelper.edgeCandidate != null)
-                        {
-                            _lastEdgeCandidate = port.edgeConnector.edgeDragHelper.edgeCandidate;
-                            break;
-                        }
-                        else if (port.edgeConnector.edgeDragHelper.edgeCandidate == _lastEdgeCandidate)
-                        {
-                            foundLastEdgeCandidate = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (foundLastEdgeCandidate)
-                {
-                    Debug.Log("Yessir");
-                    _lastEdgeCandidate = null;
-                }
-                
-            }
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
             RepaintNodeViews();
             Repaint();
         }

@@ -9,7 +9,7 @@ using UnityEngine.UIElements;
 
 namespace Jungle.Editor
 {
-    public class JungleGraphView : GraphView
+    public class JungleGraphView : GraphView, IEdgeConnectorListener
     {
         #region Variables
 
@@ -18,7 +18,7 @@ namespace Jungle.Editor
         public JungleNodeView SelectedNodeView { get; private set; }
 
         private JungleEditor _jungleEditor;
-
+        
         public new class UxmlFactory : UxmlFactory<JungleGraphView, UxmlTraits> {}
         
         #endregion
@@ -32,7 +32,7 @@ namespace Jungle.Editor
             this.AddManipulator(new SelectionDragger());
             this.AddManipulator(new RectangleSelector());
             RegisterCallback<ExecuteCommandEvent>(ExecuteCommandCallback);
-            
+
             var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(JungleEditor.STYLE_SHEET_FILE_PATH);
             styleSheets.Add(styleSheet);
 
@@ -42,7 +42,7 @@ namespace Jungle.Editor
                 AssetDatabase.SaveAssets();
             };
         }
-
+        
         public void Initialize(JungleEditor editor, JungleSearchView searchView)
         {
             _jungleEditor = editor;
@@ -51,7 +51,7 @@ namespace Jungle.Editor
                 SearchWindow.Open(new SearchWindowContext(context.screenMousePosition), searchView);
             };
         }
-
+        
         /// <summary>
         /// 
         /// </summary>
@@ -62,11 +62,11 @@ namespace Jungle.Editor
             {
                 return;
             }
-
+            
             graphViewChanged -= GraphViewChangedCallback;
             DeleteElements(graphElements);
             graphViewChanged += GraphViewChangedCallback;
-
+            
             // Add root node if one does not already exist
             if (jungleTree.nodes == null || jungleTree.nodes.Length == 0)
             {
@@ -88,7 +88,8 @@ namespace Jungle.Editor
                 }
                 var nodeView = new JungleNodeView(node)
                 {
-                    JungleEditor = _jungleEditor
+                    JungleEditor = _jungleEditor,
+                    JungleGraphView = this
                 };
                 AddElement(nodeView);
             }
@@ -281,6 +282,16 @@ namespace Jungle.Editor
                                                                   && other.node != selected.node 
                                                                   && other.portType == selected.portType);
             return compatible.ToList();
+        }
+
+        public void OnDrop(GraphView graphView, Edge edge)
+        {
+            Debug.Log("OnDrop");
+        }
+        
+        public void OnDropOutsidePort(Edge edge, Vector2 position)
+        {
+            Debug.Log("OnDropOutside");
         }
 
         #endregion

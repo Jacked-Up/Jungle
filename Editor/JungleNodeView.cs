@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Jungle.Nodes;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
@@ -20,7 +21,9 @@ namespace Jungle.Editor
         public List<Port> OutputPortViews { get; private set; }
 
         public JungleEditor JungleEditor { get; set; }
-        
+
+        public JungleGraphView JungleGraphView { get; set; }
+
         private float _lastDrawTime = -1f;
 
         #endregion
@@ -93,6 +96,7 @@ namespace Jungle.Editor
                     : nameof(Error).ToUpper();
                 
                 newPortView.portName = $"<b>{port.PortName} <size=10><i>({portTypeName})</i></size></b>";
+                newPortView.AddManipulator(new EdgeConnector<Edge>(JungleGraphView));
                 OutputPortViews.Add(newPortView);
                 outputContainer.Add(newPortView);
             }
@@ -152,6 +156,15 @@ namespace Jungle.Editor
                 position = new Vector2(position.xMin, position.yMin)
             };
             NodeObject.NodeProperties = nodeProperties;
+        }
+        
+        public override Port InstantiatePort(
+            Orientation orientation,
+            Direction direction,
+            Port.Capacity capacity,
+            Type type)
+        {
+            return JunglePortView.Create<Edge>(orientation, direction, capacity, type);
         }
 
         public override void OnSelected()

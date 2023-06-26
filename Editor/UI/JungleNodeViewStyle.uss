@@ -6,9 +6,9 @@
     border-right-width: 2px;
     border-top-width: 5px;
     border-bottom-width: 2px;
-    border-top-left-radius: 10px;
+    border-top-left-radius: 2px;
     border-bottom-left-radius: 10px;
-    border-top-right-radius: 10px;
+    border-top-right-radius: 2px;
     border-bottom-right-radius: 10px;
 }
 
@@ -22,9 +22,9 @@
     top: 0;
     right: 0;
     bottom: 0;
-    border-top-left-radius: 10px;
+    border-top-left-radius: 2px;
     border-bottom-left-radius: 10px;
-    border-top-right-radius: 10px;
+    border-top-right-radius: 2px;
     border-bottom-right-radius: 10px;
 }
 
@@ -40,10 +40,10 @@
     border-right-width: 3px;
     border-top-width: 5px;
     border-bottom-width: 3px;
-    border-left-color: rgba(0, 255, 255, 255);
-    border-right-color: rgba(0, 255, 255, 255);
-    border-top-color: rgba(0, 255, 255, 255);
-    border-bottom-color: rgba(0, 255, 255, 255);
+    border-left-color: rgb(0, 255, 255);
+    border-right-color: rgb(0, 255, 255);
+    border-top-color: rgb(0, 255, 255);
+    border-bottom-color: rgb(0, 255, 255);
 }
 
 .node {

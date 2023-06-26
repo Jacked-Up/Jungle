@@ -1,5 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="project://database/Packages/com.jackedupstudios.jungle/Editor/UI/JungleNodeViewStyle.uss?fileID=7433441132597879392&amp;guid=71737f929a53ffe4cac670416573ced3&amp;type=3#JungleNodeViewStyle" />
+    <Style src="project://database/Packages/com.jackedupsoftware.jungle/Editor/UI/JungleNodeViewStyle.uss?fileID=7433441132597879392&amp;guid=71737f929a53ffe4cac670416573ced3&amp;type=3#JungleNodeViewStyle" />
     <ui:VisualElement name="node-border" style="margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; min-width: 165px; max-width: 400px;">
         <ui:VisualElement name="title" style="margin-left: 10px; margin-right: 10px; margin-top: 5px; margin-bottom: 5px;">
             <ui:VisualElement name="active-bar" picking-mode="Ignore" style="background-color: rgb(255, 217, 0); height: 2px; border-top-left-radius: 5px; border-bottom-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px;" />
