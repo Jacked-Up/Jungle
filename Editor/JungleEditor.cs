@@ -125,6 +125,7 @@ namespace Jungle.Editor
         
         private void OnGUI()
         {
+            RepaintTitle();
             RepaintNodeViews();
             Repaint();
         }
@@ -144,12 +145,24 @@ namespace Jungle.Editor
         private void RepaintTitle()
         {
             var titleLabel = rootVisualElement.Q<Label>("tree-name-label");
-            if (titleLabel == null || EditTree == null) return;
-            // Ensures the name displayed can be no longer than the maximum length
-            // If it is too long, this removes the extra text and adds a "..." bit
-            titleLabel.text = EditTree.name.Length > MAXIMUM_DISPLAYED_TREE_NAME 
-                ? $"{EditTree.name[..(MAXIMUM_DISPLAYED_TREE_NAME - 2)]}..." 
-                : EditTree.name;
+            if (titleLabel != null && EditTree != null)
+            {
+                // Ensures the name displayed can be no longer than the maximum length
+                // If it is too long, this removes the extra text and adds a "..." bit
+                titleLabel.text = EditTree.name.Length > MAXIMUM_DISPLAYED_TREE_NAME 
+                    ? $"{EditTree.name[..(MAXIMUM_DISPLAYED_TREE_NAME - 2)]}..." 
+                    : EditTree.name;
+            }
+            
+            var nodeLabel = rootVisualElement.Q<Label>("node-name-label");
+            if (nodeLabel != null && _graphView.SelectedNodeView != null)
+            {
+                nodeLabel.text = _graphView.SelectedNodeView.NodeObject.name;
+            }
+            else if (nodeLabel != null)
+            {
+                nodeLabel.text = "-";
+            }
         }
 
         /// <summary>

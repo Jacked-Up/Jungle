@@ -20,10 +20,10 @@ namespace Jungle.Editor
                 edgesToDelete = new List<GraphElement>();
                 graphViewChange.edgesToCreate = edgesToCreate;
             }
-       
+            
             public void OnDropOutsidePort(Edge edge, Vector2 position)
             {
-                Debug.Log($"Is of type {edge.output.portType}. At point {position.ToString()}");
+                
             }
             
             public void OnDrop(GraphView graphView, Edge edge)
@@ -52,14 +52,17 @@ namespace Jungle.Editor
                     }
                 }
 
+                edgesToDelete ??= new List<GraphElement>();
                 if (edgesToDelete.Count > 0)
                 {
                     graphView.DeleteElements(edgesToDelete);
                 }
                 if (graphView.graphViewChanged != null)
                 {
+                    edgesToCreate ??= new List<Edge>();
                     edgesToCreate = graphView.graphViewChanged(graphViewChange).edgesToCreate;
                 }
+                edgesToCreate ??= new List<Edge>();
                 foreach (var edgeToCreate in edgesToCreate)
                 {
                     graphView.AddElement(edgeToCreate);

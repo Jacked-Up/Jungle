@@ -35,7 +35,11 @@ namespace Jungle.Editor
 
             var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(JungleEditor.STYLE_SHEET_FILE_PATH);
             styleSheets.Add(styleSheet);
-
+            AddToClassList(EditorGUIUtility.isProSkin
+                ? "dark"
+                : "light"
+            );
+            
             Undo.undoRedoPerformed += () =>
             {
                 UpdateGraphView();

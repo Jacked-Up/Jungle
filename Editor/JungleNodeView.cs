@@ -13,6 +13,8 @@ namespace Jungle.Editor
         #region Variables
         
         private const float MINIMUM_ACTIVE_BAR_TIME = 0.5f; 
+        private string LIGHT_MODE_TEXT_HEX_CODE = "#000000";
+        private string DARK_MODE_TEXT_HEX_CODE = "#FFFFFF";
         
         public JungleNode NodeObject;
 
@@ -40,15 +42,19 @@ namespace Jungle.Editor
             // Sets the node object to the reference and returns true if the node reference
             // is of type RootNode
             HandleNodeObject(nodeReference);
-            
-            // Set color of node in the Jungle Editor
-            AddToClassList(nodeReference.NodeColor.ToString().ToLower());
-            
+
             if (nodeReference.GetType() != typeof(StartNode))
             {
                 HandleInputPortViews();
             }
             HandleOutputPortViews();
+            
+            // Set color of node in the Jungle Editor
+            AddToClassList(nodeReference.NodeColor.ToString().ToLower());
+            AddToClassList(EditorGUIUtility.isProSkin
+                ? "dark"
+                : "light"
+            );
         }
         
         public void UpdateNodeView()
@@ -78,8 +84,11 @@ namespace Jungle.Editor
             var portTypeName = port.PortType != typeof(Error)
                 ? port.PortType.Name
                 : nameof(Error).ToUpper();
-            
-            InputPortView.portName = $"<b><size=10><i>({portTypeName})</i></size> {port.PortName}</b>";
+
+            InputPortView.portName = 
+                $"<color={(EditorGUIUtility.isProSkin ? DARK_MODE_TEXT_HEX_CODE : LIGHT_MODE_TEXT_HEX_CODE)}>";
+            InputPortView.portName += $"<b><size=10><i>({portTypeName})</i></size> {port.PortName}</b>";
+            InputPortView.portName += "</color>";
             inputContainer.Add(InputPortView);
         }
 
@@ -88,14 +97,18 @@ namespace Jungle.Editor
             OutputPortViews = new List<Port>();
             foreach (var port in NodeObject.OutputInfo)
             {
-                var newPortView = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Multi,
-                    port.PortType);
+                var newPortView = InstantiatePort(Orientation.Horizontal, Direction.Output, 
+                    Port.Capacity.Multi, port.PortType);
 
                 var portTypeName = port.PortType != typeof(Error)
                     ? port.PortType.Name
                     : nameof(Error).ToUpper();
                 
-                newPortView.portName = $"<b>{port.PortName} <size=10><i>({portTypeName})</i></size></b>";
+                newPortView.portName = 
+                    $"<color={(EditorGUIUtility.isProSkin ? DARK_MODE_TEXT_HEX_CODE : LIGHT_MODE_TEXT_HEX_CODE)}>";
+                newPortView.portName += $"<b>{port.PortName} <size=10><i>({portTypeName})</i></size></b>";
+                newPortView.portName += "</color>";
+                
                 newPortView.AddManipulator(new EdgeConnector<Edge>(JungleGraphView));
                 OutputPortViews.Add(newPortView);
                 outputContainer.Add(newPortView);
@@ -105,6 +118,11 @@ namespace Jungle.Editor
         private void UpdateActiveBar()
         {
             var activeBarElement = mainContainer.Q<VisualElement>("active-bar");
+            if (activeBarElement == null)
+            {
+                return;
+                //throw new NullReferenceException("Jungle Node View is missing active bar element");
+            }
             
             // The node cannot be active while in play mode
             if (!Application.isPlaying)
@@ -131,12 +149,16 @@ namespace Jungle.Editor
         private void UpdateErrorIcon()
         {
             var element = mainContainer.Q<VisualElement>("error-icon");
+            if (element == null)
+            {
+                return;
+            }
+            
             if (Application.isPlaying)
             {
                 element.visible = false;
                 return;
             }
-            
             element.visible = true;
         }
 

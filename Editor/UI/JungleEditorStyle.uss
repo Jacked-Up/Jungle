@@ -1,6 +1,29 @@
-GridBackground {
-    --grid-background-color: rgb(0, 28, 80);
-    --line-color: rgba(46, 68, 175, 0.1);
+.dark GridBackground {
+    --grid-background-color: rgb(47, 47, 47);
+    --line-color: rgba(100, 100, 100, 0.1);
     --thick-line-color: rgba(0, 0, 0, 0);
     --spacing: 10;
+}
+
+.light GridBackground {
+    --grid-background-color: rgb(171, 171, 171);
+    --line-color: rgba(234, 234, 234, 0.19);
+    --thick-line-color: rgba(0, 0, 0, 0);
+    --spacing: 10;
+}
+
+.dark #tree-name-label {
+    color: rgba(255, 255, 255, 0.31);
+}
+
+.light #tree-name-label {
+    color: rgba(0, 0, 0, 0.31);
+}
+
+.dark #node-name-label {
+    color: rgba(255, 255, 255, 0.31);
+}
+
+.light #node-name-label {
+    color: rgba(0, 0, 0, 0.31);
 }
