@@ -1,15 +1,15 @@
 .dark GridBackground {
-    --grid-background-color: rgb(47, 47, 47);
-    --line-color: rgba(100, 100, 100, 0.1);
+    --grid-background-color: rgb(43, 44, 45);
+    --line-color: rgba(96, 97, 98, 0.1);
     --thick-line-color: rgba(0, 0, 0, 0);
-    --spacing: 10;
+    --spacing: 12.5;
 }
 
 .light GridBackground {
     --grid-background-color: rgb(171, 171, 171);
     --line-color: rgba(234, 234, 234, 0.19);
     --thick-line-color: rgba(0, 0, 0, 0);
-    --spacing: 10;
+    --spacing: 12.5;
 }
 
 .dark #tree-name-label {

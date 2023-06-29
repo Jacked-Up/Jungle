@@ -13,8 +13,8 @@ namespace Jungle.Editor
         #region Variables
         
         private const float MINIMUM_ACTIVE_BAR_TIME = 0.5f; 
-        private string LIGHT_MODE_TEXT_HEX_CODE = "#000000";
-        private string DARK_MODE_TEXT_HEX_CODE = "#FFFFFF";
+        private string LIGHT_MODE_TEXT_HEX_CODE = "#222222";
+        private string DARK_MODE_TEXT_HEX_CODE = "#D4D4D4";
         
         public JungleNode NodeObject;
 

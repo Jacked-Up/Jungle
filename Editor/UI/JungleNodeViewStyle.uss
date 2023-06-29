@@ -1,18 +1,51 @@
-#node-border {
-    -unity-text-outline-width: 0;
-    border-left-width: 0;
-    border-right-width: 2px;
-    border-top-width: 0;
-    border-bottom-width: 2px;
-    max-width: 400px;
-    min-width: 175px;
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
+.node {
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
-.dark #node-border {
+.red #accent {
+    background-color: rgb(171, 0, 0);
+}
+
+.orange #accent {
+    background-color: rgb(255, 133, 0);
+}
+
+.yellow #accent {
+    background-color: rgb(207, 166, 0);
+}
+
+.green #accent {
+    background-color: rgb(0, 204, 74);
+}
+
+.teal #accent {
+    background-color: rgb(0, 204, 156);
+}
+
+.blue #accent {
+    background-color: rgb(0, 105, 255);
+}
+
+.purple #accent {
+    background-color: rgb(179, 0, 255);
+}
+
+.violet #accent {
+    background-color: rgb(111, 0, 55);
+}
+
+.grey #accent {
+    background-color: rgb(132, 132, 132);
+}
+
+.black #accent {
+    background-color: rgb(16, 16, 16);
+}
+
+.dark #node {
     border-left-color: rgb(36, 36, 36);
     border-right-color: rgb(36, 36, 36);
     border-top-color: rgb(36, 36, 36);
@@ -21,89 +54,25 @@
     color: rgb(212, 212, 212);
 }
 
-.light #node-border {
-    border-left-color: rgb(78, 79, 82);
-    border-right-color: rgb(78, 79, 82);
-    border-top-color: rgb(78, 79, 82);
-    border-bottom-color: rgb(78, 79, 82);
+.light #node {
+    border-left-color: rgb(138, 140, 144);
+    border-right-color: rgb(138, 140, 144);
+    border-top-color: rgb(138, 140, 144);
+    border-bottom-color: rgb(138, 140, 144);
     background-color: rgb(207, 207, 207);
     color: rgb(34, 34, 34);
 }
 
-#selection-border {
-    border-left-width: 2px;
-    border-right-width: 2px;
-    border-top-width: 6px;
-    border-bottom-width: 2px;
-    border-top-left-radius: 2px;
-    border-bottom-left-radius: 2px;
-    border-top-right-radius: 2px;
-    border-bottom-right-radius: 2px;
-    border-left-color: rgba(0, 0, 0, 0);
-    border-right-color: rgba(0, 0, 0, 0);
-    border-top-color: rgba(0, 0, 0, 0);
-    border-bottom-color: rgba(0, 0, 0, 0);
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    position: absolute;
-}
-
-:hover > #node-border {
+:hover > #node {
     border-left-color: rgb(185, 185, 185);
     border-right-color: rgb(185, 185, 185);
     border-top-color: rgb(185, 185, 185);
     border-bottom-color: rgb(185, 185, 185);
 }
 
-:selected > #selection-border {
-    border-left-color: rgb(0, 255, 244);
-    border-right-color: rgb(0, 255, 244);
-    border-top-color: rgb(0, 255, 244);
-    border-bottom-color: rgb(0, 255, 244);
-    border-left-width: 3px;
-    border-right-width: 3px;
-    border-top-width: 3px;
-    border-bottom-width: 3px;
-}
-
-.red #color-accent {
-    background-color: rgb(171, 0, 0);
-}
-
-.orange #color-accent {
-    background-color: rgb(255, 133, 0);
-}
-
-.yellow #color-accent {
-    background-color: rgb(207, 166, 0);
-}
-
-.green #color-accent {
-    background-color: rgb(0, 204, 74);
-}
-
-.teal #color-accent {
-    background-color: rgb(0, 204, 156);
-}
-
-.blue #color-accent {
-    background-color: rgb(0, 105, 255);
-}
-
-.purple #color-accent {
-    background-color: rgb(179, 0, 255);
-}
-
-.violet #color-accent {
-    background-color: rgb(111, 0, 55);
-}
-
-.grey #color-accent {
-    background-color: rgb(132, 132, 132);
-}
-
-.black #color-accent {
-    background-color: rgb(16, 16, 16);
+:selected > #node {
+    border-left-color: rgb(85, 188, 217);
+    border-right-color: rgb(85, 188, 217);
+    border-top-color: rgb(85, 188, 217);
+    border-bottom-color: rgb(85, 188, 217);
 }

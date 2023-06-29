@@ -1,19 +1,14 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Packages/com.jackedupsoftware.jungle/Editor/UI/JungleNodeViewStyle.uss?fileID=7433441132597879392&amp;guid=71737f929a53ffe4cac670416573ced3&amp;type=3#JungleNodeViewStyle" />
-    <ui:VisualElement name="node-border" picking-mode="Ignore">
-        <ui:VisualElement name="color-accent" style="height: 5px;" />
-        <ui:VisualElement name="title" style="margin-left: 5px; margin-right: 5px; margin-top: 3px; margin-bottom: 0;">
-            <ui:VisualElement name="title-bar" style="flex-direction: row;">
-                <ui:Label tabindex="-1" text="My Node" display-tooltip-when-elided="true" name="title-label" style="-unity-font-style: bold; font-size: 16px; align-self: stretch; margin-bottom: 0; padding-bottom: 0; padding-top: 0; padding-right: 0; padding-left: 0; justify-content: space-around; -unity-text-align: middle-left;" />
-                <ui:VisualElement name="space" style="height: 0; width: 5px;" />
-                <ui:VisualElement name="error-icon" style="background-image: resource(&apos;Icons/JungleIssueIcon&apos;); width: 16px; height: 16px; justify-content: center; align-items: auto;" />
-            </ui:VisualElement>
-            <ui:VisualElement name="active-bar" picking-mode="Ignore" style="background-color: rgb(255, 217, 0); height: 3px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; margin-top: 2px; margin-bottom: 2px;" />
+    <ui:VisualElement name="glow" picking-mode="Ignore" style="position: absolute; left: -50px; top: -50px; right: -50px; bottom: -50px; background-image: resource(&apos;Icons/nodeBloomBackground&apos;); -unity-background-image-tint-color: rgb(255, 177, 0);" />
+    <ui:VisualElement name="node" picking-mode="Ignore" style="min-width: 150px; min-height: 50px; border-left-width: 0; border-right-width: 2px; border-top-width: 0; border-bottom-width: 2px; max-width: 300px; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0;">
+        <ui:VisualElement name="accent" style="height: 5px;" />
+        <ui:VisualElement name="header" style="margin-left: 5px; margin-right: 5px; margin-top: 3px; margin-bottom: 3px; flex-direction: row; -unity-text-align: upper-center;">
+            <ui:Label tabindex="-1" display-tooltip-when-elided="true" name="title-label" style="-unity-font-style: bold; font-size: 16px; align-self: stretch; justify-content: space-around; padding-right: 5px; padding-left: 0; max-width: 270px; flex-wrap: wrap;" />
         </ui:VisualElement>
         <ui:VisualElement name="contents">
             <ui:VisualElement name="input" style="background-color: rgba(0, 0, 0, 0.1); -unity-text-align: upper-left; -unity-font-style: normal;" />
             <ui:VisualElement name="output" />
         </ui:VisualElement>
     </ui:VisualElement>
-    <ui:VisualElement name="selection-border" picking-mode="Ignore" />
 </ui:UXML>
