@@ -310,6 +310,8 @@ namespace Jungle
             node.RemoveConnection(disconnect, portIndex);
         }
         
+        public JungleTreeEditorData editorData;
+        
         public delegate void JungleTreeValidateCallback();
         public event JungleTreeValidateCallback OnJungleTreeValidate;
         private void OnValidate()
@@ -372,7 +374,7 @@ namespace Jungle
     
 #if UNITY_EDITOR
     [CustomEditor(typeof(JungleTree))]
-    public class TreeEditor : Editor
+    public class JungleTreeEditor : Editor
     {
         #region Variables
 
@@ -476,5 +478,12 @@ namespace Jungle
             Repaint();
         }
     }
+
+    [Serializable]
+    public struct JungleTreeEditorData
+    {
+        public Vector3 lastViewPosition;
+    }
+    
 #endif
 }

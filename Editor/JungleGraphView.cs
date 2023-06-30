@@ -123,6 +123,9 @@ namespace Jungle.Editor
                     }
                 }
             }
+
+            // The view transform is the graph view "camera"
+            viewTransform.position = jungleTree.editorData.lastViewPosition;
         }
         
         /// <summary>
@@ -141,6 +144,12 @@ namespace Jungle.Editor
                 if (node == null) continue;
                 GetNodeView(node)?.UpdateNodeView();
             }
+            
+            // The view transform is the graph view "camera"
+            jungleTree.editorData = new JungleTreeEditorData
+            {
+                lastViewPosition = viewTransform.position
+            };
         }
         
         /// <summary>

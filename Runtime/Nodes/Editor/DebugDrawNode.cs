@@ -8,7 +8,7 @@ namespace Jungle.Nodes.Editor
     [Node(
         TitleName = "Debug Draw",
         Category = "Editor", 
-        Color = Color.Grey,
+        Color = Color.White,
         InputPortName = "Draw"
     )]
     public class DebugDrawNode : JungleNode

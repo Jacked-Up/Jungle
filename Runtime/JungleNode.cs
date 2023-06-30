@@ -58,10 +58,12 @@ namespace Jungle
             Yellow,
             Green,
             Teal,
+            Cyan,
             Blue,
             Purple,
+            Pink,
             Violet,
-            Grey,
+            White,
             Black
         }
         

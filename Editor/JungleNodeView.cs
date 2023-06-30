@@ -117,7 +117,7 @@ namespace Jungle.Editor
 
         private void UpdateActiveBar()
         {
-            var activeBarElement = mainContainer.Q<VisualElement>("active-bar");
+            var activeBarElement = mainContainer.Q<VisualElement>("glow");
             if (activeBarElement == null)
             {
                 return;

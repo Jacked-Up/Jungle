@@ -6,7 +6,7 @@
 }
 
 .red #accent {
-    background-color: rgb(171, 0, 0);
+    background-color: rgb(220, 19, 19);
 }
 
 .orange #accent {
@@ -14,7 +14,7 @@
 }
 
 .yellow #accent {
-    background-color: rgb(207, 166, 0);
+    background-color: rgb(217, 190, 18);
 }
 
 .green #accent {
@@ -22,7 +22,11 @@
 }
 
 .teal #accent {
-    background-color: rgb(0, 204, 156);
+    background-color: rgb(21, 222, 171);
+}
+
+.cyan #accent {
+    background-color: rgb(0, 234, 255);
 }
 
 .blue #accent {
@@ -33,12 +37,16 @@
     background-color: rgb(179, 0, 255);
 }
 
-.violet #accent {
-    background-color: rgb(111, 0, 55);
+.pink #accent {
+    background-color: rgb(255, 0, 234);
 }
 
-.grey #accent {
-    background-color: rgb(132, 132, 132);
+.violet #accent {
+    background-color: rgb(133, 3, 76);
+}
+
+.white #accent {
+    background-color: rgb(255, 255, 255);
 }
 
 .black #accent {
@@ -71,8 +79,8 @@
 }
 
 :selected > #node {
-    border-left-color: rgb(85, 188, 217);
-    border-right-color: rgb(85, 188, 217);
-    border-top-color: rgb(85, 188, 217);
-    border-bottom-color: rgb(85, 188, 217);
+    border-left-color: rgb(85, 178, 217);
+    border-right-color: rgb(85, 178, 217);
+    border-top-color: rgb(85, 178, 217);
+    border-bottom-color: rgb(85, 178, 217);
 }

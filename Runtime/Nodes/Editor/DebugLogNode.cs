@@ -6,7 +6,7 @@ namespace Jungle.Nodes.Editor
     [Node(
         TitleName = "Debug Log",
         Category = "Editor", 
-        Color = Color.Grey
+        Color = Color.White
     )]
     public class DebugLogNode : JungleNode
     {

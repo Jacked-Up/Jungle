@@ -125,17 +125,6 @@ namespace Jungle.Editor
         
         private void OnGUI()
         {
-            if (EditTree.PlayTime > 0f)
-            {
-                //_graphView?.SetEnabled(false);
-                //_inspectorView?.SetEnabled(false);
-            }
-            else
-            {
-                //_graphView?.SetEnabled(true);
-                //_inspectorView?.SetEnabled(true);
-            }
-            
             RepaintTitle();
             RepaintNodeViews();
             Repaint();
@@ -150,7 +139,7 @@ namespace Jungle.Editor
 
         private void RepaintNodeViews()
         {
-            _graphView?.UpdateNodeViews();
+            _graphView.UpdateNodeViews();
         }
         
         private void RepaintTitle()
