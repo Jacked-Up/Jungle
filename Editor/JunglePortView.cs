@@ -14,6 +14,9 @@ namespace Jungle.Editor
             private List<Edge> edgesToCreate;
             private List<GraphElement> edgesToDelete;
        
+            public event DropEdgeInEmptySpace OnDropEdgeInEmptySpace;
+            public delegate void DropEdgeInEmptySpace(Type outputType, Vector2 dropPosition);
+            
             public JungleEdgeConnectorListener()
             {
                 edgesToCreate = new List<Edge>();
@@ -23,7 +26,11 @@ namespace Jungle.Editor
             
             public void OnDropOutsidePort(Edge edge, Vector2 position)
             {
-                Debug.Log("Yuh");
+                if (edge.output == null)
+                {
+                    return;
+                }
+                OnDropEdgeInEmptySpace?.Invoke(edge.output.portType, position);
             }
             
             public void OnDrop(GraphView graphView, Edge edge)
@@ -71,7 +78,7 @@ namespace Jungle.Editor
                 }
             }
         }
-        
+
         protected JunglePortView(
             Orientation portOrientation,
             Direction portDirection,

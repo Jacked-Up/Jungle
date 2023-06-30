@@ -102,7 +102,8 @@ namespace Jungle.Editor
         public bool OnSelectEntry(SearchTreeEntry searchTreeEntry, SearchWindowContext context)
         {
             var mousePosition = _jungleEditor.GetMousePosition(context.screenMousePosition);
-            return _jungleEditor.TryAddNodeToGraph(searchTreeEntry.userData.GetType(), mousePosition);
+            //return _jungleEditor.TryAddNodeToGraph(searchTreeEntry.userData.GetType(), mousePosition);
+            return true;
         }
     }
 }

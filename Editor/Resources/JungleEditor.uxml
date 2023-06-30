@@ -8,9 +8,9 @@
         </ui:VisualElement>
         <ui:VisualElement name="right-panel" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0);">
             <Jungle.Editor.JungleGraphView focusable="true" name="graph-view" style="flex-grow: 1; transition-duration: 1s;">
-                <ui:VisualElement name="title-labels">
-                    <ui:Label tabindex="-1" display-tooltip-when-elided="false" enable-rich-text="false" name="tree-name-label" style="font-size: 28px; -unity-font-style: bold; margin-left: 20px; margin-top: 20px; margin-bottom: 0; margin-right: 20px; justify-content: center; align-self: stretch; -unity-text-align: middle-left;" />
-                    <ui:Label tabindex="-1" display-tooltip-when-elided="false" name="node-name-label" enable-rich-text="false" style="font-size: 12px; margin-left: 20px; margin-top: 0; margin-bottom: 0; margin-right: 20px; justify-content: center; align-self: stretch; -unity-text-align: middle-left;" />
+                <ui:VisualElement name="title-labels" picking-mode="Ignore">
+                    <ui:Label display-tooltip-when-elided="false" enable-rich-text="false" name="tree-name-label" picking-mode="Ignore" text="Jungle Tree Title" style="font-size: 30px; -unity-font-style: bold; margin-left: 20px; margin-top: 20px; margin-bottom: 0; margin-right: 20px; justify-content: center; align-self: stretch;" />
+                    <ui:Label display-tooltip-when-elided="false" name="node-name-label" enable-rich-text="false" picking-mode="Ignore" text="Node title 1\nNode title 2\nNode title 3\nNode title 4" style="margin-left: 20px; margin-top: 0; margin-bottom: 0; margin-right: 20px; justify-content: center; align-self: stretch;" />
                 </ui:VisualElement>
             </Jungle.Editor.JungleGraphView>
         </ui:VisualElement>

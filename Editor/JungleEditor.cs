@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -95,11 +94,11 @@ namespace Jungle.Editor
             }
             var window = GetWindow<JungleEditor>();
             window.EditTree = Selection.activeObject as JungleTree;
-            window.RepaintGraphView();
             window._inspectorView.UpdateSelection(null);
+            window.RepaintGraphView();
             return true;
         }
-
+        
         private void CreateGUI()
         {
             JungleTutorials.TryShowEditorTutorial();
@@ -107,18 +106,18 @@ namespace Jungle.Editor
             var jungleEditorFilePath = AssetDatabase.GetAssetPath(Resources.Load("JungleEditor"));
             var visualTreeAsset = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(jungleEditorFilePath);
             visualTreeAsset.CloneTree(rootVisualElement);
-
+            
             var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(STYLE_SHEET_FILE_PATH);
             rootVisualElement.styleSheets.Add(styleSheet);
             
             _inspectorView = rootVisualElement.Q<JungleInspectorView>("inspector-view");
-            _inspectorView.Initialize(this);
+            _inspectorView.Initialize();
             
             _searchView = CreateInstance<JungleSearchView>();
             _searchView.Initialize(this);
-
+            
             _graphView = rootVisualElement.Q<JungleGraphView>("graph-view");
-            _graphView.Initialize(this, _searchView);
+            _graphView.Initialize(this, _inspectorView, _searchView);
             RepaintGraphView();
         }
         
@@ -154,9 +153,22 @@ namespace Jungle.Editor
             }
             
             var nodeLabel = rootVisualElement.Q<Label>("node-name-label");
-            if (nodeLabel != null && _graphView.SelectedNodeView != null)
+            if (nodeLabel != null && _graphView.SelectedNodeViews.Count > 0)
             {
-                nodeLabel.text = _graphView.SelectedNodeView.NodeObject.name;
+                nodeLabel.text = string.Empty;
+                for (var i = 0; i < 4; i++)
+                {
+                    if (i + 1 == 4 && _graphView.SelectedNodeViews.Count > 4)
+                    {
+                        nodeLabel.text += $"{_graphView.SelectedNodeViews.Count - 3} more selected";
+                        break;
+                    }
+                    if (i > _graphView.SelectedNodeViews.Count - 1)
+                    {
+                        break;
+                    }
+                    nodeLabel.text += $"{_graphView.SelectedNodeViews[i].Node.name}\n";
+                }
             }
             else if (nodeLabel != null)
             {
@@ -164,25 +176,7 @@ namespace Jungle.Editor
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="nodeView"></param>
-        public void OnSelectedNode(JungleNodeView nodeView)
-        {
-            _graphView?.UpdateSelected(nodeView);
-            _inspectorView?.UpdateSelection(nodeView);
-        }
-        
-        /// <summary>
-        /// 
-        /// </summary>
-        public void OnDeselectedNode()
-        {
-            _graphView?.UpdateSelected(null);
-            _inspectorView?.UpdateSelection(null);
-        }
-        
+        /*
         /// <summary>
         /// 
         /// </summary>
@@ -195,6 +189,7 @@ namespace Jungle.Editor
             OnSelectedNode(nodeView);
             return _graphView != null;
         }
+        */
         
         /// <summary>
         /// 

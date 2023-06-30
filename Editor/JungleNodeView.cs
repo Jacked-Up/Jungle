@@ -16,18 +16,18 @@ namespace Jungle.Editor
         private string LIGHT_MODE_TEXT_HEX_CODE = "#222222";
         private string DARK_MODE_TEXT_HEX_CODE = "#D4D4D4";
         
-        public JungleNode NodeObject;
+        public JungleNode Node;
 
         public Port InputPortView { get; private set; }
         
         public List<Port> OutputPortViews { get; private set; }
 
-        public JungleEditor JungleEditor { get; set; }
-
-        public JungleGraphView JungleGraphView { get; set; }
+        public event SelectionCallback OnNodeSelected;
+        public event SelectionCallback OnNodeUnselected;
+        public delegate void SelectionCallback(JungleNodeView context);
 
         private float _lastDrawTime = -1f;
-
+        
         #endregion
 
         public JungleNodeView(JungleNode nodeReference) 
@@ -65,7 +65,7 @@ namespace Jungle.Editor
         
         private void HandleNodeObject(JungleNode reference)
         {
-            NodeObject = reference;
+            Node = reference;
             title = reference.TitleName;
             tooltip = reference.Tooltip;
             viewDataKey = reference.NodeProperties.guid;
@@ -76,7 +76,7 @@ namespace Jungle.Editor
 
         private void HandleInputPortViews()
         {
-            var port = NodeObject.InputInfo;
+            var port = Node.InputInfo;
             
             InputPortView = InstantiatePort(Orientation.Horizontal, Direction.Input,
                 Port.Capacity.Multi, port.PortType);
@@ -95,7 +95,7 @@ namespace Jungle.Editor
         private void HandleOutputPortViews()
         {
             OutputPortViews = new List<Port>();
-            foreach (var port in NodeObject.OutputInfo)
+            foreach (var port in Node.OutputInfo)
             {
                 var newPortView = InstantiatePort(Orientation.Horizontal, Direction.Output, 
                     Port.Capacity.Multi, port.PortType);
@@ -132,7 +132,7 @@ namespace Jungle.Editor
             
             // This is so that any nodes that finish execution immediately will still visualize
             // when they're active for a set period of time
-            if (_lastDrawTime == -1f && NodeObject.IsRunning)
+            if (_lastDrawTime == -1f && Node.IsRunning)
             {
                 _lastDrawTime = (float)EditorApplication.timeSinceStartup;
                 activeBarElement.visible = true;
@@ -163,20 +163,20 @@ namespace Jungle.Editor
 
         public override void SetPosition(Rect position)
         {
-            if (NodeObject == null)
+            if (Node == null)
             {
                 return;
             }
             
             base.SetPosition(position);
-            Undo.RecordObject(NodeObject, $"Set {NodeObject.name} position");
+            Undo.RecordObject(Node, $"Set {Node.name} position");
             var nodeProperties = new NodeProperties
             {
-                guid = NodeObject.NodeProperties.guid,
-                comments = NodeObject.NodeProperties.comments,
+                guid = Node.NodeProperties.guid,
+                comments = Node.NodeProperties.comments,
                 position = new Vector2(position.xMin, position.yMin)
             };
-            NodeObject.NodeProperties = nodeProperties;
+            Node.NodeProperties = nodeProperties;
         }
         
         public override Port InstantiatePort(
@@ -191,19 +191,13 @@ namespace Jungle.Editor
         public override void OnSelected()
         {
             base.OnSelected();
-            if (JungleEditor != null)
-            {
-                JungleEditor.OnSelectedNode(this);
-            }
+            OnNodeSelected?.Invoke(this);
         }
         
         public override void OnUnselected()
         {
             base.OnUnselected();
-            if (JungleEditor != null)
-            {
-                JungleEditor.OnDeselectedNode();
-            }
+            OnNodeUnselected?.Invoke(this);
         }
     }
 }

@@ -15,14 +15,23 @@ namespace Jungle.Editor
 
         private readonly Vector2 DEFAULT_START_NODE_POSITION = new(100, 120);
         
-        public JungleNodeView SelectedNodeView { get; private set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public List<JungleNodeView> SelectedNodeViews
+        {
+            get;
+            private set;
+        } = new();
 
+        private JungleInspectorView _inspectorView;
+        
         private JungleEditor _jungleEditor;
         
         public new class UxmlFactory : UxmlFactory<JungleGraphView, UxmlTraits> {}
         
         #endregion
-
+        
         public JungleGraphView()
         {
             Insert(0, new GridBackground());
@@ -31,7 +40,7 @@ namespace Jungle.Editor
             this.AddManipulator(new ContentDragger());
             this.AddManipulator(new SelectionDragger());
             this.AddManipulator(new RectangleSelector());
-            RegisterCallback<ExecuteCommandEvent>(ExecuteCommandCallback);
+            //RegisterCallback<ExecuteCommandEvent>(ExecuteCommandCallback);
 
             var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(JungleEditor.STYLE_SHEET_FILE_PATH);
             styleSheets.Add(styleSheet);
@@ -47,9 +56,10 @@ namespace Jungle.Editor
             };
         }
         
-        public void Initialize(JungleEditor editor, JungleSearchView searchView)
+        public void Initialize(JungleEditor editor, JungleInspectorView inspectorView, JungleSearchView searchView)
         {
             _jungleEditor = editor;
+            _inspectorView = inspectorView;
             nodeCreationRequest = context =>
             {
                 SearchWindow.Open(new SearchWindowContext(context.screenMousePosition), searchView);
@@ -90,11 +100,7 @@ namespace Jungle.Editor
                 {
                     continue;
                 }
-                var nodeView = new JungleNodeView(node)
-                {
-                    JungleEditor = _jungleEditor,
-                    JungleGraphView = this
-                };
+                var nodeView = new JungleNodeView(node);
                 AddElement(nodeView);
             }
             foreach (var node in jungleTree.nodes)
@@ -103,17 +109,20 @@ namespace Jungle.Editor
                 // This is a case the only occurs when the nodes
                 // script has been deleted
                 if (nodeView == null) continue;
+
+                nodeView.OnNodeSelected += NodeSelectedCallback;
+                nodeView.OnNodeUnselected += NodeUnselectedCallback;
                 
                 for (var i = 0; i < nodeView.OutputPortViews.Count; i++)
                 {
                     // If this condition is met, it means the node has no connections
                     // Therefore it can be safely skipped
-                    if (nodeView.OutputPortViews.Count != nodeView.NodeObject.OutputPorts.Length)
+                    if (nodeView.OutputPortViews.Count != nodeView.Node.OutputPorts.Length)
                     {
                         continue;
                     }
                     var outputPortView = nodeView.OutputPortViews[i];
-                    var outputPort = nodeView.NodeObject.OutputPorts[i];
+                    var outputPort = nodeView.Node.OutputPorts[i];
                     foreach (var connection in outputPort.connections)
                     {
                         var connectionView = GetNodeView(connection);
@@ -161,22 +170,10 @@ namespace Jungle.Editor
             {
                 return null;
             }
-            
-            var nodeView = new JungleNodeView(jungleTree.CreateNode(nodeType, position))
-            {
-                JungleEditor = _jungleEditor
-            };
+
+            var nodeView = new JungleNodeView(jungleTree.CreateNode(nodeType, position));
             AddElement(nodeView);
             return nodeView;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="nodeView"></param>
-        public void UpdateSelected(JungleNodeView nodeView)
-        {
-            SelectedNodeView = nodeView;
         }
 
         public JungleNodeView GetNodeView(JungleNode node)
@@ -189,6 +186,39 @@ namespace Jungle.Editor
             return nodeView as JungleNodeView;
         }
 
+        private void NodeSelectedCallback(JungleNodeView selected)
+        {
+            SelectedNodeViews ??= new List<JungleNodeView>();
+            if (SelectedNodeViews.Contains(selected))
+            {
+                return;
+            }
+            SelectedNodeViews.Add(selected);
+            _inspectorView.UpdateSelection(selected);
+        }
+        
+        private void NodeUnselectedCallback(JungleNodeView unselected)
+        {
+            SelectedNodeViews ??= new List<JungleNodeView>();
+            if (!SelectedNodeViews.Contains(unselected))
+            {
+                return;
+            }
+            SelectedNodeViews.Remove(unselected);
+            
+            // If no nodes views are selected, clear the node inspector
+            if (SelectedNodeViews.Count == 0)
+            {
+                _inspectorView.UpdateSelection(null);
+            }
+            // If the currently inspected node is the node that has been deselected,
+            // select the last node in the selection list
+            else if (_inspectorView.InspectingNode == unselected.Node)
+            {
+                _inspectorView.UpdateSelection(SelectedNodeViews[^1]);
+            }
+        }
+        
         #region Editor Inheritance
 
         private GraphViewChange GraphViewChangedCallback(GraphViewChange graphViewChange)
@@ -207,9 +237,9 @@ namespace Jungle.Editor
                 {
                     if (element is JungleNodeView nodeView)
                     {
-                        if (nodeView.NodeObject.GetType() != typeof(StartNode))
+                        if (nodeView.Node.GetType() != typeof(StartNode))
                         {
-                            jungleTree.DeleteNode(nodeView.NodeObject);
+                            jungleTree.DeleteNode(nodeView.Node);
                         }
                         else rootNodeView = element;
                     }
@@ -218,7 +248,7 @@ namespace Jungle.Editor
                         if (edge.output.node is JungleNodeView parentView && edge.input.node is JungleNodeView childView)
                         {
                             var index = (byte)parentView.OutputPortViews.IndexOf(edge.output);
-                            jungleTree.DisconnectNodes(parentView.NodeObject, childView.NodeObject, index);
+                            jungleTree.DisconnectNodes(parentView.Node, childView.Node, index);
                         }
                     }
                 }
@@ -237,7 +267,7 @@ namespace Jungle.Editor
                     if (edge.output.node is JungleNodeView parentView && edge.input.node is JungleNodeView childView)
                     {
                         var nodeIndex = (byte)parentView.OutputPortViews.ToList().IndexOf(edge.output);
-                        jungleTree.ConnectNodes(parentView.NodeObject, childView.NodeObject, nodeIndex);
+                        jungleTree.ConnectNodes(parentView.Node, childView.Node, nodeIndex);
                     }
                 }
             }
@@ -245,6 +275,7 @@ namespace Jungle.Editor
             return graphViewChange;
         }
 
+        /*
         private void ExecuteCommandCallback(ExecuteCommandEvent arg)
         {
             var jungleTree = _jungleEditor.EditTree;
@@ -260,14 +291,11 @@ namespace Jungle.Editor
             if (arg.commandName == "Duplicate")
             {
                 // Duplicating the root node is forbidden
-                if (SelectedNodeView.NodeObject is StartNode)
+                if (SelectedNodeView.Node is StartNode)
                 {
                     return;
                 }
-                var nodeView = new JungleNodeView(jungleTree.DuplicateNode(SelectedNodeView.NodeObject))
-                {
-                    JungleEditor = _jungleEditor
-                };
+                var nodeView = new JungleNodeView(jungleTree.DuplicateNode(SelectedNodeView.Node));
                 _jungleEditor.OnSelectedNode(nodeView);
                 AddElement(nodeView);
                 arg.StopPropagation();
@@ -275,7 +303,8 @@ namespace Jungle.Editor
             if (!arg.isPropagationStopped || arg.imguiEvent == null) return;
             arg.imguiEvent.Use();
         }
-
+        */
+        
         public override void BuildContextualMenu(ContextualMenuPopulateEvent evt) {}
         
         public override List<Port> GetCompatiblePorts(Port selected, NodeAdapter _)

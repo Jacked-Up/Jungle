@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using JetBrains.Annotations;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -11,9 +12,20 @@ namespace Jungle.Editor
     {
         #region Variables
 
-        private JungleEditor _jungleEditor;
+        public JungleNode InspectingNode
+        {
+            get
+            {
+                if (nodeInspector == null)
+                {
+                    return null;
+                }
+                return nodeInspector.target as JungleNode;
+            }
+        }
+
         private UnityEditor.Editor nodeInspector;
-        
+
         public new class UxmlFactory : UxmlFactory<JungleInspectorView, UxmlTraits> {}
         
         #endregion
@@ -21,10 +33,8 @@ namespace Jungle.Editor
         /// <summary>
         /// Initialize with Jungle editor.
         /// </summary>
-        /// <param name="editor">Jungle editor reference.</param>
-        public void Initialize(JungleEditor editor)
+        public void Initialize()
         {
-            _jungleEditor = editor;
             RepaintGUIContainer();
         }
         
@@ -35,9 +45,9 @@ namespace Jungle.Editor
         public void UpdateSelection(JungleNodeView nodeView)
         {
             // Create nodes inspector IF possible
-            if (nodeView != null && nodeView.NodeObject != null)
+            if (nodeView != null && nodeView.Node != null)
             {
-                nodeInspector = UnityEditor.Editor.CreateEditor(nodeView.NodeObject);
+                nodeInspector = UnityEditor.Editor.CreateEditor(nodeView.Node);
             }
             else nodeInspector = null;
             RepaintGUIContainer();
