@@ -23,7 +23,7 @@ namespace Jungle.Editor
             
             public void OnDropOutsidePort(Edge edge, Vector2 position)
             {
-                
+                Debug.Log("Yuh");
             }
             
             public void OnDrop(GraphView graphView, Edge edge)

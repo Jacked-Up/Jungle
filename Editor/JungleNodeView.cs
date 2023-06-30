@@ -109,7 +109,6 @@ namespace Jungle.Editor
                 newPortView.portName += $"<b>{port.PortName} <size=10><i>({portTypeName})</i></size></b>";
                 newPortView.portName += "</color>";
                 
-                newPortView.AddManipulator(new EdgeConnector<Edge>(JungleGraphView));
                 OutputPortViews.Add(newPortView);
                 outputContainer.Add(newPortView);
             }

@@ -9,7 +9,7 @@ using UnityEngine.UIElements;
 
 namespace Jungle.Editor
 {
-    public class JungleGraphView : GraphView, IEdgeConnectorListener
+    public class JungleGraphView : GraphView
     {
         #region Variables
 
@@ -144,12 +144,9 @@ namespace Jungle.Editor
                 if (node == null) continue;
                 GetNodeView(node)?.UpdateNodeView();
             }
-            
+
             // The view transform is the graph view "camera"
-            jungleTree.editorData = new JungleTreeEditorData
-            {
-                lastViewPosition = viewTransform.position
-            };
+            jungleTree.editorData.lastViewPosition = viewTransform.position;
         }
         
         /// <summary>
@@ -295,16 +292,6 @@ namespace Jungle.Editor
                                                                   && other.node != selected.node 
                                                                   && other.portType == selected.portType);
             return compatible.ToList();
-        }
-
-        public void OnDrop(GraphView graphView, Edge edge)
-        {
-            Debug.Log("OnDrop");
-        }
-        
-        public void OnDropOutsidePort(Edge edge, Vector2 position)
-        {
-            Debug.Log("OnDropOutside");
         }
 
         #endregion

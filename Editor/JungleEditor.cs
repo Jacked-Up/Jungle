@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using JetBrains.Annotations;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEditor.Experimental.GraphView;
@@ -84,7 +83,7 @@ namespace Jungle.Editor
             var icon = EditorGUIUtility.isProSkin 
                 ? Resources.Load<Texture>(TAB_ICON_DARK_FILE_PATH) 
                 : Resources.Load<Texture>(TAB_ICON_LIGHT_FILE_PATH);
-            titleContent = new GUIContent("Jungle Editor*", icon);
+            titleContent = new GUIContent("Jungle Editor", icon);
         }
 
         [OnOpenAsset]
@@ -139,7 +138,7 @@ namespace Jungle.Editor
 
         private void RepaintNodeViews()
         {
-            _graphView.UpdateNodeViews();
+            _graphView?.UpdateNodeViews();
         }
         
         private void RepaintTitle()
