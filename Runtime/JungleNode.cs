@@ -414,11 +414,6 @@ namespace Jungle
         public string guid;
 
         /// <summary>
-        /// The contextual name of the node in the graph view
-        /// </summary>
-        public string comments;
-
-        /// <summary>
         /// Position of the node inside the graph view
         /// </summary>
         public Vector2 position;

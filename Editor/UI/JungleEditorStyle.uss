@@ -12,6 +12,10 @@
     --spacing: 12.5;
 }
 
+.dark Edge {
+    --edge-color: rgba(1, 1, 1, 1);
+}
+
 .dark #tree-name-label {
     color: rgba(255, 255, 255, 0.31);
 }

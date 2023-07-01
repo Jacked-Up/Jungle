@@ -13,6 +13,12 @@ namespace Jungle.Editor
 
         private const string TITLE = "Add Node to Tree";
 
+        public static JungleSearchView Instance
+        {
+            get;
+            private set;
+        }
+        
         private JungleEditor _jungleEditor;
         
         private struct CategoryCache
@@ -32,6 +38,7 @@ namespace Jungle.Editor
         public void Initialize(JungleEditor editor)
         {
             _jungleEditor = editor;
+            Instance = this;
         }
         
         public List<SearchTreeEntry> CreateSearchTree(SearchWindowContext context)
@@ -101,8 +108,8 @@ namespace Jungle.Editor
 
         public bool OnSelectEntry(SearchTreeEntry searchTreeEntry, SearchWindowContext context)
         {
-            var mousePosition = _jungleEditor.GetMousePosition(context.screenMousePosition);
-            //return _jungleEditor.TryAddNodeToGraph(searchTreeEntry.userData.GetType(), mousePosition);
+            var mousePosition = _jungleEditor.MousePositionToGraphViewPosition(context.screenMousePosition);
+            return _jungleEditor.TryAddNodeToGraph(searchTreeEntry.userData.GetType(), mousePosition);
             return true;
         }
     }

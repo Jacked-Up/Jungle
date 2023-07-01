@@ -200,7 +200,6 @@ namespace Jungle
             node.NodeProperties = new NodeProperties
             {
                 guid = GUID.Generate().ToString(),
-                comments = string.Empty,
                 position = position
             };
             
@@ -252,7 +251,6 @@ namespace Jungle
             node.NodeProperties = new NodeProperties
             {
                 guid = GUID.Generate().ToString(),
-                comments = node.NodeProperties.comments,
                 position = original.NodeProperties.position + new Vector2(35, 35)
             };
             

@@ -5,6 +5,25 @@
     margin-bottom: 0;
 }
 
+.connectorText {
+    white-space: normal;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.connectorBox {
+    border-left-width: 8px;
+    border-right-width: 8px;
+    border-top-width: 8px;
+    border-bottom-width: 8px;
+    border-top-left-radius: 1px;
+    border-bottom-left-radius: 1px;
+    border-top-right-radius: 1px;
+    border-bottom-right-radius: 1px;
+    margin-right: 4px;
+    margin-left: 4px;
+}
+
 .red #accent {
     background-color: rgb(220, 19, 19);
 }

@@ -1,5 +1,4 @@
-﻿using JetBrains.Annotations;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -72,20 +71,14 @@ namespace Jungle.Editor
                 ? selectedNode.NodeProperties
                 : new NodeProperties();
             
-            GUILayout.Label("Comments:");
             if (selectedNode != null)
             {
-                selectedNode.NodeProperties = new NodeProperties
-                {
-                    guid = properties.guid,
-                    comments = GUILayout.TextArea(properties.comments, 300),
-                    position = properties.position
-                };
+                selectedNode.name = GUILayout.TextField(selectedNode.name, 100);
             }
             else
             {
                 GUI.enabled = false;
-                GUILayout.TextArea(string.Empty, 300);
+                GUILayout.TextField(string.Empty, 100);
                 GUI.enabled = true;
             }
             

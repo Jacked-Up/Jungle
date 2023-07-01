@@ -40,7 +40,6 @@ namespace Jungle.Editor
             this.AddManipulator(new ContentDragger());
             this.AddManipulator(new SelectionDragger());
             this.AddManipulator(new RectangleSelector());
-            //RegisterCallback<ExecuteCommandEvent>(ExecuteCommandCallback);
 
             var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(JungleEditor.STYLE_SHEET_FILE_PATH);
             styleSheets.Add(styleSheet);
@@ -170,7 +169,7 @@ namespace Jungle.Editor
             {
                 return null;
             }
-
+            
             var nodeView = new JungleNodeView(jungleTree.CreateNode(nodeType, position));
             AddElement(nodeView);
             return nodeView;
@@ -275,38 +274,6 @@ namespace Jungle.Editor
             return graphViewChange;
         }
 
-        /*
-        private void ExecuteCommandCallback(ExecuteCommandEvent arg)
-        {
-            var jungleTree = _jungleEditor.EditTree;
-            if (jungleTree == null)
-            {
-                return;
-            }
-
-            if (panel.GetCapturingElement(PointerId.mousePointerId) != null || SelectedNodeView == null)
-            {
-                return;
-            }
-            if (arg.commandName == "Duplicate")
-            {
-                // Duplicating the root node is forbidden
-                if (SelectedNodeView.Node is StartNode)
-                {
-                    return;
-                }
-                var nodeView = new JungleNodeView(jungleTree.DuplicateNode(SelectedNodeView.Node));
-                _jungleEditor.OnSelectedNode(nodeView);
-                AddElement(nodeView);
-                arg.StopPropagation();
-            }
-            if (!arg.isPropagationStopped || arg.imguiEvent == null) return;
-            arg.imguiEvent.Use();
-        }
-        */
-        
-        public override void BuildContextualMenu(ContextualMenuPopulateEvent evt) {}
-        
         public override List<Port> GetCompatiblePorts(Port selected, NodeAdapter _)
         {
             // If the port type is null, this means that the node has some kind of issue internally.
@@ -318,9 +285,84 @@ namespace Jungle.Editor
             // Otherwise the compatible port must not be the same connection direction and the same
             // connection type
             var compatible = ports.ToList().Where(other => other.direction != selected.direction 
-                                                                  && other.node != selected.node 
-                                                                  && other.portType == selected.portType);
+                                                           && other.node != selected.node 
+                                                           && other.portType == selected.portType);
             return compatible.ToList();
+        }
+        
+        public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
+        {
+            if (evt.target is JungleGraphView)
+            {
+                evt.menu.AppendAction("Create node", ContextRequestCreateNodeCallback);
+                evt.menu.AppendAction("Create sticky note", ContextRequestCreateStickyNoteCallback);
+                evt.menu.AppendSeparator();
+                evt.menu.AppendAction("Select all", ContextRequestSelectAllCallback);
+                evt.menu.AppendSeparator();
+            }
+            else if (evt.target is JungleNodeView)
+            {
+                evt.menu.AppendAction("Cut", ContextRequestCutNodeCallback);
+                evt.menu.AppendAction("Copy", ContextRequestCopyNodeCallback);
+                evt.menu.AppendAction("Paste", ContextRequestPasteNodeCallback, DropdownMenuAction.Status.Disabled);
+                evt.menu.AppendSeparator();
+                evt.menu.AppendAction("Duplicate", ContextRequestDuplicateNodeCallback);
+                evt.menu.AppendSeparator();
+                evt.menu.AppendAction("Delete", ContextRequestDeleteNodeCallback);
+            }
+            else if (evt.target is Edge)
+            {
+                evt.menu.AppendAction("Disconnect", ContextRequestDisconnectNodeCallback);
+            }
+            else if (evt.target is JungleStickyNoteView)
+            {
+                evt.menu.AppendAction("Stinky!", ContextRequestDisconnectNodeCallback);
+            }
+        }
+        
+        private void ContextRequestCreateNodeCallback(DropdownMenuAction obj)
+        {
+            
+        }
+        
+        private void ContextRequestCreateStickyNoteCallback(DropdownMenuAction obj)
+        {
+            AddElement(new StickyNote());
+        }
+        
+        private void ContextRequestSelectAllCallback(DropdownMenuAction obj)
+        {
+            
+        }
+        
+        private void ContextRequestCutNodeCallback(DropdownMenuAction obj)
+        {
+            
+        }
+
+        private void ContextRequestCopyNodeCallback(DropdownMenuAction obj)
+        {
+            
+        }
+        
+        private void ContextRequestPasteNodeCallback(DropdownMenuAction obj)
+        {
+            
+        }
+
+        private void ContextRequestDuplicateNodeCallback(DropdownMenuAction obj)
+        {
+            
+        }
+        
+        private void ContextRequestDeleteNodeCallback(DropdownMenuAction obj)
+        {
+            
+        }
+        
+        private void ContextRequestDisconnectNodeCallback(DropdownMenuAction obj)
+        {
+            
         }
 
         #endregion

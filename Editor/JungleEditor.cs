@@ -1,8 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.Callbacks;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -11,16 +11,12 @@ namespace Jungle.Editor
     public class JungleEditor : EditorWindow
     {
         #region Variables
-
-        private const string SEARCH_FILTER = "t:JungleTree";
         
-        private const string TAB_ICON_DARK_FILE_PATH = 
-            "Icons/JungleEditorIconDark";
-        private const string TAB_ICON_LIGHT_FILE_PATH = 
-            "Icons/JungleEditorIconLight";
-        public const string STYLE_SHEET_FILE_PATH =
-            "Packages/com.jackedupsoftware.jungle/Editor/UI/JungleEditorStyle.uss";
-        private const int MAXIMUM_DISPLAYED_TREE_NAME = 28;
+        private const string SEARCH_FILTER = "t:JungleTree";
+        private const string TAB_TITLE = "Jungle Editor";
+        private const string TAB_ICON_DARK_FILE_PATH = "Icons/JungleEditorIconDark";
+        private const string TAB_ICON_LIGHT_FILE_PATH = "Icons/JungleEditorIconLight";
+        public const string STYLE_SHEET_FILE_PATH = "Packages/com.jackedupsoftware.jungle/Editor/UI/JungleEditorStyle.uss";
 
         public JungleTree EditTree
         {
@@ -62,43 +58,24 @@ namespace Jungle.Editor
             }
         }
         private JungleTree _editTree;
-
+        
         private JungleInspectorView _inspectorView;
         private JungleSearchView _searchView;
         private JungleGraphView _graphView;
 
-        private bool _isDraggingEdge;
-        
-        private DragData? _currentData;
-        private struct DragData
-        {
-            public Port DragFromPort;
-        }
-        
         #endregion
-
+        
         private void OnEnable()
         {
-            var icon = EditorGUIUtility.isProSkin 
-                ? Resources.Load<Texture>(TAB_ICON_DARK_FILE_PATH) 
-                : Resources.Load<Texture>(TAB_ICON_LIGHT_FILE_PATH);
-            titleContent = new GUIContent("Jungle Editor", icon);
+            var tabIcon = Resources.Load<Texture>
+            (
+                EditorGUIUtility.isProSkin
+                    ? TAB_ICON_DARK_FILE_PATH
+                    : TAB_ICON_LIGHT_FILE_PATH
+            );
+            titleContent = new GUIContent(TAB_TITLE, tabIcon);
         }
 
-        [OnOpenAsset]
-        public static bool OpenAssetCallback(int _, int __)
-        {
-            if (Selection.activeObject.GetType() != typeof(JungleTree))
-            {
-                return false;
-            }
-            var window = GetWindow<JungleEditor>();
-            window.EditTree = Selection.activeObject as JungleTree;
-            window._inspectorView.UpdateSelection(null);
-            window.RepaintGraphView();
-            return true;
-        }
-        
         private void CreateGUI()
         {
             JungleTutorials.TryShowEditorTutorial();
@@ -118,42 +95,23 @@ namespace Jungle.Editor
             
             _graphView = rootVisualElement.Q<JungleGraphView>("graph-view");
             _graphView.Initialize(this, _inspectorView, _searchView);
-            RepaintGraphView();
+            _graphView?.UpdateGraphView();
         }
         
-        private void OnGUI()
-        {
-            RepaintTitle();
-            RepaintNodeViews();
-            Repaint();
-        }
-
-        private void RepaintGraphView()
-        {
-            _graphView?.UpdateGraphView();
-            RepaintTitle();
-            RepaintNodeViews();
-        }
-
-        private void RepaintNodeViews()
+        private void Update()
         {
             _graphView?.UpdateNodeViews();
-        }
-        
-        private void RepaintTitle()
-        {
+
+            // Update tree title label
             var titleLabel = rootVisualElement.Q<Label>("tree-name-label");
             if (titleLabel != null && EditTree != null)
             {
-                // Ensures the name displayed can be no longer than the maximum length
-                // If it is too long, this removes the extra text and adds a "..." bit
-                titleLabel.text = EditTree.name.Length > MAXIMUM_DISPLAYED_TREE_NAME 
-                    ? $"{EditTree.name[..(MAXIMUM_DISPLAYED_TREE_NAME - 2)]}..." 
-                    : EditTree.name;
+                titleLabel.text = JungleGUILayout.ShortenString(EditTree.name, 28);
             }
             
+            // Update node selection list label
             var nodeLabel = rootVisualElement.Q<Label>("node-name-label");
-            if (nodeLabel != null && _graphView.SelectedNodeViews.Count > 0)
+            if (nodeLabel != null && _graphView != null && _graphView.SelectedNodeViews.Count > 0)
             {
                 nodeLabel.text = string.Empty;
                 for (var i = 0; i < 4; i++)
@@ -167,7 +125,7 @@ namespace Jungle.Editor
                     {
                         break;
                     }
-                    nodeLabel.text += $"{_graphView.SelectedNodeViews[i].Node.name}\n";
+                    nodeLabel.text += $"{JungleGUILayout.ShortenString(_graphView.SelectedNodeViews[i].Node.name, 32)}\n";
                 }
             }
             else if (nodeLabel != null)
@@ -175,8 +133,27 @@ namespace Jungle.Editor
                 nodeLabel.text = "-";
             }
         }
-
-        /*
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="_"></param>
+        /// <param name="__"></param>
+        /// <returns></returns>
+        [OnOpenAsset]
+        public static bool OpenAssetCallback(int _, int __)
+        {
+            if (Selection.activeObject.GetType() != typeof(JungleTree))
+            {
+                return false;
+            }
+            var window = GetWindow<JungleEditor>();
+            window.EditTree = Selection.activeObject as JungleTree;
+            window._inspectorView.UpdateSelection(null);
+            window._graphView?.UpdateGraphView();
+            return true;
+        }
+        
         /// <summary>
         /// 
         /// </summary>
@@ -186,17 +163,17 @@ namespace Jungle.Editor
         public bool TryAddNodeToGraph(Type nodeType, Vector2 graphPosition)
         {
             var nodeView = _graphView?.CreateNode(nodeType, graphPosition);
-            OnSelectedNode(nodeView);
+            //OnSelectedNode(nodeView);
             return _graphView != null;
         }
-        */
+        
         
         /// <summary>
         /// 
         /// </summary>
         /// <param name="screenMousePosition"></param>
         /// <returns></returns>
-        public Vector2 GetMousePosition(Vector2 screenMousePosition)
+        public Vector2 MousePositionToGraphViewPosition(Vector2 screenMousePosition)
         {
             var mousePosition = rootVisualElement.ChangeCoordinatesTo(rootVisualElement.parent,
                 screenMousePosition - position.position);

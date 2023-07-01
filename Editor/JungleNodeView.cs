@@ -66,7 +66,7 @@ namespace Jungle.Editor
         private void HandleNodeObject(JungleNode reference)
         {
             Node = reference;
-            title = reference.TitleName;
+            title = JungleGUILayout.ShortenString(reference.TitleName, 50);
             tooltip = reference.Tooltip;
             viewDataKey = reference.NodeProperties.guid;
             var graphPosition = reference.NodeProperties.position;
@@ -78,17 +78,24 @@ namespace Jungle.Editor
         {
             var port = Node.InputInfo;
             
-            InputPortView = InstantiatePort(Orientation.Horizontal, Direction.Input,
-                Port.Capacity.Multi, port.PortType);
+            InputPortView = InstantiatePort
+            (
+                Orientation.Horizontal,
+                Direction.Input,
+                Port.Capacity.Multi,
+                port.PortType
+            );
             
             var portTypeName = port.PortType != typeof(Error)
                 ? port.PortType.Name
                 : nameof(Error).ToUpper();
 
-            InputPortView.portName = 
-                $"<color={(EditorGUIUtility.isProSkin ? DARK_MODE_TEXT_HEX_CODE : LIGHT_MODE_TEXT_HEX_CODE)}>";
-            InputPortView.portName += $"<b><size=10><i>({portTypeName})</i></size> {port.PortName}</b>";
-            InputPortView.portName += "</color>";
+            var portTitleName = JungleGUILayout.ShortenString(port.PortName, 30);
+            
+            //InputPortView.portName = $"<color={(EditorGUIUtility.isProSkin ? DARK_MODE_TEXT_HEX_CODE : LIGHT_MODE_TEXT_HEX_CODE)}>";
+            InputPortView.portName = $"<b><size=10><i>({portTypeName})</i></size> {portTitleName}</b>";
+            //InputPortView.portName += "</color>";
+
             inputContainer.Add(InputPortView);
         }
 
@@ -97,17 +104,23 @@ namespace Jungle.Editor
             OutputPortViews = new List<Port>();
             foreach (var port in Node.OutputInfo)
             {
-                var newPortView = InstantiatePort(Orientation.Horizontal, Direction.Output, 
-                    Port.Capacity.Multi, port.PortType);
+                var newPortView = InstantiatePort
+                (
+                    Orientation.Horizontal, 
+                    Direction.Output, 
+                    Port.Capacity.Multi,
+                    port.PortType
+                );
 
                 var portTypeName = port.PortType != typeof(Error)
                     ? port.PortType.Name
                     : nameof(Error).ToUpper();
                 
-                newPortView.portName = 
-                    $"<color={(EditorGUIUtility.isProSkin ? DARK_MODE_TEXT_HEX_CODE : LIGHT_MODE_TEXT_HEX_CODE)}>";
-                newPortView.portName += $"<b>{port.PortName} <size=10><i>({portTypeName})</i></size></b>";
-                newPortView.portName += "</color>";
+                var portTitleName = JungleGUILayout.ShortenString(port.PortName, 30);
+                
+                //newPortView.portName = $"<color={(EditorGUIUtility.isProSkin ? DARK_MODE_TEXT_HEX_CODE : LIGHT_MODE_TEXT_HEX_CODE)}>";
+                newPortView.portName = $"<b>{portTitleName} <size=10><i>({portTypeName})</i></size></b>";
+                //newPortView.portName += "</color>";
                 
                 OutputPortViews.Add(newPortView);
                 outputContainer.Add(newPortView);
@@ -173,7 +186,6 @@ namespace Jungle.Editor
             var nodeProperties = new NodeProperties
             {
                 guid = Node.NodeProperties.guid,
-                comments = Node.NodeProperties.comments,
                 position = new Vector2(position.xMin, position.yMin)
             };
             Node.NodeProperties = nodeProperties;

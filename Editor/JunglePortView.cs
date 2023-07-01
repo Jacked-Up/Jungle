@@ -31,6 +31,8 @@ namespace Jungle.Editor
                     return;
                 }
                 OnDropEdgeInEmptySpace?.Invoke(edge.output.portType, position);
+                
+                SearchWindow.Open(new SearchWindowContext(position), JungleSearchView.Instance);
             }
             
             public void OnDrop(GraphView graphView, Edge edge)
