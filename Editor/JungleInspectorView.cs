@@ -67,9 +67,6 @@ namespace Jungle.Editor
             var selectedNode = nodeInspector != null
                 ? nodeInspector.target as JungleNode
                 : null;
-            var properties = selectedNode != null
-                ? selectedNode.NodeProperties
-                : new NodeProperties();
             
             if (selectedNode != null)
             {
@@ -78,7 +75,7 @@ namespace Jungle.Editor
             else
             {
                 GUI.enabled = false;
-                GUILayout.TextField(string.Empty, 100);
+                GUILayout.TextField(string.Empty);
                 GUI.enabled = true;
             }
             

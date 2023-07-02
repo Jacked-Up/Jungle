@@ -28,17 +28,29 @@ namespace Jungle
         /// <summary>
         /// 
         /// </summary>
-        public List<JungleNode> RunningNodes { get; private set; } = new();
-        
-        /// <summary>
-        /// 
-        /// </summary>
-        public float PlayTime { get; private set; }
+        public List<JungleNode> RunningNodes
+        {
+            get;
+            private set; 
+        } = new();
 
         /// <summary>
         /// 
         /// </summary>
-        public TreeState State { get; private set; } = TreeState.Ready;
+        public float PlayTime
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public TreeState State
+        {
+            get; 
+            private set;
+        } = TreeState.Ready;
         /// <summary>
         /// Status flag of the node tree
         /// </summary>
@@ -66,8 +78,7 @@ namespace Jungle
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="link"></param>
-        public void Play(Scene? link = null)
+        public void Start()
         {
             if (State == TreeState.Running)
             {
@@ -83,9 +94,9 @@ namespace Jungle
             RunningNodes[0].Initialize(new None());
             State = TreeState.Running;
             
-            JungleRuntime.Singleton.StartTree(this, link);
+            JungleRuntime.Singleton.StartTree(this);
         }
-
+        
         /// <summary>
         /// Stops the execution of the node tree
         /// </summary>
@@ -388,8 +399,6 @@ namespace Jungle
             set => EditorPrefs.SetBool("JungleDebugFoldoutOpen", value);
         }
         
-        private List<string> sceneLinkOptions;
-        private int selectedSceneIndex;
         private JungleTree instance;
         
         #endregion
@@ -433,31 +442,11 @@ namespace Jungle
             if (DebugFoldDownOpen)
             {
                 GUI.enabled = Application.isPlaying;
-                sceneLinkOptions = new List<string>()
-                {
-                    "None"
-                };
-                var sceneCount = SceneManager.sceneCount;
-                var sceneNames = new string[sceneCount];
-                for (var i = 0; i < sceneCount; i++) 
-                {
-                    sceneLinkOptions.Add(SceneManager.GetSceneAt(i).name);
-                }
-                selectedSceneIndex = EditorGUILayout.Popup("Linked Scene", selectedSceneIndex, sceneLinkOptions.ToArray());
-            
                 GUILayout.BeginHorizontal();
                 GUI.enabled = instance.State != JungleTree.TreeState.Running && Application.isPlaying;
-                if (GUILayout.Button("Play"))
+                if (GUILayout.Button("Start"))
                 {
-                    // Condition simply checks if a scene is selected and calls the proper method
-                    if (selectedSceneIndex == 0)
-                    {
-                        instance.Play();
-                    }
-                    else
-                    {
-                        instance.Play(SceneManager.GetSceneAt(selectedSceneIndex - 1));
-                    }
+                    instance.Start();
                 }
                 GUI.enabled = instance.State == JungleTree.TreeState.Running && Application.isPlaying;
                 if (GUILayout.Button("Stop"))
