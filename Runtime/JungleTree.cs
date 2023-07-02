@@ -10,7 +10,7 @@ using UnityEditor;
 namespace Jungle
 {
     /// <summary>
-    /// 
+    /// Main Jungle Tree class.
     /// </summary>
     [Serializable]
     [CreateAssetMenu(fileName = "My Jungle Tree 0", menuName = "Jungle Tree", order = 81)]
@@ -19,13 +19,13 @@ namespace Jungle
         #region Variables
         
         /// <summary>
-        /// 
+        /// Array list of all associated nodes.
         /// </summary>
         [HideInInspector]
         public JungleNode[] nodes = Array.Empty<JungleNode>();
         
         /// <summary>
-        /// 
+        /// List of all currently running nodes.
         /// </summary>
         public List<JungleNode> RunningNodes
         {
@@ -34,7 +34,7 @@ namespace Jungle
         } = new();
 
         /// <summary>
-        /// 
+        /// The amount of time in seconds the Jungle Tree has been running.
         /// </summary>
         public float PlayTime
         {
@@ -43,72 +43,174 @@ namespace Jungle
         }
 
         /// <summary>
-        /// 
+        /// The Jungle Trees run state.
         /// </summary>
-        public TreeState State
+        public StateFlag State
         {
             get; 
             private set;
-        } = TreeState.Ready;
+        } = StateFlag.Ready;
+        
+        private ActionsList _revertActions = new();
+        private float _startPlayTime;
+
         /// <summary>
-        /// Status flag of the node tree
+        /// 
         /// </summary>
-        public enum TreeState
+        public struct StartResult
         {
-            /// <summary>
-            /// Describes a node that has never been run and is not currently running
-            /// </summary>
-            Ready,
-            /// <summary>
-            /// Describes a node that is currently running
-            /// </summary>
-            Running,
-            /// <summary>
-            /// Describes a node that is not currently running and has run at some point
-            /// </summary>
-            Finished
+            public ErrorFlag Error;
         }
         
-        private ActionsList _revertActions;
-        private float _startPlayTime;
+        /// <summary>
+        /// 
+        /// </summary>
+        public struct StopResult
+        {
+            public ErrorFlag Error;
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        [Flags]
+        public enum ErrorFlag
+        {
+            /// <summary>
+            /// 
+            /// </summary>
+            AlreadyRunning = 0,
+            /// <summary>
+            /// 
+            /// </summary>
+            IsNotRunning = 1,
+            /// <summary>
+            /// 
+            /// </summary>
+            NotInPlayMode = 2,
+            /// <summary>
+            /// 
+            /// </summary>
+            NoNodes = 3,
+            /// <summary>
+            /// 
+            /// </summary>
+            NoRuntimeSingletonInstance = 4,
+            /// <summary>
+            /// 
+            /// </summary>
+            None = 99
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        [Flags]
+        public enum StateFlag
+        {
+            /// <summary>
+            /// Describes a node that has never been run and is not currently running.
+            /// </summary>
+            Ready = 0,
+            /// <summary>
+            /// Describes a node that is currently running.
+            /// </summary>
+            Running = 1,
+            /// <summary>
+            /// Describes a node that is not currently running and has run at some point.
+            /// </summary>
+            Finished = 0
+        }
         
         #endregion
 
         /// <summary>
-        /// 
+        /// Starts the execution of the Jungle Tree.
         /// </summary>
-        public void Start()
+        public StartResult Start()
         {
-            if (State == TreeState.Running)
+            var result = new StartResult
             {
-                return;
+                Error = ErrorFlag.None
+            };
+            
+            // Must be in play mode in order to start a Jungle Tree
+            if (Application.isPlaying)
+            {
+#if UNITY_EDITOR
+                Debug.LogFormat
+                (LogType.Error, LogOption.NoStacktrace, this,
+                    $"[{name}] Failed to start Jungle Tree because the editor is not in play-mode."
+                );
+#endif
+                result.Error = ErrorFlag.NotInPlayMode;
+                return result;
             }
-
+            // Jungle Tree must not already be running to start
+            if (State == StateFlag.Running)
+            {
+#if UNITY_EDITOR
+                Debug.LogFormat
+                (LogType.Warning, LogOption.NoStacktrace, this,
+                    $"[{name}] Could not start Jungle Tree because it is already running."
+                );
+#endif
+                result.Error = ErrorFlag.AlreadyRunning;
+                return result;
+            }
+            // Jungle Tree must have nodes to start
+            if (nodes == null || nodes.Length == 0)
+            {
+#if UNITY_EDITOR
+                Debug.LogFormat
+                (LogType.Error, LogOption.NoStacktrace, this,
+                    $"[{name}] Failed to start Jungle Tree because it has no nodes."
+                );
+#endif
+                result.Error = ErrorFlag.NoNodes;
+                return result;
+            }
+            
             _startPlayTime = Time.unscaledTime;
             RunningNodes = new List<JungleNode>
             {
-                // Finds the index of the root node. Should always be zero, but just in case
+                // Find the index of the start node and add to execution list
                 nodes[nodes.ToList().IndexOf(nodes.First(node => node is StartNode))]
             };
             RunningNodes[0].Initialize(new None());
-            State = TreeState.Running;
+            State = StateFlag.Running;
+
+            // Jungle Runtime singleton instance must exist to start
+            if (JungleRuntime.Singleton == null)
+            {
+#if UNITY_EDITOR
+                Debug.LogFormat
+                (LogType.Error, LogOption.NoStacktrace, this,
+                    $"[{name}] Failed to start Jungle Tree because there wasn't a Jungle Runtime " +
+                    "instance in the scene."
+                );
+#endif
+                result.Error = ErrorFlag.NoRuntimeSingletonInstance;
+                return result;
+            }
             
             JungleRuntime.Singleton.StartTree(this);
+            return result;
         }
         
         /// <summary>
-        /// Stops the execution of the node tree
+        /// Stops the execution of the Jungle Tree.
         /// </summary>
         public void Stop()
         {
-            if (State != TreeState.Running)
+            if (State != StateFlag.Running)
             {
                 return;
             }
 
             PlayTime = 0f;
             RunningNodes = new List<JungleNode>();
-            State = TreeState.Finished;
+            State = StateFlag.Finished;
             
             // Invoke revert methods
             _revertActions?.InvokeAll();
@@ -122,7 +224,7 @@ namespace Jungle
         /// </summary>
         public void Update()
         {
-            if (State == TreeState.Finished)
+            if (State == StateFlag.Finished)
             {
                 return;
             }
@@ -437,17 +539,17 @@ namespace Jungle
                 GUILayout.BeginHorizontal();
                     switch (instance.State)
                     {
-                        case JungleTree.TreeState.Ready or JungleTree.TreeState.Finished 
+                        case JungleTree.StateFlag.Ready or JungleTree.StateFlag.Finished 
                         when GUILayout.Button(PlayIcon, GUILayout.Width(65f), GUILayout.ExpandHeight(true)):
                             instance.Start();
                             break;
-                        case JungleTree.TreeState.Running 
+                        case JungleTree.StateFlag.Running 
                         when GUILayout.Button(StopIcon, GUILayout.Width(65f), GUILayout.ExpandHeight(true)):
                             instance.Stop();
                             break;
                     }
                     GUILayout.BeginVertical();
-                        var state = instance.State is JungleTree.TreeState.Ready or JungleTree.TreeState.Finished
+                        var state = instance.State is JungleTree.StateFlag.Ready or JungleTree.StateFlag.Finished
                             ? "Ready"
                             : "Running";
                         GUILayout.Label($"State: {state}");

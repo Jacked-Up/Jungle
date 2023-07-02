@@ -76,7 +76,7 @@ namespace Jungle
         {
             foreach (var entry in new List<TreeEntry>(_running))
             {
-                if (entry.Tree.State == JungleTree.TreeState.Finished)
+                if (entry.Tree.State == JungleTree.StateFlag.Finished)
                 {
                     StopTree(entry.Tree);
                     continue;
