@@ -67,13 +67,14 @@ namespace Jungle.Editor
         
         private void OnEnable()
         {
-            var tabIcon = Resources.Load<Texture>
+            var tabIcon = EditorGUIUtility.IconContent
             (
                 EditorGUIUtility.isProSkin
-                    ? TAB_ICON_DARK_FILE_PATH
-                    : TAB_ICON_LIGHT_FILE_PATH
+                    ? "d_BlendTree Icon"
+                    : "BlendTree Icon"
             );
-            titleContent = new GUIContent(TAB_TITLE, tabIcon);
+            tabIcon.text = TAB_TITLE;
+            titleContent = tabIcon;
         }
 
         private void CreateGUI()

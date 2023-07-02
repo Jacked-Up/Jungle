@@ -158,6 +158,15 @@ namespace Jungle.Editor
 
         private void OnEnable()
         {
+            var tabIcon = EditorGUIUtility.IconContent
+            (
+                EditorGUIUtility.isProSkin
+                    ? "console.infoicon"
+                    : "console.infoicon.inactive.sml@2x"
+            );
+            tabIcon.text = "Jungle Validator";
+            titleContent = tabIcon;
+            
             _reports = Array.Empty<ValidationReport>();
             _openFoldout = -1;
         }
@@ -165,11 +174,7 @@ namespace Jungle.Editor
         [MenuItem("Window/Jungle/Open Jungle Validator")]
         public static void OpenWindow()
         {
-            _instance = GetWindow<JungleValidatorEditor>
-            (
-                false,
-                "Jungle Validator"
-            );
+            _instance = GetWindow<JungleValidatorEditor>();
             RefreshReports();
         }
 
@@ -228,7 +233,7 @@ namespace Jungle.Editor
                 if (ShowAutoFixDialog)
                 {
                     var decision = EditorUtility.DisplayDialogComplex("Jungle Validator",
-                        $"Are you sure you want to auto-fix all Jungle Trees?" +
+                        "Are you sure you want to auto-fix all Jungle Trees?" +
                         "\n\nThis could cause irreversible damage.",
                         "Yes", "No", "Yes, Don't Ask Again");
                     if (decision == 2)
@@ -290,16 +295,18 @@ namespace Jungle.Editor
             }
 
             _scrollView = GUILayout.BeginScrollView(_scrollView);
-            
+
+            GUI.enabled = false;
             if (_reports == null || _reports.Length == 0)
             {
-                GUILayout.Label("No reports to show. Try refreshing?", EditorStyles.boldLabel);
+                GUILayout.Label("No reports to show. Try refreshing?");
             }
             else if ((reportsToShow.Count == 0 && !string.IsNullOrEmpty(_searchQuery)) 
                      || (reportsToShow.Count == 0 && onlyShowIssues))
             {
                 GUILayout.Label("No results", EditorStyles.boldLabel);
             }
+            GUI.enabled = true;
             
             var okStyle = new GUIStyle(EditorStyles.helpBox)
             {
