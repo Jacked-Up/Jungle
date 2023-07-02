@@ -71,7 +71,7 @@ namespace Jungle
         }
         
         private ActionsList _revertActions;
-        private float _lastPlayTime;
+        private float _startPlayTime;
         
         #endregion
 
@@ -85,7 +85,7 @@ namespace Jungle
                 return;
             }
 
-            _lastPlayTime = Time.unscaledTime;
+            _startPlayTime = Time.unscaledTime;
             RunningNodes = new List<JungleNode>
             {
                 // Finds the index of the root node. Should always be zero, but just in case
@@ -106,8 +106,8 @@ namespace Jungle
             {
                 return;
             }
-            
-            _lastPlayTime = 0f;
+
+            PlayTime = 0f;
             RunningNodes = new List<JungleNode>();
             State = TreeState.Finished;
             
@@ -127,7 +127,7 @@ namespace Jungle
             {
                 return;
             }
-            PlayTime = Time.unscaledTime - _lastPlayTime;
+            PlayTime = Time.unscaledTime - _startPlayTime;
             
             var query = new List<JungleNode>(RunningNodes);
             foreach (var node in RunningNodes)
@@ -387,18 +387,6 @@ namespace Jungle
     {
         #region Variables
 
-        private static bool InformationFoldoutOpen
-        {
-            get => EditorPrefs.GetBool("JungleInfoFoldoutOpen", true);
-            set => EditorPrefs.SetBool("JungleInfoFoldoutOpen", value);
-        }
-        
-        private static bool DebugFoldDownOpen
-        {
-            get => EditorPrefs.GetBool("JungleDebugFoldoutOpen", true);
-            set => EditorPrefs.SetBool("JungleDebugFoldoutOpen", value);
-        }
-        
         private JungleTree instance;
         
         #endregion
@@ -410,66 +398,70 @@ namespace Jungle
 
         public override void OnInspectorGUI()
         {
-            InformationFoldoutOpen = EditorGUILayout.Foldout(InformationFoldoutOpen, new GUIContent("Information"));
-            if (InformationFoldoutOpen)
+            GUILayout.Label("Description:");
+            if (instance.editorData.description == null)
             {
-                GUI.enabled = false;
-                EditorGUILayout.LabelField($"Node Count: {instance.nodes?.Length ?? 0}");
-                
-                var treeStatus = instance.State is JungleTree.TreeState.Ready or JungleTree.TreeState.Finished
-                    ? "Ready"
-                    : "Running";
-                EditorGUILayout.LabelField($"Tree Status: {treeStatus}");
-                
-                if (instance.State == JungleTree.TreeState.Running)
-                {
-                    EditorGUILayout.LabelField($"Play Time: {Math.Round(instance.PlayTime, 1)}s");
-                }
-                else
-                {
-                    EditorGUILayout.LabelField("Play Time: 0s");
-                }
-                GUI.enabled = true;
+                instance.editorData.description = "\n\n";
             }
+            instance.editorData.description = GUILayout.TextArea(instance.editorData.description, 500);
             
-            GUILayout.Space(2.5f);
+            GUILayout.Space(2f);
             EditorGUI.DrawRect(EditorGUILayout.GetControlRect(false, 1), EditorGUIUtility.isProSkin 
                 ? new Color(0.7f, 0.7f, 0.7f, 0.5f) 
                 : new Color(0.3f, 0.3f, 0.3f, 0.5f));
-            GUILayout.Space(2.5f);
+            GUILayout.Space(2f);
             
-            DebugFoldDownOpen = EditorGUILayout.Foldout(DebugFoldDownOpen, new GUIContent("Debug"));
-            if (DebugFoldDownOpen)
-            {
-                GUI.enabled = Application.isPlaying;
-                GUILayout.BeginHorizontal();
-                GUI.enabled = instance.State != JungleTree.TreeState.Running && Application.isPlaying;
-                if (GUILayout.Button("Start"))
-                {
-                    instance.Start();
-                }
-                GUI.enabled = instance.State == JungleTree.TreeState.Running && Application.isPlaying;
-                if (GUILayout.Button("Stop"))
-                {
-                    instance.Stop();
-                }
-                GUILayout.EndHorizontal();
-                if (!Application.isPlaying)
-                {
-                    GUI.enabled = true;
-                    EditorGUILayout.HelpBox("Jungle Trees can only be debugged while the editor is in" +
-                                            " play mode.", MessageType.Info);
-                }
-            }
+            GUILayout.BeginVertical(EditorStyles.helpBox);
+            GUI.enabled = Application.isPlaying;
+            GUILayout.BeginHorizontal();
 
+            var playIcon = EditorGUIUtility.IconContent
+            (
+                EditorGUIUtility.isProSkin 
+                    ? "PlayButton On@2x" 
+                    : "PlayButton@2x"
+            );
+            var stopIcon = EditorGUIUtility.IconContent
+            (
+                EditorGUIUtility.isProSkin 
+                    ? "PauseButton On@2x"
+                    : "PauseButton@2x"
+            );
+
+            if (instance.State is JungleTree.TreeState.Ready or JungleTree.TreeState.Finished 
+                && GUILayout.Button(playIcon, GUILayout.Width(65f), GUILayout.ExpandHeight(true)))
+            {
+                instance.Start();
+            }
+            else if (instance.State == JungleTree.TreeState.Running 
+                && GUILayout.Button(stopIcon, GUILayout.Width(65f), GUILayout.ExpandHeight(true)))
+            {
+                instance.Stop();
+            }
+            GUILayout.BeginVertical();
+            var treeStatus = instance.State is JungleTree.TreeState.Ready or JungleTree.TreeState.Finished
+                ? "Ready"
+                : "Running";
+            GUILayout.Label($"State: {treeStatus}");
+            GUILayout.Label($"Time: {Math.Round(instance.PlayTime, 1)}s");
+            GUILayout.EndVertical();
+            GUILayout.EndHorizontal();
+            GUI.enabled = true;
+            GUILayout.EndVertical();
+            if (!Application.isPlaying)
+            {
+                EditorGUILayout.HelpBox("Jungle Trees can only be debugged in play mode.", MessageType.Info);
+            }
+            
             Repaint();
         }
     }
-
+    
     [Serializable]
     public struct JungleTreeEditorData
     {
         public Vector3 lastViewPosition;
+        public string description;
     }
     
 #endif

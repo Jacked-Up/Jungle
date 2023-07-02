@@ -167,7 +167,6 @@ namespace Jungle.Editor
             return _graphView != null;
         }
         
-        
         /// <summary>
         /// 
         /// </summary>

@@ -293,12 +293,12 @@ namespace Jungle.Editor
             
             if (_reports == null || _reports.Length == 0)
             {
-                GUILayout.Label("No Reports to Show. Try Refreshing?", EditorStyles.boldLabel);
+                GUILayout.Label("No reports to show. Try refreshing?", EditorStyles.boldLabel);
             }
             else if ((reportsToShow.Count == 0 && !string.IsNullOrEmpty(_searchQuery)) 
                      || (reportsToShow.Count == 0 && onlyShowIssues))
             {
-                GUILayout.Label("No Results", EditorStyles.boldLabel);
+                GUILayout.Label("No results", EditorStyles.boldLabel);
             }
             
             var okStyle = new GUIStyle(EditorStyles.helpBox)
@@ -373,7 +373,7 @@ namespace Jungle.Editor
                 {
                     if (!reportsToShow[i].Failed)
                     {
-                        GUILayout.Label("- No issues found");
+                        GUILayout.Label("- No issues detected");
                     }
                     else
                     {

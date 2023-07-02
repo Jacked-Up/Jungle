@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 1a0da7d77d55d274995986fd19b7d629
+guid: e478ee7dc11b71c49b726e4dfd75019e
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -53,7 +53,7 @@ TextureImporter:
   alphaUsage: 1
   alphaIsTransparency: 1
   spriteTessellationDetail: -1
-  textureType: 2
+  textureType: 8
   textureShape: 1
   singleChannelComponent: 0
   flipbookRows: 1
@@ -67,10 +67,10 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 3
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 64
+    maxTextureSize: 1024
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
