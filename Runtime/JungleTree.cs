@@ -385,7 +385,25 @@ namespace Jungle
     public class JungleTreeEditor : Editor
     {
         #region Variables
-
+        
+        private GUIContent PlayIcon =>
+            _playIcon ??= EditorGUIUtility.IconContent
+            (
+                EditorGUIUtility.isProSkin
+                    ? "PlayButton On@2x"
+                    : "PlayButton@2x"
+            );
+        private GUIContent _playIcon;
+        
+        private GUIContent StopIcon =>
+            _stopIcon ??= EditorGUIUtility.IconContent
+            (
+                EditorGUIUtility.isProSkin
+                    ? "PauseButton On@2x"
+                    : "PauseButton@2x"
+            );
+        private GUIContent _stopIcon;
+        
         private JungleTree instance;
         
         #endregion
@@ -397,12 +415,15 @@ namespace Jungle
 
         public override void OnInspectorGUI()
         {
+            // This is literally just a description field. Yo mama
             GUILayout.Label("Description:");
-            if (instance.editorData.description == null)
+            instance.editorData.description ??= "\n\n";
+            var description = GUILayout.TextArea(instance.editorData.description, 500);
+            if (instance.editorData.description != description)
             {
-                instance.editorData.description = "\n\n";
+                instance.editorData.description = description;
+                EditorUtility.SetDirty(instance);
             }
-            instance.editorData.description = GUILayout.TextArea(instance.editorData.description, 500);
             
             GUILayout.Space(2f);
             EditorGUI.DrawRect(EditorGUILayout.GetControlRect(false, 1), EditorGUIUtility.isProSkin 
@@ -410,45 +431,34 @@ namespace Jungle
                 : new Color(0.3f, 0.3f, 0.3f, 0.5f));
             GUILayout.Space(2f);
             
+            // Start, stop, and status information box
             GUILayout.BeginVertical(EditorStyles.helpBox);
-            GUI.enabled = Application.isPlaying;
-            GUILayout.BeginHorizontal();
-
-            var playIcon = EditorGUIUtility.IconContent
-            (
-                EditorGUIUtility.isProSkin 
-                    ? "PlayButton On@2x" 
-                    : "PlayButton@2x"
-            );
-            var stopIcon = EditorGUIUtility.IconContent
-            (
-                EditorGUIUtility.isProSkin 
-                    ? "PauseButton On@2x"
-                    : "PauseButton@2x"
-            );
-
-            if (instance.State is JungleTree.TreeState.Ready or JungleTree.TreeState.Finished 
-                && GUILayout.Button(playIcon, GUILayout.Width(65f), GUILayout.ExpandHeight(true)))
-            {
-                instance.Start();
-            }
-            else if (instance.State == JungleTree.TreeState.Running 
-                && GUILayout.Button(stopIcon, GUILayout.Width(65f), GUILayout.ExpandHeight(true)))
-            {
-                instance.Stop();
-            }
-            GUILayout.BeginVertical();
-            var treeStatus = instance.State is JungleTree.TreeState.Ready or JungleTree.TreeState.Finished
-                ? "Ready"
-                : "Running";
-            GUILayout.Label($"State: {treeStatus}");
-            GUILayout.Label($"Time: {Math.Round(instance.PlayTime, 1)}s");
+                GUI.enabled = Application.isPlaying;
+                GUILayout.BeginHorizontal();
+                    switch (instance.State)
+                    {
+                        case JungleTree.TreeState.Ready or JungleTree.TreeState.Finished 
+                        when GUILayout.Button(PlayIcon, GUILayout.Width(65f), GUILayout.ExpandHeight(true)):
+                            instance.Start();
+                            break;
+                        case JungleTree.TreeState.Running 
+                        when GUILayout.Button(StopIcon, GUILayout.Width(65f), GUILayout.ExpandHeight(true)):
+                            instance.Stop();
+                            break;
+                    }
+                    GUILayout.BeginVertical();
+                        var state = instance.State is JungleTree.TreeState.Ready or JungleTree.TreeState.Finished
+                            ? "Ready"
+                            : "Running";
+                        GUILayout.Label($"State: {state}");
+                        GUILayout.Label($"Time: {Math.Round(instance.PlayTime, 1)}s");
+                    GUILayout.EndVertical();
+                GUILayout.EndHorizontal();
             GUILayout.EndVertical();
-            GUILayout.EndHorizontal();
-            GUI.enabled = true;
-            GUILayout.EndVertical();
+            
             if (!Application.isPlaying)
             {
+                GUI.enabled = true;
                 EditorGUILayout.HelpBox("Jungle Trees can only be debugged in play mode.", MessageType.Info);
             }
             
