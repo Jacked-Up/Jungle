@@ -46,7 +46,7 @@ namespace Jungle
         /// <summary>
         /// True if the node is actively being executed by the Jungle Tree.
         /// </summary>
-        public bool IsRunning => Tree.RunningNodes.Contains(this);
+        public bool IsRunning => Tree.ExecutionList.Contains(this);
 
         /// <summary>
         /// List of Jungle Node view colors.

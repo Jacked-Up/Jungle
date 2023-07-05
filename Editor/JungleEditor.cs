@@ -14,8 +14,6 @@ namespace Jungle.Editor
         
         private const string SEARCH_FILTER = "t:JungleTree";
         private const string TAB_TITLE = "Jungle Editor";
-        private const string TAB_ICON_DARK_FILE_PATH = "Icons/JungleEditorIconDark";
-        private const string TAB_ICON_LIGHT_FILE_PATH = "Icons/JungleEditorIconLight";
         public const string STYLE_SHEET_FILE_PATH = "Packages/com.jackedupsoftware.jungle/Editor/UI/JungleEditorStyle.uss";
 
         public JungleTree EditTree
@@ -76,7 +74,7 @@ namespace Jungle.Editor
             tabIcon.text = TAB_TITLE;
             titleContent = tabIcon;
         }
-
+        
         private void CreateGUI()
         {
             JungleTutorials.TryShowEditorTutorial();
@@ -131,16 +129,10 @@ namespace Jungle.Editor
             }
             else if (nodeLabel != null)
             {
-                nodeLabel.text = "-";
+                nodeLabel.text = string.Empty;
             }
         }
         
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="_"></param>
-        /// <param name="__"></param>
-        /// <returns></returns>
         [OnOpenAsset]
         public static bool OpenAssetCallback(int _, int __)
         {

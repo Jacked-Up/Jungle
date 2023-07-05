@@ -17,6 +17,7 @@ namespace Jungle.Editor
         
         #endregion
 
+        [MenuItem("Window/Jungle/Tutorials/Jungle Editor")]
         public static void TryShowEditorTutorial()
         {
             // Only show if it has never been shown before

@@ -36,7 +36,7 @@ namespace Jungle.Editor
         {
             RepaintGUIContainer();
         }
-        
+
         /// <summary>
         /// Repaint inspector view with selected nodes editor.
         /// </summary>
@@ -51,7 +51,7 @@ namespace Jungle.Editor
             else nodeInspector = null;
             RepaintGUIContainer();
         }
-        
+
         private void RepaintGUIContainer()
         {
             Clear();

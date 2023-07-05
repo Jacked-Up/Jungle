@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Jungle.Nodes;
 using UnityEngine;
+using UnityEngine.Serialization;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -10,7 +11,7 @@ using UnityEditor;
 namespace Jungle
 {
     /// <summary>
-    /// Main Jungle Tree class.
+    /// Jungle sequencer node tree class.
     /// </summary>
     [Serializable]
     [CreateAssetMenu(fileName = "My Jungle Tree 0", menuName = "Jungle Tree", order = 81)]
@@ -19,15 +20,15 @@ namespace Jungle
         #region Variables
         
         /// <summary>
-        /// Array list of all associated nodes.
+        /// Array list of all nodes associated with this Jungle Tree.
         /// </summary>
         [HideInInspector]
         public JungleNode[] nodes = Array.Empty<JungleNode>();
         
         /// <summary>
-        /// List of all currently running nodes.
+        /// List of all actively executing nodes.
         /// </summary>
-        public List<JungleNode> RunningNodes
+        public List<JungleNode> ExecutionList
         {
             get;
             private set; 
@@ -43,7 +44,7 @@ namespace Jungle
         }
 
         /// <summary>
-        /// The Jungle Trees run state.
+        /// The current state.
         /// </summary>
         public StateFlag State
         {
@@ -71,39 +72,39 @@ namespace Jungle
         }
         
         /// <summary>
-        /// 
+        /// Jungle Tree error flags.
         /// </summary>
         [Flags]
         public enum ErrorFlag
         {
             /// <summary>
-            /// 
+            /// This error is thrown when a request to start the Jungle Tree is made but the tree is already running.
             /// </summary>
             AlreadyRunning = 0,
             /// <summary>
-            /// 
+            /// This error is thrown when a request to stop the Jungle Tree is made but the tree isn't running.
             /// </summary>
             IsNotRunning = 1,
             /// <summary>
-            /// 
+            /// This error is thrown when the Jungle Tree is requested to start while the editor is not in play-mode. 
             /// </summary>
             NotInPlayMode = 2,
             /// <summary>
-            /// 
+            /// This error is thrown when the Jungle Tree has no nodes to execute.
             /// </summary>
             NoNodes = 3,
             /// <summary>
-            /// 
+            /// This error is thrown when Jungle fails to find a Jungle Runtime instance in the scene.
             /// </summary>
             NoRuntimeSingletonInstance = 4,
             /// <summary>
-            /// 
+            /// Describes an error-less request. Woo hoo!
             /// </summary>
             None = 99
         }
         
         /// <summary>
-        /// 
+        /// Jungle Tree state flags.
         /// </summary>
         [Flags]
         public enum StateFlag
@@ -127,6 +128,7 @@ namespace Jungle
         /// <summary>
         /// Starts the execution of the Jungle Tree.
         /// </summary>
+        /// <returns>The result of running this request.</returns>>
         public StartResult Start()
         {
             var result = new StartResult
@@ -135,7 +137,7 @@ namespace Jungle
             };
             
             // Must be in play mode in order to start a Jungle Tree
-            if (Application.isPlaying)
+            if (!Application.isPlaying)
             {
 #if UNITY_EDITOR
                 Debug.LogFormat
@@ -172,12 +174,12 @@ namespace Jungle
             }
             
             _startPlayTime = Time.unscaledTime;
-            RunningNodes = new List<JungleNode>
+            ExecutionList = new List<JungleNode>
             {
                 // Find the index of the start node and add to execution list
                 nodes[nodes.ToList().IndexOf(nodes.First(node => node is StartNode))]
             };
-            RunningNodes[0].Initialize(new None());
+            ExecutionList[0].Initialize(new None());
             State = StateFlag.Running;
 
             // Jungle Runtime singleton instance must exist to start
@@ -201,6 +203,7 @@ namespace Jungle
         /// <summary>
         /// Stops the execution of the Jungle Tree.
         /// </summary>
+        /// <returns>The result of running this request.</returns>>
         public void Stop()
         {
             if (State != StateFlag.Running)
@@ -209,7 +212,7 @@ namespace Jungle
             }
 
             PlayTime = 0f;
-            RunningNodes = new List<JungleNode>();
+            ExecutionList = new List<JungleNode>();
             State = StateFlag.Finished;
             
             // Invoke revert methods
@@ -230,8 +233,8 @@ namespace Jungle
             }
             PlayTime = Time.unscaledTime - _startPlayTime;
             
-            var query = new List<JungleNode>(RunningNodes);
-            foreach (var node in RunningNodes)
+            var query = new List<JungleNode>(ExecutionList);
+            foreach (var node in ExecutionList)
             {
                 var finished = node.Execute(out var portCalls);
                 foreach (var call in portCalls)
@@ -261,8 +264,8 @@ namespace Jungle
             }
             // Populate executing nodes with new query ONLY if it has changed
             // I believe this prevents the list from redundantly reallocating new memory. I could be wrong
-            if (!RunningNodes.Equals(query)) RunningNodes = query;
-            if (RunningNodes.Count == 0) Stop();
+            if (!ExecutionList.Equals(query)) ExecutionList = query;
+            if (ExecutionList.Count == 0) Stop();
         }
 
         /// <summary>
@@ -572,6 +575,7 @@ namespace Jungle
     public struct JungleTreeEditorData
     {
         public Vector3 lastViewPosition;
+        public Vector3 lastViewScale;
         public string description;
     }
     

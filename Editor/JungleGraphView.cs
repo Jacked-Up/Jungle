@@ -12,8 +12,10 @@ namespace Jungle.Editor
     public class JungleGraphView : GraphView
     {
         #region Variables
-
+        
         private readonly Vector2 DEFAULT_START_NODE_POSITION = new(100, 120);
+        private const float MINIMUM_ZOOM = 0.5f;
+        private const float MAXIMUM_ZOOM = 1.5f;
         
         /// <summary>
         /// 
@@ -25,7 +27,6 @@ namespace Jungle.Editor
         } = new();
 
         private JungleInspectorView _inspectorView;
-        
         private JungleEditor _jungleEditor;
         
         public new class UxmlFactory : UxmlFactory<JungleGraphView, UxmlTraits> {}
@@ -35,18 +36,19 @@ namespace Jungle.Editor
         public JungleGraphView()
         {
             Insert(0, new GridBackground());
-            
-            SetupZoom(ContentZoomer.DefaultMinScale, ContentZoomer.DefaultMaxScale);
             this.AddManipulator(new ContentDragger());
             this.AddManipulator(new SelectionDragger());
             this.AddManipulator(new RectangleSelector());
-
-            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(JungleEditor.STYLE_SHEET_FILE_PATH);
-            styleSheets.Add(styleSheet);
-            AddToClassList(EditorGUIUtility.isProSkin
-                ? "dark"
-                : "light"
+            SetupZoom
+            (
+                MINIMUM_ZOOM,
+                MAXIMUM_ZOOM,
+                ContentZoomer.DefaultScaleStep,
+                ContentZoomer.DefaultReferenceScale
             );
+            
+            styleSheets.Add(AssetDatabase.LoadAssetAtPath<StyleSheet>(JungleEditor.STYLE_SHEET_FILE_PATH));
+            AddToClassList(EditorGUIUtility.isProSkin ? "dark" : "light");
             
             Undo.undoRedoPerformed += () =>
             {
@@ -55,7 +57,12 @@ namespace Jungle.Editor
             };
         }
         
-        public void Initialize(JungleEditor editor, JungleInspectorView inspectorView, JungleSearchView searchView)
+        public void Initialize
+        (
+            JungleEditor editor,
+            JungleInspectorView inspectorView,
+            JungleSearchView searchView
+        )
         {
             _jungleEditor = editor;
             _inspectorView = inspectorView;
@@ -134,6 +141,11 @@ namespace Jungle.Editor
 
             // The view transform is the graph view "camera"
             viewTransform.position = jungleTree.editorData.lastViewPosition;
+            if (jungleTree.editorData.lastViewScale == Vector3.zero)
+            {
+                jungleTree.editorData.lastViewScale = Vector3.one;
+            }
+            viewTransform.scale = jungleTree.editorData.lastViewScale;
         }
         
         /// <summary>
@@ -149,12 +161,22 @@ namespace Jungle.Editor
             
             foreach (var node in jungleTree.nodes ??= Array.Empty<JungleNode>())
             {
-                if (node == null) continue;
+                if (node == null)
+                {
+                    continue;
+                }
                 GetNodeView(node)?.UpdateNodeView();
             }
 
             // The view transform is the graph view "camera"
+            if (jungleTree.editorData.lastViewPosition != viewTransform.position
+                || jungleTree.editorData.lastViewScale != viewTransform.scale
+                )
+            {
+                EditorUtility.SetDirty(jungleTree);
+            }
             jungleTree.editorData.lastViewPosition = viewTransform.position;
+            jungleTree.editorData.lastViewScale = viewTransform.scale;
         }
         
         /// <summary>
@@ -273,7 +295,7 @@ namespace Jungle.Editor
             
             return graphViewChange;
         }
-
+        
         public override List<Port> GetCompatiblePorts(Port selected, NodeAdapter _)
         {
             // If the port type is null, this means that the node has some kind of issue internally.
@@ -299,6 +321,17 @@ namespace Jungle.Editor
                 evt.menu.AppendSeparator();
                 evt.menu.AppendAction("Select all", ContextRequestSelectAllCallback);
                 evt.menu.AppendSeparator();
+                evt.menu.AppendAction("Preferences", _ =>
+                {
+                    JunglePreferences.OpenWindow();
+                });
+                evt.menu.AppendSeparator();
+                evt.menu.AppendAction("Recenter view", _ =>
+                {
+                    viewTransform.position = Vector3.zero;
+                    viewTransform.scale = Vector3.one;
+                });
+                evt.menu.AppendSeparator();
             }
             else if (evt.target is JungleNodeView)
             {
@@ -313,10 +346,6 @@ namespace Jungle.Editor
             else if (evt.target is Edge)
             {
                 evt.menu.AppendAction("Disconnect", ContextRequestDisconnectNodeCallback);
-            }
-            else if (evt.target is JungleStickyNoteView)
-            {
-                evt.menu.AppendAction("Stinky!", ContextRequestDisconnectNodeCallback);
             }
         }
         
@@ -334,7 +363,7 @@ namespace Jungle.Editor
         {
             
         }
-        
+
         private void ContextRequestCutNodeCallback(DropdownMenuAction obj)
         {
             
