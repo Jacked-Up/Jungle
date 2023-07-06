@@ -340,7 +340,7 @@ namespace Jungle
             get; 
             set;
         } = string.Empty;
-
+        
         /// <summary>
         /// The color of the node in the visual editor.
         /// </summary>

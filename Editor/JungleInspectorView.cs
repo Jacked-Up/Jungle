@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using System.Runtime.CompilerServices;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -67,23 +68,18 @@ namespace Jungle.Editor
             var selectedNode = nodeInspector != null
                 ? nodeInspector.target as JungleNode
                 : null;
-            
+            var editName = selectedNode != null
+                ? selectedNode.name
+                : string.Empty;
+            GUI.enabled = selectedNode != null;
+            editName = GUILayout.TextField(editName, 100);
             if (selectedNode != null)
             {
-                GUILayout.BeginHorizontal();
-                    //EditorGUILayout.Toggle(true, GUILayout.MaxWidth(15f));
-                    selectedNode.name = GUILayout.TextField(selectedNode.name, 100);
-                GUILayout.EndHorizontal();
+                selectedNode.name = !string.IsNullOrEmpty(editName) 
+                    ? editName 
+                    : "Untitled Node";
             }
-            else
-            {
-                GUI.enabled = false;
-                GUILayout.BeginHorizontal();
-                    //EditorGUILayout.Toggle(false, GUILayout.MaxWidth(15f));
-                    GUILayout.TextField(string.Empty);
-                GUILayout.EndHorizontal();
-                GUI.enabled = true;
-            }
+            GUI.enabled = true;
             
             GUILayout.Space(1);
             var lineRect = EditorGUILayout.GetControlRect(false, 1);

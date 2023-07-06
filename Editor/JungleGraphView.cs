@@ -158,28 +158,6 @@ namespace Jungle.Editor
             {
                 return;
             }
-
-
-
-
-
-
-
-
-            var e = Event.current;
-            if (e != null)
-            {
-                Debug.Log(e.commandName);
-            }
-            
-            
-            
-            
-            
-            
-            
-            
-            
             
             foreach (var node in jungleTree.nodes ??= Array.Empty<JungleNode>())
             {
@@ -328,9 +306,11 @@ namespace Jungle.Editor
             }
             // Otherwise the compatible port must not be the same connection direction and the same
             // connection type
-            var compatible = ports.ToList().Where(other => other.direction != selected.direction 
-                                                           && other.node != selected.node 
-                                                           && other.portType == selected.portType);
+            var compatible = ports.ToList().Where(
+                other => 
+                    other.direction != selected.direction 
+                    && other.node != selected.node 
+                    && other.portType == selected.portType);
             return compatible.ToList();
         }
         
@@ -347,7 +327,6 @@ namespace Jungle.Editor
                 {
                     JunglePreferences.OpenWindow();
                 });
-                evt.menu.AppendSeparator();
                 evt.menu.AppendAction("Recenter view", _ =>
                 {
                     viewTransform.position = Vector3.zero;

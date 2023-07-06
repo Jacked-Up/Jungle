@@ -11,7 +11,7 @@ namespace Jungle.Editor
     {
         #region Variables
 
-        private const string TITLE = "Add Node to Tree";
+        private const string TITLE = "Create node";
 
         public static JungleSearchView Instance
         {
