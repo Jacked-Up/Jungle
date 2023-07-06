@@ -100,7 +100,25 @@ namespace Jungle.Editor
         private void Update()
         {
             _graphView?.UpdateNodeViews();
+            UpdateGraphHeader();
+        }
 
+        [OnOpenAsset]
+        public static bool OpenAssetCallback(int _, int __)
+        {
+            if (Selection.activeObject.GetType() != typeof(JungleTree))
+            {
+                return false;
+            }
+            var window = GetWindow<JungleEditor>();
+            window.EditTree = Selection.activeObject as JungleTree;
+            window._inspectorView.UpdateSelection(null);
+            window._graphView?.UpdateGraphView();
+            return true;
+        }
+        
+        private void UpdateGraphHeader()
+        {
             // Update tree title label
             var titleLabel = rootVisualElement.Q<Label>("tree-name-label");
             if (titleLabel != null && EditTree != null)
@@ -131,20 +149,6 @@ namespace Jungle.Editor
             {
                 nodeLabel.text = string.Empty;
             }
-        }
-        
-        [OnOpenAsset]
-        public static bool OpenAssetCallback(int _, int __)
-        {
-            if (Selection.activeObject.GetType() != typeof(JungleTree))
-            {
-                return false;
-            }
-            var window = GetWindow<JungleEditor>();
-            window.EditTree = Selection.activeObject as JungleTree;
-            window._inspectorView.UpdateSelection(null);
-            window._graphView?.UpdateGraphView();
-            return true;
         }
         
         /// <summary>

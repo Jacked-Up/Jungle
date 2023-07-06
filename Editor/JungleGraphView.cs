@@ -32,7 +32,7 @@ namespace Jungle.Editor
         public new class UxmlFactory : UxmlFactory<JungleGraphView, UxmlTraits> {}
         
         #endregion
-        
+
         public JungleGraphView()
         {
             Insert(0, new GridBackground());
@@ -46,7 +46,7 @@ namespace Jungle.Editor
                 ContentZoomer.DefaultScaleStep,
                 ContentZoomer.DefaultReferenceScale
             );
-            
+
             styleSheets.Add(AssetDatabase.LoadAssetAtPath<StyleSheet>(JungleEditor.STYLE_SHEET_FILE_PATH));
             AddToClassList(EditorGUIUtility.isProSkin ? "dark" : "light");
             
@@ -56,7 +56,7 @@ namespace Jungle.Editor
                 AssetDatabase.SaveAssets();
             };
         }
-        
+
         public void Initialize
         (
             JungleEditor editor,
@@ -158,6 +158,28 @@ namespace Jungle.Editor
             {
                 return;
             }
+
+
+
+
+
+
+
+
+            var e = Event.current;
+            if (e != null)
+            {
+                Debug.Log(e.commandName);
+            }
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             foreach (var node in jungleTree.nodes ??= Array.Empty<JungleNode>())
             {
@@ -239,7 +261,7 @@ namespace Jungle.Editor
                 _inspectorView.UpdateSelection(SelectedNodeViews[^1]);
             }
         }
-        
+
         #region Editor Inheritance
 
         private GraphViewChange GraphViewChangedCallback(GraphViewChange graphViewChange)

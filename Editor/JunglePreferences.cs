@@ -87,9 +87,11 @@ namespace Jungle.Editor
             // General settings
             if (_openTabIndex == 0)
             {
+                /* Not quite ready for this just yet...
                 GUILayout.BeginVertical(EditorStyles.helpBox);
                     EditorGUILayout.EnumPopup("Language", SupportedLanguages.English);
                 GUILayout.EndVertical();
+                */
                 
                 GUILayout.BeginVertical(EditorStyles.helpBox);
                 GUILayout.Label("Runtime", EditorStyles.boldLabel);

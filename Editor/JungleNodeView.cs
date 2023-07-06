@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Jungle.Nodes;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
+using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -33,16 +34,12 @@ namespace Jungle.Editor
         public JungleNodeView(JungleNode nodeReference) 
             : base(AssetDatabase.GetAssetPath(Resources.Load("JungleNodeView")))
         {
-            // NEED TO DETECT THIS ERROR
             if (nodeReference == null)
             {
                 return;
             }
             
-            // Sets the node object to the reference and returns true if the node reference
-            // is of type RootNode
             HandleNodeObject(nodeReference);
-
             if (nodeReference.GetType() != typeof(StartNode))
             {
                 HandleInputPortViews();
@@ -51,10 +48,16 @@ namespace Jungle.Editor
             
             // Set color of node in the Jungle Editor
             AddToClassList(nodeReference.NodeColor.ToString().ToLower());
-            AddToClassList(EditorGUIUtility.isProSkin
-                ? "dark"
-                : "light"
+            AddToClassList
+            (
+                EditorGUIUtility.isProSkin
+                    ? "dark"
+                    : "light"
             );
+            
+            mainContainer.Q("icon-image").style.backgroundImage
+                = new StyleBackground(
+                    EditorGUIUtility.ObjectContent(nodeReference, nodeReference.GetType()).image as Texture2D);
         }
         
         public void UpdateNodeView()
@@ -92,13 +95,14 @@ namespace Jungle.Editor
 
             var portTitleName = JungleGUILayout.ShortenString(port.PortName, 30);
             
-            //InputPortView.portName = $"<color={(EditorGUIUtility.isProSkin ? DARK_MODE_TEXT_HEX_CODE : LIGHT_MODE_TEXT_HEX_CODE)}>";
-            InputPortView.portName = $"<b><size=10><i>({portTypeName})</i></size> {portTitleName}</b>";
-            //InputPortView.portName += "</color>";
-
+            InputPortView.portName = $"<color={(EditorGUIUtility.isProSkin ? DARK_MODE_TEXT_HEX_CODE : LIGHT_MODE_TEXT_HEX_CODE)}>";
+            InputPortView.portName += $"<b><size=10><i>({portTypeName})</i></size> {portTitleName}</b>";
+            InputPortView.portName += "</color>";
+            
+            InputPortView.portColor = new Color(0.4f, 0.4f, 0.4f);
             inputContainer.Add(InputPortView);
         }
-
+        
         private void HandleOutputPortViews()
         {
             OutputPortViews = new List<Port>();
@@ -118,10 +122,11 @@ namespace Jungle.Editor
                 
                 var portTitleName = JungleGUILayout.ShortenString(port.PortName, 30);
                 
-                //newPortView.portName = $"<color={(EditorGUIUtility.isProSkin ? DARK_MODE_TEXT_HEX_CODE : LIGHT_MODE_TEXT_HEX_CODE)}>";
-                newPortView.portName = $"<b>{portTitleName} <size=10><i>({portTypeName})</i></size></b>";
-                //newPortView.portName += "</color>";
-                
+                newPortView.portName = $"<color={(EditorGUIUtility.isProSkin ? DARK_MODE_TEXT_HEX_CODE : LIGHT_MODE_TEXT_HEX_CODE)}>";
+                newPortView.portName += $"<b>{portTitleName} <size=10><i>({portTypeName})</i></size></b>";
+                newPortView.portName += "</color>";
+
+                newPortView.portColor = new Color(0.4f, 0.4f, 0.4f);
                 OutputPortViews.Add(newPortView);
                 outputContainer.Add(newPortView);
             }

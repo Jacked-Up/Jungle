@@ -56,7 +56,7 @@ namespace Jungle
         private float _startPlayTime;
 
         /// <summary>
-        /// 
+        /// Data returned when the Jungle Tree is started.
         /// </summary>
         public struct StartResult
         {
@@ -64,7 +64,7 @@ namespace Jungle
         }
         
         /// <summary>
-        /// 
+        /// Data returned when the Jungle Tree is stopped.
         /// </summary>
         public struct StopResult
         {
@@ -122,13 +122,17 @@ namespace Jungle
             /// </summary>
             Finished = 0
         }
+
+#if UNITY_EDITOR
+        public JungleTreeEditorData editorData;
+#endif
         
         #endregion
 
         /// <summary>
         /// Starts the execution of the Jungle Tree.
         /// </summary>
-        /// <returns>The result of running this request.</returns>>
+        /// <returns>The result of running this request.</returns>
         public StartResult Start()
         {
             var result = new StartResult
@@ -141,7 +145,10 @@ namespace Jungle
             {
 #if UNITY_EDITOR
                 Debug.LogFormat
-                (LogType.Error, LogOption.NoStacktrace, this,
+                (
+                    LogType.Error,
+                    LogOption.NoStacktrace,
+                    this,
                     $"[{name}] Failed to start Jungle Tree because the editor is not in play-mode."
                 );
 #endif
@@ -153,7 +160,10 @@ namespace Jungle
             {
 #if UNITY_EDITOR
                 Debug.LogFormat
-                (LogType.Warning, LogOption.NoStacktrace, this,
+                (
+                    LogType.Warning,
+                    LogOption.NoStacktrace, 
+                    this,
                     $"[{name}] Could not start Jungle Tree because it is already running."
                 );
 #endif
@@ -165,7 +175,10 @@ namespace Jungle
             {
 #if UNITY_EDITOR
                 Debug.LogFormat
-                (LogType.Error, LogOption.NoStacktrace, this,
+                (
+                    LogType.Error,
+                    LogOption.NoStacktrace,
+                    this,
                     $"[{name}] Failed to start Jungle Tree because it has no nodes."
                 );
 #endif
@@ -187,7 +200,10 @@ namespace Jungle
             {
 #if UNITY_EDITOR
                 Debug.LogFormat
-                (LogType.Error, LogOption.NoStacktrace, this,
+                (
+                    LogType.Error,
+                    LogOption.NoStacktrace,
+                    this,
                     $"[{name}] Failed to start Jungle Tree because there wasn't a Jungle Runtime " +
                     "instance in the scene."
                 );
@@ -204,13 +220,29 @@ namespace Jungle
         /// Stops the execution of the Jungle Tree.
         /// </summary>
         /// <returns>The result of running this request.</returns>>
-        public void Stop()
+        public StopResult Stop()
         {
+            var result = new StopResult
+            {
+                Error = ErrorFlag.None
+            };
+
+            // Jungle Tree must be already already running to stop
             if (State != StateFlag.Running)
             {
-                return;
+#if UNITY_EDITOR
+                Debug.LogFormat
+                (
+                    LogType.Warning,
+                    LogOption.NoStacktrace, 
+                    this,
+                    $"[{name}] Could not stop Jungle Tree because it is wasn't already running."
+                );
+#endif
+                result.Error = ErrorFlag.IsNotRunning;
+                return result;
             }
-
+            
             PlayTime = 0f;
             ExecutionList = new List<JungleNode>();
             State = StateFlag.Finished;
@@ -218,12 +250,30 @@ namespace Jungle
             // Invoke revert methods
             _revertActions?.InvokeAll();
             _revertActions = new ActionsList();
+
+            // Jungle Runtime singleton instance must exist to stop
+            if (JungleRuntime.Singleton == null)
+            {
+#if UNITY_EDITOR
+                Debug.LogFormat
+                (
+                    LogType.Error, 
+                    LogOption.NoStacktrace, 
+                    this,
+                    $"[{name}] Failed to stop Jungle Tree because there wasn't a Jungle Runtime " +
+                    "instance in the scene."
+                );
+#endif
+                result.Error = ErrorFlag.NoRuntimeSingletonInstance;
+                return result;
+            }
             
             JungleRuntime.Singleton.StopTree(this);
+            return result;
         }
         
         /// <summary>
-        /// Executes all listening nodes in the node tree and removes nodes which have finished execution
+        /// Performs execution for all executing nodes for this frame. 
         /// </summary>
         public void Update()
         {
@@ -267,9 +317,9 @@ namespace Jungle
             if (!ExecutionList.Equals(query)) ExecutionList = query;
             if (ExecutionList.Count == 0) Stop();
         }
-
+        
         /// <summary>
-        /// Adds an action to be invoked when the Jungle Tree execution ends or is stopped.
+        /// Adds an action to be invoked when the Jungle Tree execution ends.
         /// </summary>
         /// <param name="action">Action to add to the invoke list.</param>
         public void AddRevertAction(Action action)
@@ -279,7 +329,7 @@ namespace Jungle
         }
         
         /// <summary>
-        /// Removed an action from the revert invoke list.
+        /// Removes an action from the revert list.
         /// </summary>
         /// <param name="action">Action to be removed from the invoke list.</param>
         public void RemoveRevertAction(Action action)
@@ -305,6 +355,7 @@ namespace Jungle
             }
             
             // Create unique file name
+            // DOES NOT WORK!
             var i = 0;
             var path = $"{AssetDatabase.GetAssetPath(this)}/{name}_{nodeType.Name}_{i.ToString()}.asset";
             while (AssetDatabase.LoadAssetAtPath(path, typeof(JungleNode)) != null) i++;
@@ -421,15 +472,6 @@ namespace Jungle
         {
             Undo.RecordObject(node, $"Removed edge from {node.name}");
             node.RemoveConnection(disconnect, portIndex);
-        }
-        
-        public JungleTreeEditorData editorData;
-        
-        public delegate void JungleTreeValidateCallback();
-        public event JungleTreeValidateCallback OnJungleTreeValidate;
-        private void OnValidate()
-        {
-            OnJungleTreeValidate?.Invoke();
         }
 #endif
     }

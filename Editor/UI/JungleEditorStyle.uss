@@ -12,22 +12,10 @@
     --spacing: 12.5;
 }
 
-.dark Edge {
-    --edge-color: rgba(1, 1, 1, 1);
-}
-
-.dark #tree-name-label {
+.dark #graph-header {
     color: rgba(255, 255, 255, 0.31);
 }
 
-.light #tree-name-label {
-    color: rgba(0, 0, 0, 0.31);
-}
-
-.dark #node-name-label {
-    color: rgba(255, 255, 255, 0.31);
-}
-
-.light #node-name-label {
+.light #graph-header {
     color: rgba(0, 0, 0, 0.31);
 }
