@@ -603,13 +603,10 @@ namespace Jungle
                 GUILayout.EndHorizontal();
             GUILayout.EndVertical();
             
-            if (!Application.isPlaying)
+            if (Application.isPlaying && instance.State == JungleTree.StateFlag.Running)
             {
-                GUI.enabled = true;
-                EditorGUILayout.HelpBox("Jungle Trees can only be debugged in play mode.", MessageType.Info);
+                Repaint();
             }
-            
-            Repaint();
         }
     }
     
