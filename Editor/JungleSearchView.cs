@@ -49,7 +49,7 @@ namespace Jungle.Editor
             {
                 var typeObject = CreateInstance(nodeType) as JungleNode;
                 if (typeObject == null || typeObject is StartNode) return;
-                var typeCategory = typeObject.Category;
+                var typeCategory = typeObject.GetCategory();
                 if (categories.All(category => category.CategoryName != typeCategory))
                 {
                     categories.Add(new CategoryCache(typeCategory, typeObject));
@@ -84,7 +84,7 @@ namespace Jungle.Editor
                     });
                     category.Nodes.ForEach(node =>
                     {
-                        searchTree.Add(new SearchTreeEntry(new GUIContent(node.TitleName))
+                        searchTree.Add(new SearchTreeEntry(new GUIContent(node.GetTitle()))
                         {
                             userData = node,
                             level = 2
@@ -96,7 +96,7 @@ namespace Jungle.Editor
             {
                 category.Nodes.ForEach(node =>
                 {
-                    searchTree.Add(new SearchTreeEntry(new GUIContent(node.TitleName))
+                    searchTree.Add(new SearchTreeEntry(new GUIContent(node.GetTitle()))
                     {
                         userData = node,
                         level = 1

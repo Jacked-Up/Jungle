@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Jungle.Nodes.Time
 {
-    [Node(TitleName = "Wait For Frames", 
+    [Node(Title = "Wait For Frames", 
         Category = "Time",
         Color = Color.Purple, 
         OutputPortNames = new []{"Elapsed"}

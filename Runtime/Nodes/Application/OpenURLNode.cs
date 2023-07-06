@@ -6,7 +6,7 @@ using UnityEditor;
 namespace Jungle.Nodes.Application
 {
     [Node(
-        TitleName = "Open URL",
+        Title = "Open URL",
         Category = "Application", 
         Color = Color.Violet,
         InputPortName = "Open"

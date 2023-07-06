@@ -6,7 +6,7 @@ using UnityEditor;
 namespace Jungle.Nodes.Application
 {
     [Node(
-        TitleName = "Quit Application",
+        Title = "Quit Application",
         Category = "Application", 
         Color = Color.Red,
         InputPortName = "Quit",

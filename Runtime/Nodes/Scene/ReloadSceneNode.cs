@@ -8,7 +8,7 @@ using UnityEditor;
 namespace Jungle.Nodes.Scene
 {
     [Node(
-        TitleName = "Reload Scene",
+        Title = "Reload Scene",
         Category = "Scene",
         Color = Color.Orange,
         InputPortName = "Reload",

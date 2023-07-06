@@ -101,8 +101,7 @@ namespace Jungle
         
 #if UNITY_EDITOR
         /// <summary>
-        /// Jungle editor properties of the node.
-        /// *Strongly recommended to not touch this.
+        /// Editor property cache for the Jungle editor.
         /// </summary>
         public NodeProperties NodeProperties
         {
@@ -110,54 +109,71 @@ namespace Jungle
             set
             {
                 nodeProperties = value;
-                UnityEditor.EditorUtility.SetDirty(this);
+                EditorUtility.SetDirty(this);
             }
         }
         [SerializeField] [HideInInspector] 
         private NodeProperties nodeProperties;
 
         /// <summary>
-        /// Returns the Jungle nodes cached icon as a Texture2D.
+        /// Returns the nodes title name.
         /// </summary>
-        /// <returns>The cached icon.</returns>
+        public string GetTitle()
+        {
+            return NodeInfo.Title;
+        }
+        
+        /// <summary>
+        /// Returns a description of the nodes function. 
+        /// </summary>
+        public string GetTooltip()
+        {
+            return NodeInfo.Tooltip;
+        }
+        
+        /// <summary>
+        /// Returns the nodes category.
+        /// </summary>
+        public string GetCategory()
+        {
+            return NodeInfo.Category;
+        }
+        
+        /// <summary>
+        /// Returns the nodes accent color.
+        /// </summary>
+        public Color GetColor()
+        {
+            return NodeInfo.Color;
+        }
+
+        /// <summary>
+        /// Returns the nodes cached icon.
+        /// </summary>
         public Texture2D GetIcon()
         {
             return EditorGUIUtility.ObjectContent(this, GetType()).image as Texture2D;
         }
         
-        private NodeAttribute NodeInfo
-            => (NodeAttribute) GetType().GetCustomAttributes(typeof(NodeAttribute), true)[0];
+        /// <summary>
+        /// Returns the input port name and value type.
+        /// </summary>
+        public NodeAttribute.PortInfo GetInput()
+        {
+            return NodeInfo.InputInfo;
+        }
 
         /// <summary>
-        /// Main name of the node displayed in big letters inside the Jungle editor graph view.
+        /// Returns all a list array of output ports names and value types.
         /// </summary>
-        public string TitleName => NodeInfo.TitleName;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public string Tooltip => NodeInfo.Tooltip;
+        public NodeAttribute.PortInfo[] GetOutputs()
+        {
+            return NodeInfo.OutputInfo;
+        }
         
-        /// <summary>
-        /// Category placement of the node inside the create node window.
-        /// </summary>
-        public string Category => NodeInfo.Category;
-
-        /// <summary>
-        /// Displayed color of the node inside the Jungle editor graph view.
-        /// </summary>
-        public Color NodeColor => NodeInfo.Color;
-
-        /// <summary>
-        /// Name and data type info about the input port.
-        /// </summary>
-        public NodeAttribute.PortInfo InputInfo => NodeInfo.InputInfo;
-
-        /// <summary>
-        /// Name and data type info about the output ports.
-        /// </summary>
-        public NodeAttribute.PortInfo[] OutputInfo => NodeInfo.OutputInfo;
-
+        private NodeAttribute NodeInfo 
+            => (NodeAttribute)GetType().GetCustomAttributes(typeof(NodeAttribute), true)[0];
+        
         /// <summary>
         /// 
         /// </summary>
@@ -173,14 +189,14 @@ namespace Jungle
             
             // Fix any mismatches with the port attributes
             // Output ports count error
-            if (OutputPorts.Length != OutputInfo.Length)
+            if (OutputPorts.Length != GetOutputs().Length)
             {
                 if (OutputPorts.Length != 0)
                 {
                     Debug.LogError($"[{name}] Output port count was changed was changed. All connections have " +
                                    "been lost to prevent type mismatch errors");
                 }
-                var repairedPortsList = OutputInfo.Select(info =>
+                var repairedPortsList = GetOutputs().Select(info =>
                 {
                     return new JunglePort(Array.Empty<JungleNode>(), info.PortType);
                 }).ToArray();
@@ -188,12 +204,12 @@ namespace Jungle
             }
             // Output ports type mismatch error
             var newPortsList = new List<JunglePort>();
-            for (var i = 0; i < OutputInfo.Length; i++)
+            for (var i = 0; i < GetOutputs().Length; i++)
             {
-                var portType = OutputInfo[i].PortType;
+                var portType = GetOutputs()[i].PortType;
                 if (OutputPorts[i].PortType != portType)
                 {
-                    Debug.LogError($"[{name}] Port by name \"{OutputInfo[i].PortName}\" was of type" +
+                    Debug.LogError($"[{name}] Port by name \"{GetOutputs()[i].PortName}\" was of type" +
                                    $" {OutputPorts[i].PortType} but is now of type {portType}." +
                                    " All port connections have been lost to prevent type mismatch errors");
                 }
@@ -213,7 +229,7 @@ namespace Jungle
         /// <param name="portIndex"></param>
         public void RemoveConnection(JungleNode node, byte portIndex)
         {
-            if (OutputPorts.Length != OutputInfo.Length)
+            if (OutputPorts.Length != GetOutputs().Length)
             {
                 return;
             }
@@ -269,7 +285,7 @@ namespace Jungle
             this.portType = portType.AssemblyQualifiedName;
         }
     }
-
+    
     /// <summary>
     /// Container that stores the port ID and the value to send to the port
     /// </summary>
@@ -301,48 +317,74 @@ namespace Jungle
         /// <summary>
         /// The name the node goes by.
         /// </summary>
-        public string TitleName { get; set; } = "Untitled Node";
+        public string Title
+        {
+            get; 
+            set;
+        } = "Untitled Node";
 
         /// <summary>
         /// Tooltip displayed while hovering over the node.
         /// </summary>
-        public string Tooltip { get; set; } = string.Empty;
-        
+        public string Tooltip
+        {
+            get; 
+            set;
+        } = string.Empty;
+
         /// <summary>
         /// ...
         /// </summary>
-        public string Category { get; set; } = string.Empty;
+        public string Category
+        {
+            get; 
+            set;
+        } = string.Empty;
 
         /// <summary>
         /// The color of the node in the visual editor.
         /// </summary>
-        public JungleNode.Color Color { get; set; } = JungleNode.Color.Blue;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public string InputPortName { get; set; } = "Execute";
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public Type InputPortType { get; set; } = typeof(None);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public string[] OutputPortNames { get; set; } =
+        public JungleNode.Color Color
         {
-            "Next"
-        };
+            get;
+            set;
+        } = JungleNode.Color.Blue;
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        public string InputPortName
+        {
+            get; 
+            set;
+        } = "Execute";
 
         /// <summary>
         /// 
         /// </summary>
-        public Type[] OutputPortTypes { get; set; } =
+        public Type InputPortType
         {
-            typeof(None)
-        };
+            get; 
+            set;
+        } = typeof(None);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string[] OutputPortNames
+        {
+            get;
+            set;
+        } = {"Next"};
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public Type[] OutputPortTypes
+        {
+            get; 
+            set;
+        } = {typeof(None)};
 
         /// <summary>
         /// The nodes input port

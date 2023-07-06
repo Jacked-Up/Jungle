@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Jungle.Nodes.Object.Rigidbody
 {
     [Node(
-        TitleName = "Get Rigidbody 2D",
+        Title = "Get Rigidbody 2D",
         Category = "Object/Physics",
         Color = Color.Teal,
         InputPortName = "Find",

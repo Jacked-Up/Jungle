@@ -3,7 +3,7 @@
 namespace Jungle.Nodes.Object.GameObject
 {
     [Node(
-        TitleName = "Destroy Game Object",
+        Title = "Destroy Game Object",
         Category = "Object",
         Color = Color.Red,
         InputPortName = "Destroy",

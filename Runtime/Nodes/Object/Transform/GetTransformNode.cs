@@ -7,7 +7,7 @@ using UnityEditor;
 namespace Jungle.Nodes.Object.Transform
 {
     [Node(
-        TitleName = "Get Transform",
+        Title = "Get Transform",
         Category = "Object/Transform",
         Color = Color.Teal,
         InputPortName = "Find",

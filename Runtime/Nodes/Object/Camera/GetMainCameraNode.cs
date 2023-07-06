@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Jungle.Nodes.Object.Camera
 {
     [Node(
-        TitleName = "Get Main Camera",
+        Title = "Get Main Camera",
         Category = "Object/Camera",
         Color = Color.Teal,
         InputPortName = "Get",

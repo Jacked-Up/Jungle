@@ -9,7 +9,7 @@ using UnityEditor;
 namespace Jungle.Nodes.Scene
 {
     [Node(
-        TitleName = "Get Active Scene",
+        Title = "Get Active Scene",
         Category = "Scene",
         Color = Color.Teal,
         InputPortName = "Get",

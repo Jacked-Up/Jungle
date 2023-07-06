@@ -7,7 +7,7 @@ using UnityEditor;
 namespace Jungle.Nodes.Object.Transform
 {
     [Node(
-        TitleName = "Set Rotation",
+        Title = "Set Rotation",
         Category = "Object/Transform",
         Color = Color.Yellow,
         InputPortName = "Set",

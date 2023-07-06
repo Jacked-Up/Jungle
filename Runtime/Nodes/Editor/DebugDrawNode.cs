@@ -6,7 +6,7 @@ using UnityEditor;
 namespace Jungle.Nodes.Editor
 {
     [Node(
-        TitleName = "Debug Draw",
+        Title = "Debug Draw",
         Category = "Editor", 
         Color = Color.White,
         InputPortName = "Draw"

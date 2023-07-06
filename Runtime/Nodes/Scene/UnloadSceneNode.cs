@@ -8,7 +8,7 @@ using UnityEditor;
 namespace Jungle.Nodes.Scene
 {
     [Node(
-        TitleName = "Unload Scene",
+        Title = "Unload Scene",
         Category = "Scene",
         Color = Color.Orange,
         InputPortName = "Unload",

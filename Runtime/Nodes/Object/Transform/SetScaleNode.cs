@@ -7,7 +7,7 @@ using UnityEditor;
 namespace Jungle.Nodes.Object.Transform
 {
     [Node(
-        TitleName = "Set Scale",
+        Title = "Set Scale",
         Category = "Object/Transform",
         Color = Color.Yellow,
         InputPortName = "Set",

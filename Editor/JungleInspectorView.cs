@@ -71,7 +71,7 @@ namespace Jungle.Editor
             if (selectedNode != null)
             {
                 GUILayout.BeginHorizontal();
-                    var enabled = EditorGUILayout.Toggle(true, GUILayout.MaxWidth(15f));
+                    //EditorGUILayout.Toggle(true, GUILayout.MaxWidth(15f));
                     selectedNode.name = GUILayout.TextField(selectedNode.name, 100);
                 GUILayout.EndHorizontal();
             }
@@ -79,7 +79,7 @@ namespace Jungle.Editor
             {
                 GUI.enabled = false;
                 GUILayout.BeginHorizontal();
-                    EditorGUILayout.Toggle(false, GUILayout.MaxWidth(15f));
+                    //EditorGUILayout.Toggle(false, GUILayout.MaxWidth(15f));
                     GUILayout.TextField(string.Empty);
                 GUILayout.EndHorizontal();
                 GUI.enabled = true;

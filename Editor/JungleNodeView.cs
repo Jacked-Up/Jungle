@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Jungle.Nodes;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
-using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -47,7 +46,7 @@ namespace Jungle.Editor
             HandleOutputPortViews();
             
             // Set color of node in the Jungle Editor
-            AddToClassList(nodeReference.NodeColor.ToString().ToLower());
+            AddToClassList(nodeReference.GetColor().ToString().ToLower());
             AddToClassList
             (
                 EditorGUIUtility.isProSkin
@@ -68,8 +67,8 @@ namespace Jungle.Editor
         private void HandleNodeObject(JungleNode reference)
         {
             Node = reference;
-            title = JungleGUILayout.ShortenString(reference.TitleName, 50);
-            tooltip = reference.Tooltip;
+            title = JungleGUILayout.ShortenString(reference.GetTitle(), 50);
+            tooltip = reference.GetTooltip();
             viewDataKey = reference.NodeProperties.guid;
             var graphPosition = reference.NodeProperties.position;
             style.left = graphPosition.x;
@@ -78,7 +77,7 @@ namespace Jungle.Editor
 
         private void HandleInputPortViews()
         {
-            var port = Node.InputInfo;
+            var port = Node.GetInput();
             
             InputPortView = InstantiatePort
             (
@@ -105,7 +104,7 @@ namespace Jungle.Editor
         private void HandleOutputPortViews()
         {
             OutputPortViews = new List<Port>();
-            foreach (var port in Node.OutputInfo)
+            foreach (var port in Node.GetOutputs())
             {
                 var newPortView = InstantiatePort
                 (
@@ -124,7 +123,7 @@ namespace Jungle.Editor
                 newPortView.portName = $"<color={(EditorGUIUtility.isProSkin ? DARK_MODE_TEXT_HEX_CODE : LIGHT_MODE_TEXT_HEX_CODE)}>";
                 newPortView.portName += $"<b>{portTitleName} <size=10><i>({portTypeName})</i></size></b>";
                 newPortView.portName += "</color>";
-
+                
                 newPortView.portColor = new Color(0.4f, 0.4f, 0.4f);
                 OutputPortViews.Add(newPortView);
                 outputContainer.Add(newPortView);

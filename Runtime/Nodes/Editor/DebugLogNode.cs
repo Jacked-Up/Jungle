@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Jungle.Nodes.Editor
 {
     [Node(
-        TitleName = "Debug Log",
+        Title = "Debug Log",
         Category = "Editor", 
         Color = Color.White
     )]

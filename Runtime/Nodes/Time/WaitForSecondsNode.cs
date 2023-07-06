@@ -6,7 +6,7 @@ using UnityEditor;
 
 namespace Jungle.Nodes.Time
 {
-    [Node(TitleName = "Wait For Seconds",
+    [Node(Title = "Wait For Seconds",
         Category = "Time",
         Color = Color.Purple,
         OutputPortNames = new []{"Elapsed"}

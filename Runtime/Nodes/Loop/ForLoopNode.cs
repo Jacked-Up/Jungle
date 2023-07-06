@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Jungle.Nodes.Loop
 {
-    [Node(TitleName = "For Loop",
+    [Node(Title = "For Loop",
         Category = "Loop",
         Color = Color.Purple,
         OutputPortNames = new []{"Invoke", "Done"}
