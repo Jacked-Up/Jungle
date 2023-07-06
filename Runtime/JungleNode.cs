@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Jungle
 {
@@ -66,7 +69,7 @@ namespace Jungle
             White,
             Black
         }
-        
+
         #endregion
         
         /// <summary>
@@ -113,6 +116,15 @@ namespace Jungle
         [SerializeField] [HideInInspector] 
         private NodeProperties nodeProperties;
 
+        /// <summary>
+        /// Returns the Jungle nodes cached icon as a Texture2D.
+        /// </summary>
+        /// <returns>The cached icon.</returns>
+        public Texture2D GetIcon()
+        {
+            return EditorGUIUtility.ObjectContent(this, GetType()).image as Texture2D;
+        }
+        
         private NodeAttribute NodeInfo
             => (NodeAttribute) GetType().GetCustomAttributes(typeof(NodeAttribute), true)[0];
 

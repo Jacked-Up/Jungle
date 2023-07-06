@@ -55,9 +55,8 @@ namespace Jungle.Editor
                     : "light"
             );
             
-            mainContainer.Q("icon-image").style.backgroundImage
-                = new StyleBackground(
-                    EditorGUIUtility.ObjectContent(nodeReference, nodeReference.GetType()).image as Texture2D);
+            // Set the nodes icon to the Jungle nodes cached icon
+            mainContainer.Q("icon-image").style.backgroundImage = new StyleBackground(nodeReference.GetIcon());
         }
         
         public void UpdateNodeView()
