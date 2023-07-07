@@ -11,8 +11,6 @@ namespace Jungle.Editor
     {
         #region Variables
 
-        private const string TITLE = "Create node";
-
         public static JungleSearchView Instance
         {
             get;
@@ -45,6 +43,8 @@ namespace Jungle.Editor
         {
             var nodeTypes = TypeCache.GetTypesDerivedFrom<JungleNode>();
             var categories = new List<CategoryCache>();
+            var groupEntries = new List<SearchTreeEntry>(); // Store group entries separately
+
             nodeTypes.ToList().ForEach(nodeType =>
             {
                 var typeObject = CreateInstance(nodeType) as JungleNode;
@@ -64,53 +64,89 @@ namespace Jungle.Editor
                     }
                 }
             });
-            
-            var searchTree = new List<SearchTreeEntry>
-            {
-                new SearchTreeGroupEntry(new GUIContent(TITLE))
-            };
-            var noCategoryNodes = new List<CategoryCache>();
+
+            var searchTree = new List<SearchTreeEntry>();
+            var noCategoryNodes = new List<JungleNode>();
+
             categories.ForEach(category =>
             {
                 if (string.IsNullOrEmpty(category.CategoryName))
                 {
-                    noCategoryNodes.Add(category);
+                    noCategoryNodes.AddRange(category.Nodes);
                 }
                 else
                 {
-                    searchTree.Add(new SearchTreeGroupEntry(new GUIContent(category.CategoryName))
+                    var categoryNames = category.CategoryName.Split('/');
+                    var currentGroup = searchTree;
+                    var groupName = "";
+
+                    for (var i = 0; i < categoryNames.Length; i++)
                     {
-                        level = 1
-                    });
+                        groupName += categoryNames[i];
+
+                        var existingGroup = FindGroupEntry(currentGroup, groupName);
+                        if (existingGroup == null)
+                        {
+                            var newGroup = new SearchTreeGroupEntry(new GUIContent(categoryNames[i]))
+                            {
+                                level = i + 1
+                            };
+
+                            currentGroup.Add(newGroup);
+                            groupEntries.Add(newGroup);
+                            //currentGroup = newGroup.children; // Use the children list of the group entry
+                        }
+                        else
+                        {
+                            //currentGroup = existingGroup.children; // Use the children list of the existing group entry
+                        }
+
+                        groupName += "/";
+                    }
+
                     category.Nodes.ForEach(node =>
                     {
-                        searchTree.Add(new SearchTreeEntry(new GUIContent(node.GetTitle()))
+                        currentGroup.Add(new SearchTreeEntry(new GUIContent(node.GetTitle(), node.GetIcon()))
                         {
                             userData = node,
-                            level = 2
+                            level = categoryNames.Length + 1
                         });
                     });
                 }
             });
-            noCategoryNodes.ForEach(category =>
+
+            // Add group entries to the search tree before individual entries
+            searchTree.AddRange(groupEntries);
+
+            // Add individual entries after group entries
+            noCategoryNodes.ForEach(node =>
             {
-                category.Nodes.ForEach(node =>
+                searchTree.Add(new SearchTreeEntry(new GUIContent(node.GetTitle()))
                 {
-                    searchTree.Add(new SearchTreeEntry(new GUIContent(node.GetTitle()))
-                    {
-                        userData = node,
-                        level = 1
-                    });
+                    userData = node,
+                    level = 1
                 });
             });
+
             return searchTree;
         }
-
+        
+        private SearchTreeEntry FindGroupEntry(List<SearchTreeEntry> searchTree, string groupName)
+        {
+            foreach (var entry in searchTree)
+            {
+                if (entry is SearchTreeGroupEntry groupEntry && groupEntry.name == groupName)
+                {
+                    return groupEntry;
+                }
+            }
+            return null;
+        }
+        
         public bool OnSelectEntry(SearchTreeEntry searchTreeEntry, SearchWindowContext context)
         {
             var mousePosition = _jungleEditor.MousePositionToGraphViewPosition(context.screenMousePosition);
             return _jungleEditor.TryAddNodeToGraph(searchTreeEntry.userData.GetType(), mousePosition);
-            return true;
         }
     }
 }

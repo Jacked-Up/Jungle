@@ -450,7 +450,7 @@ namespace Jungle
             }
         }
     }
-
+    
     /// <summary>
     /// Default Jungle node type.
     /// </summary>
@@ -472,7 +472,7 @@ namespace Jungle
         /// The unique GUID of the node
         /// </summary>
         public string guid;
-
+        
         /// <summary>
         /// Position of the node inside the graph view
         /// </summary>
@@ -485,17 +485,17 @@ namespace Jungle
     /// </summary>
     public static class JungleNodeColors
     {
-        public const string Red =     "DC1313FF";
-        public const string Orange = "FF8500FF";
-        public const string Yellow = "D9BE12FF";
-        public const string Green =  "00CC4AFF";
-        public const string Teal =   "15DEABFF";
-        public const string Cyan =   "00EAFFFF";
-        public const string Blue =   "0069FFFF";
-        public const string Purple = "B300FFFF";
-        public const string Pink =   "FF00EAFF";
-        public const string Violet = "85034CFF";
-        public const string White =  "FFFFFFFF";
-        public const string Black =  "101010FF";
+        public const string Red    = "#DC1313FF";
+        public const string Orange = "#FF8500FF";
+        public const string Yellow = "#D9BE12FF";
+        public const string Green  = "#00CC4AFF";
+        public const string Teal   = "#15DEABFF";
+        public const string Cyan   = "#00EAFFFF";
+        public const string Blue   = "#0069FFFF";
+        public const string Purple = "#B300FFFF";
+        public const string Pink   = "#FF00EAFF";
+        public const string Violet = "#85034CFF";
+        public const string White  = "#FFFFFFFF";
+        public const string Black  = "#101010FF";
     }
 }
