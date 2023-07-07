@@ -3,7 +3,7 @@
     [Node(Title = "Start", 
         Tooltip = "The first executed node.",
         Category = "HIDDEN", 
-        Color = Color.Green,
+        Color = JungleNodeColors.Green,
         OutputPortNames = new []{ "" },
         OutputPortTypes = new []{ typeof(None) }
     )]

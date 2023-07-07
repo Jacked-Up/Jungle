@@ -8,7 +8,7 @@ namespace Jungle.Nodes.Application
     [Node(
         Title = "Open URL",
         Category = "Application", 
-        Color = Color.Violet,
+        Color = JungleNodeColors.Violet,
         InputPortName = "Open"
     )]
     public class OpenURLNode : JungleNode

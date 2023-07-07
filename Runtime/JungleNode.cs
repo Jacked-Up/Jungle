@@ -142,11 +142,17 @@ namespace Jungle
         /// <summary>
         /// Returns the nodes accent color.
         /// </summary>
-        public Color GetColor()
+        public UnityEngine.Color GetColor()
         {
-            return NodeInfo.Color;
+            // Remove all stray hashtags from the hex code
+            var colorString = NodeInfo.Color.Replace("#", string.Empty);
+            if (ColorUtility.TryParseHtmlString($"#{colorString}", out var color))
+            { 
+                return color;
+            }
+            return UnityEngine.Color.clear;
         }
-
+        
         /// <summary>
         /// Returns the nodes cached icon.
         /// </summary>
@@ -219,7 +225,7 @@ namespace Jungle
                 newPortsList.Add(new JunglePort(connections, portType));
             }
             outputPorts = newPortsList.ToArray();
-            UnityEditor.EditorUtility.SetDirty(this);
+            EditorUtility.SetDirty(this);
         }
 
         /// <summary>
@@ -242,7 +248,7 @@ namespace Jungle
             }
             outputPortsQuery[portIndex] = new JunglePort(connections.ToArray(), outputPort.PortType);
             outputPorts = outputPortsQuery.ToArray();
-            UnityEditor.EditorUtility.SetDirty(this);
+            EditorUtility.SetDirty(this);
         }
 #endif
     }
@@ -340,15 +346,15 @@ namespace Jungle
             get; 
             set;
         } = string.Empty;
-        
+
         /// <summary>
-        /// The color of the node in the visual editor.
+        /// The hex code color of the nodes accent.
         /// </summary>
-        public JungleNode.Color Color
+        public string Color
         {
             get;
             set;
-        } = JungleNode.Color.Blue;
+        } = JungleNodeColors.Blue;
         
         /// <summary>
         /// 
@@ -473,4 +479,23 @@ namespace Jungle
         public Vector2 position;
     }
 #endif
+    
+    /// <summary>
+    /// List of hex codes for Jungle Node accent color.
+    /// </summary>
+    public static class JungleNodeColors
+    {
+        public const string Red =     "DC1313FF";
+        public const string Orange = "FF8500FF";
+        public const string Yellow = "D9BE12FF";
+        public const string Green =  "00CC4AFF";
+        public const string Teal =   "15DEABFF";
+        public const string Cyan =   "00EAFFFF";
+        public const string Blue =   "0069FFFF";
+        public const string Purple = "B300FFFF";
+        public const string Pink =   "FF00EAFF";
+        public const string Violet = "85034CFF";
+        public const string White =  "FFFFFFFF";
+        public const string Black =  "101010FF";
+    }
 }

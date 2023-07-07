@@ -46,7 +46,7 @@ namespace Jungle.Editor
             HandleOutputPortViews();
             
             // Set color of node in the Jungle Editor
-            AddToClassList(nodeReference.GetColor().ToString().ToLower());
+            mainContainer.Q("accent").style.backgroundColor = nodeReference.GetColor();
             AddToClassList
             (
                 EditorGUIUtility.isProSkin

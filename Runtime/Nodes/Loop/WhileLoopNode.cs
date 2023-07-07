@@ -6,7 +6,7 @@ namespace Jungle.Nodes.Loop
 {
     [Node(Title = "While Loop", 
         Category = "Loop",
-        Color = Color.Purple,
+        Color = JungleNodeColors.Purple,
         OutputPortNames = new []{"Invoke", "Done"}
     )]
     public class WhileLoopNode : JungleNode

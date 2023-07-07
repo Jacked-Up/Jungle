@@ -5,7 +5,7 @@ namespace Jungle.Nodes.Loop
 {
     [Node(Title = "For Loop",
         Category = "Loop",
-        Color = Color.Purple,
+        Color = JungleNodeColors.Purple,
         OutputPortNames = new []{"Invoke", "Done"}
     )]
     public class ForLoopNode : JungleNode

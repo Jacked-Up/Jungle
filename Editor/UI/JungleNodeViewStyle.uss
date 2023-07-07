@@ -25,54 +25,6 @@
     color: rgba(0, 0, 0, 255);
 }
 
-.red #accent {
-    background-color: rgb(220, 19, 19);
-}
-
-.orange #accent {
-    background-color: rgb(255, 133, 0);
-}
-
-.yellow #accent {
-    background-color: rgb(217, 190, 18);
-}
-
-.green #accent {
-    background-color: rgb(0, 204, 74);
-}
-
-.teal #accent {
-    background-color: rgb(21, 222, 171);
-}
-
-.cyan #accent {
-    background-color: rgb(0, 234, 255);
-}
-
-.blue #accent {
-    background-color: rgb(0, 105, 255);
-}
-
-.purple #accent {
-    background-color: rgb(179, 0, 255);
-}
-
-.pink #accent {
-    background-color: rgb(255, 0, 234);
-}
-
-.violet #accent {
-    background-color: rgb(133, 3, 76);
-}
-
-.white #accent {
-    background-color: rgb(255, 255, 255);
-}
-
-.black #accent {
-    background-color: rgb(16, 16, 16);
-}
-
 .dark #node {
     border-left-color: rgb(36, 36, 36);
     border-right-color: rgb(36, 36, 36);

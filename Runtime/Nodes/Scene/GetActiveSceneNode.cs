@@ -11,7 +11,7 @@ namespace Jungle.Nodes.Scene
     [Node(
         Title = "Get Active Scene",
         Category = "Scene",
-        Color = Color.Teal,
+        Color = JungleNodeColors.Teal,
         InputPortName = "Get",
         OutputPortNames = new []{ "Found" },
         OutputPortTypes = new []{ typeof(UnityEngine.SceneManagement.Scene) }

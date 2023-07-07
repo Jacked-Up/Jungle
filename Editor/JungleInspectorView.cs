@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+﻿using Jungle.Nodes.Scene;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -12,17 +12,10 @@ namespace Jungle.Editor
     {
         #region Variables
 
-        public JungleNode InspectingNode
-        {
-            get
-            {
-                if (nodeInspector == null)
-                {
-                    return null;
-                }
-                return nodeInspector.target as JungleNode;
-            }
-        }
+        public JungleNode InspectingNode =>
+            nodeInspector != null
+                ? nodeInspector.target as JungleNode
+                : null;
 
         private UnityEditor.Editor nodeInspector;
 

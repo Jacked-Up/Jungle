@@ -9,7 +9,7 @@ namespace Jungle.Nodes.Object.Transform
     [Node(
         Title = "Get Transform",
         Category = "Object/Transform",
-        Color = Color.Teal,
+        Color = JungleNodeColors.Teal,
         InputPortName = "Find",
         InputPortType = typeof(UnityEngine.GameObject),
         OutputPortNames = new []{ "Found" },

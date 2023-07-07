@@ -9,7 +9,7 @@ namespace Jungle.Nodes.Object.Transform
     [Node(
         Title = "Set Scale",
         Category = "Object/Transform",
-        Color = Color.Yellow,
+        Color = JungleNodeColors.Yellow,
         InputPortName = "Set",
         InputPortType = typeof(UnityEngine.Transform),
         OutputPortNames = new []{ "Finished" },

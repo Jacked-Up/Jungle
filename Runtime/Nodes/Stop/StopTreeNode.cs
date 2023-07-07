@@ -5,7 +5,7 @@ namespace Jungle.Nodes.Stop
 {
     [Node(Title = "Stop Tree(s)",
         Category = "Stop",
-        Color = Color.Red,
+        Color = JungleNodeColors.Red,
         OutputPortNames = new string[0]
     )]
     public class StopTreeNode : JungleNode
