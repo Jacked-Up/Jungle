@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Jungle.Nodes.Loop
 {
     [Node(Title = "While Loop", 
-        Category = "Loop",
+        Group = "Loop",
         Color = JungleNodeColors.Purple,
         OutputPortNames = new []{"Invoke", "Done"}
     )]

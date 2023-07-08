@@ -8,7 +8,7 @@ namespace Jungle.Nodes.Object.Transform
 {
     [Node(
         Title = "Get Transform",
-        Category = "Object/Transform",
+        Group = "Object/Transform",
         Color = JungleNodeColors.Teal,
         InputPortName = "Find",
         InputPortType = typeof(UnityEngine.GameObject),

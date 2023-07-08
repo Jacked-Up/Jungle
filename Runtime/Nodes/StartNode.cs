@@ -1,8 +1,9 @@
 ﻿namespace Jungle.Nodes
 {
-    [Node(Title = "Start", 
+    [Node(
+        Title = "Start", 
         Tooltip = "The first executed node.",
-        Category = "HIDDEN", 
+        Group = "Internal:HIDDEN", 
         Color = JungleNodeColors.Green,
         OutputPortNames = new []{ "" },
         OutputPortTypes = new []{ typeof(None) }

@@ -5,7 +5,7 @@ namespace Jungle.Nodes.Object.Rigidbody
 {
     [Node(
         Title = "Get Rigidbody",
-        Category = "Object/Physics",
+        Group = "Object/Physics",
         Color = JungleNodeColors.Teal,
         InputPortName = "Find",
         InputPortType = typeof(UnityEngine.GameObject),

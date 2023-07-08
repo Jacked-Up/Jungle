@@ -134,9 +134,9 @@ namespace Jungle
         /// <summary>
         /// Returns the nodes category.
         /// </summary>
-        public string GetCategory()
+        public string GetGroup()
         {
-            return NodeInfo.Category;
+            return NodeInfo.Group;
         }
         
         /// <summary>
@@ -341,9 +341,9 @@ namespace Jungle
         /// <summary>
         /// ...
         /// </summary>
-        public string Category
+        public string Group
         {
-            get; 
+            get;
             set;
         } = string.Empty;
 

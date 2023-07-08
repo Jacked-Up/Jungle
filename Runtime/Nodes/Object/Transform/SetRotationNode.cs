@@ -8,7 +8,7 @@ namespace Jungle.Nodes.Object.Transform
 {
     [Node(
         Title = "Set Rotation",
-        Category = "Object/Transform",
+        Group = "Object/Transform",
         Color = JungleNodeColors.Yellow,
         InputPortName = "Set",
         InputPortType = typeof(UnityEngine.Transform),

@@ -10,7 +10,7 @@ namespace Jungle.Nodes.Scene
 {
     [Node(
         Title = "Get Active Scene",
-        Category = "Scene",
+        Group = "Scene",
         Color = JungleNodeColors.Teal,
         InputPortName = "Get",
         OutputPortNames = new []{ "Found" },

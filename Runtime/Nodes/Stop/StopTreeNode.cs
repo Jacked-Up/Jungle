@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Jungle.Nodes.Stop
 {
     [Node(Title = "Stop Tree(s)",
-        Category = "Stop",
+        Group = "Stop",
         Color = JungleNodeColors.Red,
         OutputPortNames = new string[0]
     )]

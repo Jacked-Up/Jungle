@@ -7,7 +7,7 @@ namespace Jungle.Nodes.Application
 {
     [Node(
         Title = "Quit Application",
-        Category = "Application", 
+        Group = "Application", 
         Color = JungleNodeColors.Red,
         InputPortName = "Quit",
         OutputPortNames = new string[0],

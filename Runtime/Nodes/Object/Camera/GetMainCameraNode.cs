@@ -5,7 +5,7 @@ namespace Jungle.Nodes.Object.Camera
 {
     [Node(
         Title = "Get Main Camera",
-        Category = "Object/Camera",
+        Group = "Object/Camera",
         Color = JungleNodeColors.Teal,
         InputPortName = "Get",
         InputPortType = typeof(None),

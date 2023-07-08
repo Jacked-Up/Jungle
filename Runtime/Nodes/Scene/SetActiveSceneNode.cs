@@ -9,7 +9,7 @@ namespace Jungle.Nodes.Scene
 {
     [Node(
         Title = "Set Active Scene",
-        Category = "Scene",
+        Group = "Scene",
         Color = JungleNodeColors.Orange,
         InputPortName = "Set Active",
         InputPortType = typeof(UnityEngine.SceneManagement.Scene),

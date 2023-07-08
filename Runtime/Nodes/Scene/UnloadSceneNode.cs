@@ -9,7 +9,7 @@ namespace Jungle.Nodes.Scene
 {
     [Node(
         Title = "Unload Scene",
-        Category = "Scene",
+        Group = "Scene",
         Color = JungleNodeColors.Orange,
         InputPortName = "Unload",
         InputPortType = typeof(UnityEngine.SceneManagement.Scene),

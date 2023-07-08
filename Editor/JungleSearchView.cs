@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using Jungle.Nodes;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -18,16 +18,30 @@ namespace Jungle.Editor
         }
         
         private JungleEditor _jungleEditor;
-        
-        private struct CategoryCache
-        {
-            public readonly string CategoryName;
-            public readonly List<JungleNode> Nodes;
 
-            public CategoryCache(string categoryName, JungleNode firstNode)
+        private struct Group
+        {
+            public readonly string Name;
+            public readonly List<Group> Subgroups;
+            public readonly List<Item> Items;
+
+            public Group(string name)
             {
-                CategoryName = categoryName;
-                Nodes = new List<JungleNode> {firstNode};
+                Name = name;
+                Subgroups = new List<Group>();
+                Items = new List<Item>();
+            }
+        }
+        
+        private struct Item
+        {
+            public readonly string Name;
+            public readonly Type Type;
+            
+            public Item(string name, Type type)
+            {
+                Name = name;
+                Type = type;
             }
         }
 
@@ -39,110 +53,44 @@ namespace Jungle.Editor
             Instance = this;
         }
         
-        public List<SearchTreeEntry> CreateSearchTree(SearchWindowContext context)
+        public List<SearchTreeEntry> CreateSearchTree(SearchWindowContext _)
         {
-            var nodeTypes = TypeCache.GetTypesDerivedFrom<JungleNode>();
-            var categories = new List<CategoryCache>();
-            var groupEntries = new List<SearchTreeEntry>(); // Store group entries separately
+            var jungleNodeTypes = TypeCache.GetTypesDerivedFrom<JungleNode>();
+            var groups = new List<Group>();
 
-            nodeTypes.ToList().ForEach(nodeType =>
+            foreach (var jungleNodeType in jungleNodeTypes)
             {
-                var typeObject = CreateInstance(nodeType) as JungleNode;
-                if (typeObject == null || typeObject is StartNode) return;
-                var typeCategory = typeObject.GetCategory();
-                if (categories.All(category => category.CategoryName != typeCategory))
+                var instance = CreateInstance(jungleNodeType) as JungleNode;
+                if (instance == null)
                 {
-                    categories.Add(new CategoryCache(typeCategory, typeObject));
+                    continue;
                 }
-                else
+
+                var group = instance.GetGroup();
+                if (group.Contains(":HIDDEN"))
                 {
-                    for (var i = 0; i < categories.Count; i++)
+                    continue;
+                }
+
+                var groupList = group.Split('/');
+                foreach (var groupListName in groupList)
+                {
+                    var preexistingGroup = groups.FirstOrDefault(g => g.Name == groupListName);
+                    if (!preexistingGroup.Equals(new Group()))
                     {
-                        if (categories[i].CategoryName != typeCategory) continue;
-                        categories[i].Nodes.Add(typeObject);
-                        break;
+                        //var rebuildGroup = new Group(groupListName, preexistingGroup.Subgroups, preexistingGroup.Items);
                     }
-                }
-            });
-
-            var searchTree = new List<SearchTreeEntry>();
-            var noCategoryNodes = new List<JungleNode>();
-
-            categories.ForEach(category =>
-            {
-                if (string.IsNullOrEmpty(category.CategoryName))
-                {
-                    noCategoryNodes.AddRange(category.Nodes);
-                }
-                else
-                {
-                    var categoryNames = category.CategoryName.Split('/');
-                    var currentGroup = searchTree;
-                    var groupName = "";
-
-                    for (var i = 0; i < categoryNames.Length; i++)
+                    else
                     {
-                        groupName += categoryNames[i];
-
-                        var existingGroup = FindGroupEntry(currentGroup, groupName);
-                        if (existingGroup == null)
-                        {
-                            var newGroup = new SearchTreeGroupEntry(new GUIContent(categoryNames[i]))
-                            {
-                                level = i + 1
-                            };
-
-                            currentGroup.Add(newGroup);
-                            groupEntries.Add(newGroup);
-                            //currentGroup = newGroup.children; // Use the children list of the group entry
-                        }
-                        else
-                        {
-                            //currentGroup = existingGroup.children; // Use the children list of the existing group entry
-                        }
-
-                        groupName += "/";
+                        
                     }
-
-                    category.Nodes.ForEach(node =>
-                    {
-                        currentGroup.Add(new SearchTreeEntry(new GUIContent(node.GetTitle(), node.GetIcon()))
-                        {
-                            userData = node,
-                            level = categoryNames.Length + 1
-                        });
-                    });
-                }
-            });
-
-            // Add group entries to the search tree before individual entries
-            searchTree.AddRange(groupEntries);
-
-            // Add individual entries after group entries
-            noCategoryNodes.ForEach(node =>
-            {
-                searchTree.Add(new SearchTreeEntry(new GUIContent(node.GetTitle()))
-                {
-                    userData = node,
-                    level = 1
-                });
-            });
-
-            return searchTree;
-        }
-        
-        private SearchTreeEntry FindGroupEntry(List<SearchTreeEntry> searchTree, string groupName)
-        {
-            foreach (var entry in searchTree)
-            {
-                if (entry is SearchTreeGroupEntry groupEntry && groupEntry.name == groupName)
-                {
-                    return groupEntry;
                 }
             }
-            return null;
+            
+            var searchTree = new List<SearchTreeEntry>();
+            return searchTree;
         }
-        
+
         public bool OnSelectEntry(SearchTreeEntry searchTreeEntry, SearchWindowContext context)
         {
             var mousePosition = _jungleEditor.MousePositionToGraphViewPosition(context.screenMousePosition);

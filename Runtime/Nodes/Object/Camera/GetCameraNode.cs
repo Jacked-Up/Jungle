@@ -5,7 +5,7 @@ namespace Jungle.Nodes.Object.Camera
 {
     [Node(
         Title = "Get Camera",
-        Category = "Object/Camera",
+        Group = "Object/Camera",
         Color = JungleNodeColors.Teal,
         InputPortName = "Find",
         InputPortType = typeof(UnityEngine.GameObject),

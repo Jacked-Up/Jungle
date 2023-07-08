@@ -9,7 +9,7 @@ namespace Jungle.Nodes.Object.GameObject
     [Node(
         Title = "Get Game Object",
         Tooltip = "Finds a game object in the scene by name or tag.",
-        Category = "Object",
+        Group = "Object",
         Color = JungleNodeColors.Teal,
         InputPortName = "Find",
         OutputPortNames = new []{ "Found" },
