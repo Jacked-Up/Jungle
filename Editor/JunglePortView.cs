@@ -13,9 +13,6 @@ namespace Jungle.Editor
             private GraphViewChange graphViewChange;
             private List<Edge> edgesToCreate;
             private List<GraphElement> edgesToDelete;
-       
-            public event DropEdgeInEmptySpace OnDropEdgeInEmptySpace;
-            public delegate void DropEdgeInEmptySpace(Type outputType, Vector2 dropPosition);
             
             public JungleEdgeConnectorListener()
             {
@@ -30,9 +27,8 @@ namespace Jungle.Editor
                 {
                     return;
                 }
-                OnDropEdgeInEmptySpace?.Invoke(edge.output.portType, position);
-                
-                SearchWindow.Open(new SearchWindowContext(position), JungleSearchView.Instance);
+                JungleEditor.Singleton.SearchView.SetupContext(edge.output.portType, position);
+                SearchWindow.Open(new SearchWindowContext(Vector2.zero), JungleEditor.Singleton.SearchView);
             }
             
             public void OnDrop(GraphView graphView, Edge edge)

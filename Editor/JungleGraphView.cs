@@ -27,7 +27,6 @@ namespace Jungle.Editor
         } = new();
 
         private JungleInspectorView _inspectorView;
-        private JungleEditor _jungleEditor;
         
         public new class UxmlFactory : UxmlFactory<JungleGraphView, UxmlTraits> {}
         
@@ -57,18 +56,12 @@ namespace Jungle.Editor
             };
         }
 
-        public void Initialize
-        (
-            JungleEditor editor,
-            JungleInspectorView inspectorView,
-            JungleSearchView searchView
-        )
+        public void Initialize(JungleInspectorView inspectorView)
         {
-            _jungleEditor = editor;
             _inspectorView = inspectorView;
             nodeCreationRequest = context =>
             {
-                SearchWindow.Open(new SearchWindowContext(context.screenMousePosition), searchView);
+                SearchWindow.Open(new SearchWindowContext(context.screenMousePosition), JungleEditor.Singleton.SearchView);
             };
         }
         
@@ -77,7 +70,7 @@ namespace Jungle.Editor
         /// </summary>
         public void UpdateGraphView()
         {
-            var jungleTree = _jungleEditor.EditTree;
+            var jungleTree = JungleEditor.Singleton.EditTree;
             if (jungleTree == null)
             {
                 return;
@@ -153,7 +146,7 @@ namespace Jungle.Editor
         /// </summary>
         public void UpdateNodeViews()
         {
-            var jungleTree = _jungleEditor.EditTree;
+            var jungleTree = JungleEditor.Singleton.EditTree;
             if (jungleTree == null)
             {
                 return;
@@ -186,7 +179,7 @@ namespace Jungle.Editor
         /// <param name="position"></param>
         public JungleNodeView CreateNode(Type nodeType, Vector2 position)
         {
-            var jungleTree = _jungleEditor.EditTree;
+            var jungleTree = JungleEditor.Singleton.EditTree;
             if (jungleTree == null)
             {
                 return null;
@@ -244,7 +237,7 @@ namespace Jungle.Editor
 
         private GraphViewChange GraphViewChangedCallback(GraphViewChange graphViewChange)
         {
-            var jungleTree = _jungleEditor.EditTree;
+            var jungleTree = JungleEditor.Singleton.EditTree;
             if (jungleTree == null)
             {
                 return graphViewChange;
@@ -318,10 +311,13 @@ namespace Jungle.Editor
         {
             if (evt.target is JungleGraphView)
             {
-                evt.menu.AppendAction("Create node", ContextRequestCreateNodeCallback);
-                evt.menu.AppendAction("Create sticky note", ContextRequestCreateStickyNoteCallback);
+                evt.menu.AppendAction("Add node", ContextRequestCreateNodeCallback);
+                evt.menu.AppendAction("Add sticky note", ContextRequestCreateStickyNoteCallback);
                 evt.menu.AppendSeparator();
-                evt.menu.AppendAction("Select all", ContextRequestSelectAllCallback);
+                evt.menu.AppendAction("Select all", _ =>
+                {
+                    nodes.ToList().ForEach(AddToSelection);
+                });
                 evt.menu.AppendSeparator();
                 evt.menu.AppendAction("Preferences", _ =>
                 {

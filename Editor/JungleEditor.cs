@@ -13,9 +13,20 @@ namespace Jungle.Editor
         #region Variables
         
         private const string SEARCH_FILTER = "t:JungleTree";
-        private const string TAB_TITLE = "Jungle Editor";
         public const string STYLE_SHEET_FILE_PATH = "Packages/com.jackedupsoftware.jungle/Editor/UI/JungleEditorStyle.uss";
+        
+        /// <summary>
+        /// Singleton reference to the Jungle Editor. Only one Jungle Editor instance can exist at a time.
+        /// </summary>
+        public static JungleEditor Singleton
+        {
+            get;
+            private set;
+        }
 
+        /// <summary>
+        /// Reference to the Jungle Tree currently being edited in the Jungle Editor.
+        /// </summary>
         public JungleTree EditTree
         {
             get
@@ -56,9 +67,11 @@ namespace Jungle.Editor
             }
         }
         private JungleTree _editTree;
+
+        public JungleSearchView SearchView => _searchView;
+        private JungleSearchView _searchView;
         
         private JungleInspectorView _inspectorView;
-        private JungleSearchView _searchView;
         private JungleGraphView _graphView;
 
         #endregion
@@ -70,30 +83,29 @@ namespace Jungle.Editor
                 EditorGUIUtility.isProSkin
                     ? "d_BlendTree Icon"
                     : "BlendTree Icon"
-            );
-            tabIcon.text = TAB_TITLE;
-            titleContent = tabIcon;
+            ).image;
+            titleContent = new GUIContent("Jungle Editor", tabIcon);
+            
+            Singleton = this;
+            _searchView = CreateInstance<JungleSearchView>();
         }
         
         private void CreateGUI()
         {
             JungleTutorials.TryShowEditorTutorial();
-            
+
             var jungleEditorFilePath = AssetDatabase.GetAssetPath(Resources.Load("JungleEditor"));
             var visualTreeAsset = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(jungleEditorFilePath);
             visualTreeAsset.CloneTree(rootVisualElement);
             
             var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(STYLE_SHEET_FILE_PATH);
             rootVisualElement.styleSheets.Add(styleSheet);
-            
+
             _inspectorView = rootVisualElement.Q<JungleInspectorView>("inspector-view");
             _inspectorView.Initialize();
-            
-            _searchView = CreateInstance<JungleSearchView>();
-            _searchView.Initialize(this);
-            
+
             _graphView = rootVisualElement.Q<JungleGraphView>("graph-view");
-            _graphView.Initialize(this, _inspectorView, _searchView);
+            _graphView.Initialize(_inspectorView);
             _graphView?.UpdateGraphView();
         }
         
@@ -110,10 +122,10 @@ namespace Jungle.Editor
             {
                 return false;
             }
-            var window = GetWindow<JungleEditor>();
-            window.EditTree = Selection.activeObject as JungleTree;
-            window._inspectorView.UpdateSelection(null);
-            window._graphView?.UpdateGraphView();
+            Singleton = GetWindow<JungleEditor>();
+            Singleton.EditTree = Selection.activeObject as JungleTree;
+            Singleton._inspectorView.UpdateSelection(null);
+            Singleton._graphView?.UpdateGraphView();
             return true;
         }
         

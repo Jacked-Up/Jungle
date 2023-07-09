@@ -11,14 +11,20 @@ namespace Jungle.Editor
     {
         #region Variables
 
-        public static JungleSearchView Instance
+        private JungleEditor _jungleEditor;
+        private ContextRequest? _contextRequest;
+        private struct ContextRequest
         {
-            get;
-            private set;
+            public readonly Type Context;
+            public readonly Vector2 DropPosition;
+
+            public ContextRequest(Type context, Vector2 dropPosition)
+            {
+                Context = context;
+                DropPosition = dropPosition;
+            }
         }
         
-        private JungleEditor _jungleEditor;
-
         private struct Group
         {
             public readonly string Name;
@@ -46,19 +52,61 @@ namespace Jungle.Editor
         }
 
         #endregion
-
-        public void Initialize(JungleEditor editor)
+        
+        public void SetupContext(Type context, Vector2 dropPosition)
         {
-            _jungleEditor = editor;
-            Instance = this;
+            //_contextRequest = new ContextRequest(context, dropPosition);
         }
         
         public List<SearchTreeEntry> CreateSearchTree(SearchWindowContext _)
         {
-            var jungleNodeTypes = TypeCache.GetTypesDerivedFrom<JungleNode>();
+            var allJungleNodeTypes = TypeCache.GetTypesDerivedFrom<JungleNode>();
+            var searchTree = new List<SearchTreeEntry>();
+            allJungleNodeTypes.ToList().ForEach(node =>
+            {
+                var nodeInstance = CreateInstance(node) as JungleNode;
+                searchTree.Add(new SearchTreeEntry(new GUIContent(nodeInstance.GetIcon(), nodeInstance.GetTitle())));
+            });
+            
+            /*
+            // Build search view without context
+            if (_contextRequest == null)
+            {
+                allJungleNodeTypes.ToList().ForEach(node =>
+                {
+                    var nodeInstance = CreateInstance(node) as JungleNode;
+                    searchTree.Add(new SearchTreeEntry(new GUIContent(nodeInstance.GetIcon(), nodeInstance.GetTitle())));
+                });
+            }
+            // Build search view with context
+            else
+            {
+                var contextType = _contextRequest.Value.Context;
+                var contextualJungleNodeTypes = new List<JungleNode>();
+                foreach (var jungleNodeType in allJungleNodeTypes)
+                {
+                    var instance = CreateInstance(jungleNodeType) as JungleNode;
+                    if (instance == null) continue;
+                    
+                    if (instance.GetInput().PortType == contextType)
+                    {
+                        contextualJungleNodeTypes.Add(instance);
+                    }
+                }
+                
+                contextualJungleNodeTypes.ForEach(node =>
+                {
+                    searchTree.Add(new SearchTreeEntry(new GUIContent(node.GetIcon(), node.GetTitle())));
+                });
+            }
+            */
+
+            _contextRequest = null;
+            return searchTree;
+            /*
             var groups = new List<Group>();
 
-            foreach (var jungleNodeType in jungleNodeTypes)
+            foreach (var jungleNodeType in allJungleNodeTypes)
             {
                 var instance = CreateInstance(jungleNodeType) as JungleNode;
                 if (instance == null)
@@ -89,6 +137,7 @@ namespace Jungle.Editor
             
             var searchTree = new List<SearchTreeEntry>();
             return searchTree;
+            */
         }
 
         public bool OnSelectEntry(SearchTreeEntry searchTreeEntry, SearchWindowContext context)
