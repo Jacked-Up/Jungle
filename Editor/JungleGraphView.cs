@@ -16,6 +16,12 @@ namespace Jungle.Editor
         private readonly Vector2 DEFAULT_START_NODE_POSITION = new(100, 120);
         private const float MINIMUM_ZOOM = 0.5f;
         private const float MAXIMUM_ZOOM = 1.5f;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static JungleGraphView Singleton => _singleton;
+        private static JungleGraphView _singleton;
         
         /// <summary>
         /// 
@@ -26,14 +32,14 @@ namespace Jungle.Editor
             private set;
         } = new();
 
-        private JungleInspectorView _inspectorView;
-        
         public new class UxmlFactory : UxmlFactory<JungleGraphView, UxmlTraits> {}
         
         #endregion
 
         public JungleGraphView()
         {
+            _singleton = this;
+            
             Insert(0, new GridBackground());
             this.AddManipulator(new ContentDragger());
             this.AddManipulator(new SelectionDragger());
@@ -54,17 +60,13 @@ namespace Jungle.Editor
                 UpdateGraphView();
                 AssetDatabase.SaveAssets();
             };
-        }
-
-        public void Initialize(JungleInspectorView inspectorView)
-        {
-            _inspectorView = inspectorView;
+            
             nodeCreationRequest = context =>
             {
                 SearchWindow.Open(new SearchWindowContext(context.screenMousePosition), JungleEditor.Singleton.SearchView);
             };
         }
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -196,7 +198,7 @@ namespace Jungle.Editor
             {
                 return null;
             }
-            var nodeView = GetNodeByGuid(node.NodeProperties.guid);
+            var nodeView = GetNodeByGuid(node.NodeEditorProperties.guid);
             return nodeView as JungleNodeView;
         }
 
@@ -208,7 +210,7 @@ namespace Jungle.Editor
                 return;
             }
             SelectedNodeViews.Add(selected);
-            _inspectorView.UpdateSelection(selected);
+            JungleInspectorView.Singleton.UpdateSelection(selected);
         }
         
         private void NodeUnselectedCallback(JungleNodeView unselected)
@@ -223,16 +225,16 @@ namespace Jungle.Editor
             // If no nodes views are selected, clear the node inspector
             if (SelectedNodeViews.Count == 0)
             {
-                _inspectorView.UpdateSelection(null);
+                JungleInspectorView.Singleton.UpdateSelection(null);
             }
             // If the currently inspected node is the node that has been deselected,
             // select the last node in the selection list
-            else if (_inspectorView.InspectingNode == unselected.Node)
+            else if (JungleInspectorView.Singleton.InspectingNode == unselected.Node)
             {
-                _inspectorView.UpdateSelection(SelectedNodeViews[^1]);
+                JungleInspectorView.Singleton.UpdateSelection(SelectedNodeViews[^1]);
             }
         }
-
+        
         #region Editor Inheritance
 
         private GraphViewChange GraphViewChangedCallback(GraphViewChange graphViewChange)
@@ -307,58 +309,52 @@ namespace Jungle.Editor
             return compatible.ToList();
         }
         
-        public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
+        public override void BuildContextualMenu(ContextualMenuPopulateEvent context)
         {
-            if (evt.target is JungleGraphView)
+            if (context.shiftKey)
+                Debug.Log("SHIFT");
+            
+            if (context.target is JungleGraphView)
             {
-                evt.menu.AppendAction("Add node", ContextRequestCreateNodeCallback);
-                evt.menu.AppendAction("Add sticky note", ContextRequestCreateStickyNoteCallback);
-                evt.menu.AppendSeparator();
-                evt.menu.AppendAction("Select all", _ =>
+                context.menu.AppendAction("Add node", _ =>
+                {
+                    SearchWindow.Open(new SearchWindowContext(Vector2.zero), JungleEditor.Singleton.SearchView);
+                });
+                context.menu.AppendAction("Add sticky note", _ =>
+                {
+                    AddElement(new StickyNote());
+                });
+                context.menu.AppendSeparator();
+                context.menu.AppendAction("Select all", _ =>
                 {
                     nodes.ToList().ForEach(AddToSelection);
                 });
-                evt.menu.AppendSeparator();
-                evt.menu.AppendAction("Preferences", _ =>
+                context.menu.AppendSeparator();
+                context.menu.AppendAction("Preferences", _ =>
                 {
                     JunglePreferences.OpenWindow();
                 });
-                evt.menu.AppendAction("Recenter view", _ =>
+                context.menu.AppendAction("Recenter view", _ =>
                 {
                     viewTransform.position = Vector3.zero;
                     viewTransform.scale = Vector3.one;
                 });
-                evt.menu.AppendSeparator();
+                context.menu.AppendSeparator();
             }
-            else if (evt.target is JungleNodeView)
+            else if (context.target is JungleNodeView)
             {
-                evt.menu.AppendAction("Cut", ContextRequestCutNodeCallback);
-                evt.menu.AppendAction("Copy", ContextRequestCopyNodeCallback);
-                evt.menu.AppendAction("Paste", ContextRequestPasteNodeCallback, DropdownMenuAction.Status.Disabled);
-                evt.menu.AppendSeparator();
-                evt.menu.AppendAction("Duplicate", ContextRequestDuplicateNodeCallback);
-                evt.menu.AppendSeparator();
-                evt.menu.AppendAction("Delete", ContextRequestDeleteNodeCallback);
+                context.menu.AppendAction("Cut", ContextRequestCutNodeCallback);
+                context.menu.AppendAction("Copy", ContextRequestCopyNodeCallback);
+                context.menu.AppendAction("Paste", ContextRequestPasteNodeCallback, DropdownMenuAction.Status.Disabled);
+                context.menu.AppendSeparator();
+                context.menu.AppendAction("Duplicate", ContextRequestDuplicateNodeCallback);
+                context.menu.AppendSeparator();
+                context.menu.AppendAction("Delete", ContextRequestDeleteNodeCallback);
             }
-            else if (evt.target is Edge)
+            else if (context.target is Edge)
             {
-                evt.menu.AppendAction("Disconnect", ContextRequestDisconnectNodeCallback);
+                context.menu.AppendAction("Disconnect", ContextRequestDisconnectNodeCallback);
             }
-        }
-        
-        private void ContextRequestCreateNodeCallback(DropdownMenuAction obj)
-        {
-            
-        }
-        
-        private void ContextRequestCreateStickyNoteCallback(DropdownMenuAction obj)
-        {
-            AddElement(new StickyNote());
-        }
-        
-        private void ContextRequestSelectAllCallback(DropdownMenuAction obj)
-        {
-            
         }
 
         private void ContextRequestCutNodeCallback(DropdownMenuAction obj)

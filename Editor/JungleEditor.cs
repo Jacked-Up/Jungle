@@ -87,7 +87,10 @@ namespace Jungle.Editor
             titleContent = new GUIContent("Jungle Editor", tabIcon);
             
             Singleton = this;
-            _searchView = CreateInstance<JungleSearchView>();
+            if (_searchView == null)
+            {
+                _searchView = CreateInstance<JungleSearchView>();
+            }
         }
         
         private void CreateGUI()
@@ -105,7 +108,6 @@ namespace Jungle.Editor
             _inspectorView.Initialize();
 
             _graphView = rootVisualElement.Q<JungleGraphView>("graph-view");
-            _graphView.Initialize(_inspectorView);
             _graphView?.UpdateGraphView();
         }
         
@@ -122,10 +124,10 @@ namespace Jungle.Editor
             {
                 return false;
             }
-            Singleton = GetWindow<JungleEditor>();
-            Singleton.EditTree = Selection.activeObject as JungleTree;
-            Singleton._inspectorView.UpdateSelection(null);
-            Singleton._graphView?.UpdateGraphView();
+            var instance = GetWindow<JungleEditor>();
+            instance.EditTree = Selection.activeObject as JungleTree;
+            instance._inspectorView.UpdateSelection(null);
+            instance._graphView?.UpdateGraphView();
             return true;
         }
         
@@ -173,6 +175,7 @@ namespace Jungle.Editor
         {
             var nodeView = _graphView?.CreateNode(nodeType, graphPosition);
             //OnSelectedNode(nodeView);
+            _graphView?.UpdateGraphView();
             return _graphView != null;
         }
         
@@ -183,8 +186,7 @@ namespace Jungle.Editor
         /// <returns></returns>
         public Vector2 MousePositionToGraphViewPosition(Vector2 screenMousePosition)
         {
-            var mousePosition = rootVisualElement.ChangeCoordinatesTo(rootVisualElement.parent,
-                screenMousePosition - position.position);
+            var mousePosition = rootVisualElement.ChangeCoordinatesTo(rootVisualElement.parent, screenMousePosition - position.position);
             return _graphView.contentViewContainer.WorldToLocal(mousePosition);
         }
         

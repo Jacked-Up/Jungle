@@ -69,8 +69,8 @@ namespace Jungle.Editor
             Node = reference;
             title = JungleGUILayout.ShortenString(reference.GetTitle(), 50);
             tooltip = reference.GetTooltip();
-            viewDataKey = reference.NodeProperties.guid;
-            var graphPosition = reference.NodeProperties.position;
+            viewDataKey = reference.NodeEditorProperties.guid;
+            var graphPosition = reference.NodeEditorProperties.position;
             style.left = graphPosition.x;
             style.top = graphPosition.y;
         }
@@ -186,12 +186,12 @@ namespace Jungle.Editor
             
             base.SetPosition(position);
             Undo.RecordObject(Node, $"Set {Node.name} position");
-            var nodeProperties = new NodeProperties
+            var nodeProperties = new NodeEditorProperties
             {
-                guid = Node.NodeProperties.guid,
+                guid = Node.NodeEditorProperties.guid,
                 position = new Vector2(position.xMin, position.yMin)
             };
-            Node.NodeProperties = nodeProperties;
+            Node.NodeEditorProperties = nodeProperties;
         }
         
         public override Port InstantiatePort(

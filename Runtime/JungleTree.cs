@@ -363,7 +363,7 @@ namespace Jungle
             
             // Build node and populate graph view properties
             node.Tree = this;
-            node.NodeProperties = new NodeProperties
+            node.NodeEditorProperties = new NodeEditorProperties
             {
                 guid = GUID.Generate().ToString(),
                 position = position
@@ -414,10 +414,10 @@ namespace Jungle
             
             // Build node and populate graph view properties
             node.Tree = this;
-            node.NodeProperties = new NodeProperties
+            node.NodeEditorProperties = new NodeEditorProperties
             {
                 guid = GUID.Generate().ToString(),
-                position = original.NodeProperties.position + new Vector2(35, 35)
+                position = original.NodeEditorProperties.position + new Vector2(35, 35)
             };
             
             // Add new node instance to list

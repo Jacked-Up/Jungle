@@ -2,13 +2,14 @@
   "name": "com.jackedupsoftware.jungle",
   "version": "1.0.0",
   "displayName": "Jungle",
-  "description": "Visual node-based sequencer.",
+  "description": "A game-changing sequencer system for building out intricate sequences, from missions to quests, from dialogs to cinematics, and so much more, all through a robust node-based visual editor.",
   "unity": "2021.3",
-  "documentationUrl": "https://www.jackedup.xyz/jungle/docs",
+  "documentationUrl": "https://jackedupsoftware.com/jungle",
+  "changelogUrl": "https://jackedupsoftware.com/jungle",
   "author": {
-    "name": "Jacked Up Studios LLC",
-    "email": "support@jackedup.xyz",
-    "url": "https://www.jackedup.xyz/jungle"
+    "name": "Jacked Up Software LLC",
+    "email": "support@jackedupsoftware.com",
+    "url": "https://www.jackedupsoftware.com/jungle"
   },
   "dependencies": {
     "com.unity.ugui": "1.0.0",

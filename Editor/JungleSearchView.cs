@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Jungle.Nodes;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Jungle.Editor
 {
@@ -55,33 +57,65 @@ namespace Jungle.Editor
         
         public void SetupContext(Type context, Vector2 dropPosition)
         {
-            //_contextRequest = new ContextRequest(context, dropPosition);
+            _contextRequest = new ContextRequest(context, dropPosition);
+            SearchWindow.Open(new SearchWindowContext(dropPosition), this);
         }
         
         public List<SearchTreeEntry> CreateSearchTree(SearchWindowContext _)
         {
             var allJungleNodeTypes = TypeCache.GetTypesDerivedFrom<JungleNode>();
             var searchTree = new List<SearchTreeEntry>();
-            allJungleNodeTypes.ToList().ForEach(node =>
-            {
-                var nodeInstance = CreateInstance(node) as JungleNode;
-                searchTree.Add(new SearchTreeEntry(new GUIContent(nodeInstance.GetIcon(), nodeInstance.GetTitle())));
-            });
-            
-            /*
+
             // Build search view without context
             if (_contextRequest == null)
             {
+                searchTree.Add(new SearchTreeGroupEntry(new GUIContent("Add Node")));
+                
+                var groups = new List<Group>();
+
+                foreach (var jungleNodeType in allJungleNodeTypes)
+                {
+                    var instance = CreateInstance(jungleNodeType) as JungleNode;
+                    if (instance == null)
+                    {
+                        continue;
+                    }
+
+                    var group = instance.GetGroup();
+                    if (group.Contains(":HIDDEN"))
+                    {
+                        continue;
+                    }
+
+                    var groupList = group.Split('/');
+                    foreach (var groupListName in groupList)
+                    {
+                        var preexistingGroup = groups.FirstOrDefault(g => g.Name == groupListName);
+                        if (!preexistingGroup.Equals(new Group()))
+                        {
+                            //var rebuildGroup = new Group(groupListName, preexistingGroup.Subgroups, preexistingGroup.Items);
+                        }
+                        else
+                        {
+                        
+                        }
+                    }
+                }
+                
                 allJungleNodeTypes.ToList().ForEach(node =>
                 {
                     var nodeInstance = CreateInstance(node) as JungleNode;
-                    searchTree.Add(new SearchTreeEntry(new GUIContent(nodeInstance.GetIcon(), nodeInstance.GetTitle())));
+                    searchTree.Add(new SearchTreeEntry(new GUIContent(nodeInstance.GetTitle(), nodeInstance.GetIcon())));
                 });
             }
             // Build search view with context
             else
             {
                 var contextType = _contextRequest.Value.Context;
+
+                var mainGroup = new SearchTreeGroupEntry(new GUIContent($"Add Node ({contextType.Name})"));
+                searchTree.Add(mainGroup);
+                
                 var contextualJungleNodeTypes = new List<JungleNode>();
                 foreach (var jungleNodeType in allJungleNodeTypes)
                 {
@@ -96,54 +130,64 @@ namespace Jungle.Editor
                 
                 contextualJungleNodeTypes.ForEach(node =>
                 {
-                    searchTree.Add(new SearchTreeEntry(new GUIContent(node.GetIcon(), node.GetTitle())));
+                    var entry = CreateSearchTreeEntry(node, 1);
+                    if (entry == null)
+                    {
+                        return;
+                    }
+                    searchTree.Add(entry);
                 });
             }
-            */
-
-            _contextRequest = null;
-            return searchTree;
-            /*
-            var groups = new List<Group>();
-
-            foreach (var jungleNodeType in allJungleNodeTypes)
-            {
-                var instance = CreateInstance(jungleNodeType) as JungleNode;
-                if (instance == null)
-                {
-                    continue;
-                }
-
-                var group = instance.GetGroup();
-                if (group.Contains(":HIDDEN"))
-                {
-                    continue;
-                }
-
-                var groupList = group.Split('/');
-                foreach (var groupListName in groupList)
-                {
-                    var preexistingGroup = groups.FirstOrDefault(g => g.Name == groupListName);
-                    if (!preexistingGroup.Equals(new Group()))
-                    {
-                        //var rebuildGroup = new Group(groupListName, preexistingGroup.Subgroups, preexistingGroup.Items);
-                    }
-                    else
-                    {
-                        
-                    }
-                }
-            }
             
-            var searchTree = new List<SearchTreeEntry>();
             return searchTree;
-            */
         }
-
+        
         public bool OnSelectEntry(SearchTreeEntry searchTreeEntry, SearchWindowContext context)
         {
-            var mousePosition = _jungleEditor.MousePositionToGraphViewPosition(context.screenMousePosition);
-            return _jungleEditor.TryAddNodeToGraph(searchTreeEntry.userData.GetType(), mousePosition);
+            var convertedPosition = JungleGraphView.Singleton.viewport.ChangeCoordinatesTo(
+                JungleEditor.Singleton.rootVisualElement.parent,
+                _contextRequest.Value.DropPosition - JungleEditor.Singleton.position.position);
+
+            var a = JungleGraphView.Singleton.viewTransform.matrix.inverse.MultiplyPoint(_contextRequest.Value.DropPosition);
+            
+            JungleEditor.Singleton.TryAddNodeToGraph(searchTreeEntry.userData.GetType(), a);
+            _contextRequest = null;
+            return true;
+        }
+
+        private SearchTreeEntry CreateSearchTreeEntry(JungleNode node, int level)
+        {
+            if (node.GetType() == typeof(StartNode))
+            {
+                return null;
+            }
+            
+            var entry = new SearchTreeEntry(new GUIContent(node.GetTitle(), node.GetIcon()))
+            {
+                level = level,
+                userData = node
+            };
+            return entry;
+        }
+        
+        private SearchTreeEntry CreateSearchTreeEntry(Type type, int level)
+        {
+            if (type == typeof(StartNode))
+            {
+                return null;
+            }
+
+            var node = CreateInstance(type) as JungleNode;
+            if (node == null)
+            {
+                return null;
+            }
+            var entry = new SearchTreeEntry(new GUIContent(node.GetTitle(), node.GetIcon()))
+            {
+                level = level,
+                userData = type
+            };
+            return entry;
         }
     }
 }

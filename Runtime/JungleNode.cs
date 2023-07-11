@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
 namespace Jungle
 {
@@ -12,7 +9,7 @@ namespace Jungle
     /// Base node class inherited by all Jungle nodes.
     /// </summary>
     [Serializable] [Node]
-    public abstract class JungleNode : ScriptableObject, INode
+    public abstract class JungleNode : ScriptableObject
     {
         #region Variables
 
@@ -51,25 +48,6 @@ namespace Jungle
         /// </summary>
         public bool IsRunning => Tree.ExecutionList.Contains(this);
 
-        /// <summary>
-        /// List of Jungle Node view colors.
-        /// </summary>
-        public enum Color
-        {
-            Red,
-            Orange,
-            Yellow,
-            Green,
-            Teal,
-            Cyan,
-            Blue,
-            Purple,
-            Pink,
-            Violet,
-            White,
-            Black
-        }
-
         #endregion
         
         /// <summary>
@@ -78,7 +56,7 @@ namespace Jungle
         /// </summary>
         /// <param name="inputValue">The value sent from a parent node.</param>
         public abstract void Initialize(in object inputValue);
-         
+        
         /// <summary>
         /// This method is called every frame while this node is running. On every execution, return its run state using
         /// true if finished, and false if still running. Port calls are used to send data to nodes connected to this
@@ -103,82 +81,20 @@ namespace Jungle
         /// <summary>
         /// Editor property cache for the Jungle editor.
         /// </summary>
-        public NodeProperties NodeProperties
+        public NodeEditorProperties NodeEditorProperties
         {
-            get => nodeProperties;
+            get => nodeEditorProperties;
             set
             {
-                nodeProperties = value;
-                EditorUtility.SetDirty(this);
+                nodeEditorProperties = value;
+                UnityEditor.EditorUtility.SetDirty(this);
             }
         }
         [SerializeField] [HideInInspector] 
-        private NodeProperties nodeProperties;
-
-        /// <summary>
-        /// Returns the nodes title name.
-        /// </summary>
-        public string GetTitle()
-        {
-            return NodeInfo.Title;
-        }
-        
-        /// <summary>
-        /// Returns a description of the nodes function. 
-        /// </summary>
-        public string GetTooltip()
-        {
-            return NodeInfo.Tooltip;
-        }
-        
-        /// <summary>
-        /// Returns the nodes category.
-        /// </summary>
-        public string GetGroup()
-        {
-            return NodeInfo.Group;
-        }
-        
-        /// <summary>
-        /// Returns the nodes accent color.
-        /// </summary>
-        public UnityEngine.Color GetColor()
-        {
-            // Remove all stray hashtags from the hex code
-            var colorString = NodeInfo.Color.Replace("#", string.Empty);
-            if (ColorUtility.TryParseHtmlString($"#{colorString}", out var color))
-            { 
-                return color;
-            }
-            return UnityEngine.Color.clear;
-        }
-        
-        /// <summary>
-        /// Returns the nodes cached icon.
-        /// </summary>
-        public Texture2D GetIcon()
-        {
-            return EditorGUIUtility.ObjectContent(this, GetType()).image as Texture2D;
-        }
-        
-        /// <summary>
-        /// Returns the input port name and value type.
-        /// </summary>
-        public NodeAttribute.PortInfo GetInput()
-        {
-            return NodeInfo.InputInfo;
-        }
-
-        /// <summary>
-        /// Returns all a list array of output ports names and value types.
-        /// </summary>
-        public NodeAttribute.PortInfo[] GetOutputs()
-        {
-            return NodeInfo.OutputInfo;
-        }
+        private NodeEditorProperties nodeEditorProperties;
         
         private NodeAttribute NodeInfo 
-            => (NodeAttribute)GetType().GetCustomAttributes(typeof(NodeAttribute), true)[0];
+            => (NodeAttribute) GetType().GetCustomAttributes(typeof(NodeAttribute), true)[0];
         
         /// <summary>
         /// 
@@ -225,7 +141,7 @@ namespace Jungle
                 newPortsList.Add(new JunglePort(connections, portType));
             }
             outputPorts = newPortsList.ToArray();
-            EditorUtility.SetDirty(this);
+            UnityEditor.EditorUtility.SetDirty(this);
         }
 
         /// <summary>
@@ -248,9 +164,102 @@ namespace Jungle
             }
             outputPortsQuery[portIndex] = new JunglePort(connections.ToArray(), outputPort.PortType);
             outputPorts = outputPortsQuery.ToArray();
-            EditorUtility.SetDirty(this);
+            UnityEditor.EditorUtility.SetDirty(this);
         }
 #endif
+
+        /// <summary>
+        /// Returns the nodes title name.
+        /// </summary>
+        public string GetTitle()
+        {
+#if UNITY_EDITOR
+            return NodeInfo.Title;
+#else
+            return "EDITOR ONLY";
+#endif
+        }
+        
+        /// <summary>
+        /// Returns a description of the nodes function. 
+        /// </summary>
+        public string GetTooltip()
+        {
+#if UNITY_EDITOR
+            return NodeInfo.Tooltip;
+#else
+            return "EDITOR ONLY";
+#endif
+        }
+        
+        /// <summary>
+        /// Returns the nodes category.
+        /// </summary>
+        public string GetGroup()
+        {
+#if UNITY_EDITOR
+            return NodeInfo.Group;
+#else
+            return "EDITOR ONLY";
+#endif
+        }
+        
+        /// <summary>
+        /// Returns the nodes accent color.
+        /// </summary>
+        public UnityEngine.Color GetColor()
+        {
+#if UNITY_EDITOR
+            // Remove all stray hashtags from the hex code
+            var colorString = NodeInfo.Color.Replace("#", string.Empty);
+            if (ColorUtility.TryParseHtmlString($"#{colorString}", out var color))
+            { 
+                return color;
+            }
+            return UnityEngine.Color.clear;
+#else
+            return UnityEngine.Color.clear;
+#endif
+        }
+        
+        /// <summary>
+        /// Returns the nodes cached icon.
+        /// </summary>
+        public Texture2D GetIcon()
+        {
+#if UNITY_EDITOR
+            return UnityEditor.EditorGUIUtility.ObjectContent(this, GetType()).image as Texture2D;
+#else
+            return Texture2D.whiteTexture;
+#endif
+        }
+        
+        /// <summary>
+        /// Returns the input port name and value type.
+        /// </summary>
+        public PortInfo GetInput()
+        {
+#if UNITY_EDITOR
+            return NodeInfo.InputInfo;
+#else
+            return new PortInfo("EDITOR ONLY", typeof(Error));
+#endif
+        }
+        
+        /// <summary>
+        /// Returns all a list array of output ports names and value types.
+        /// </summary>
+        public PortInfo[] GetOutputs()
+        {
+#if UNITY_EDITOR
+            return NodeInfo.OutputInfo;
+#else
+            return new []
+            {
+                new PortInfo("EDITOR ONLY", typeof(Error))
+            };
+#endif
+        }
     }
 
     /// <summary>
@@ -427,28 +436,6 @@ namespace Jungle
                 return infoList.ToArray();
             }
         }
-
-        /// <summary>
-        /// Contains info about the ports name and value type.
-        /// </summary>
-        public struct PortInfo
-        {
-            /// <summary>
-            /// 
-            /// </summary>
-            public string PortName { get; }
-            
-            /// <summary>
-            /// 
-            /// </summary>
-            public Type PortType { get; }
-
-            public PortInfo(string portName, Type portType)
-            {
-                PortName = portName;
-                PortType = portType;
-            }
-        }
     }
     
     /// <summary>
@@ -461,12 +448,34 @@ namespace Jungle
     /// </summary>
     public struct Error { }
 
+    /// <summary>
+    /// Contains info about the ports name and value type.
+    /// </summary>
+    public struct PortInfo
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public string PortName { get; }
+            
+        /// <summary>
+        /// 
+        /// </summary>
+        public Type PortType { get; }
+
+        public PortInfo(string portName, Type portType)
+        {
+            PortName = portName;
+            PortType = portType;
+        }
+    }
+    
 #if UNITY_EDITOR
     /// <summary>
     /// Details about the node in the Jungle editor like GUID, position, and view name
     /// </summary>
     [Serializable]
-    public struct NodeProperties
+    public struct NodeEditorProperties
     {
         /// <summary>
         /// The unique GUID of the node

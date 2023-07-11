@@ -12,11 +12,17 @@ namespace Jungle.Editor
     {
         #region Variables
 
+        /// <summary>
+        /// 
+        /// </summary>
+        public static JungleInspectorView Singleton => _singleton;
+        private static JungleInspectorView _singleton;
+        
         public JungleNode InspectingNode =>
             nodeInspector != null
                 ? nodeInspector.target as JungleNode
                 : null;
-
+        
         private UnityEditor.Editor nodeInspector;
 
         public new class UxmlFactory : UxmlFactory<JungleInspectorView, UxmlTraits> {}
@@ -28,6 +34,7 @@ namespace Jungle.Editor
         /// </summary>
         public void Initialize()
         {
+            _singleton = this;
             RepaintGUIContainer();
         }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -28,7 +29,6 @@ namespace Jungle.Editor
                     return;
                 }
                 JungleEditor.Singleton.SearchView.SetupContext(edge.output.portType, position);
-                SearchWindow.Open(new SearchWindowContext(Vector2.zero), JungleEditor.Singleton.SearchView);
             }
             
             public void OnDrop(GraphView graphView, Edge edge)
