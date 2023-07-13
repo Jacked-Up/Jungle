@@ -8,10 +8,10 @@ using UnityEditor;
 
 namespace Jungle.Nodes.Scene
 {
-    [Node(
+    [NodeProperties(
         Title = "Get Active Scene",
-        Group = "Scene",
-        Color = JungleNodeColors.Teal,
+        Category = "Scene",
+        Color = Teal,
         InputPortName = "Get",
         OutputPortNames = new []{ "Found" },
         OutputPortTypes = new []{ typeof(UnityEngine.SceneManagement.Scene) }

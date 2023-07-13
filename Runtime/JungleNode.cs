@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace Jungle
@@ -8,33 +7,77 @@ namespace Jungle
     /// <summary>
     /// Base node class inherited by all Jungle nodes.
     /// </summary>
-    [Serializable] [Node]
-    public abstract class JungleNode : ScriptableObject
+    [Serializable] [NodeProperties]
+    public abstract class JungleNode : ScriptableObject, IJungleNode
     {
         #region Variables
+        
+        /// <summary>
+        /// #DC1313FF
+        /// </summary>
+        public const string Red    = "#DC1313FF";
+        
+        /// <summary>
+        /// #FF8500FF
+        /// </summary>
+        public const string Orange = "#FF8500FF";
+        
+        /// <summary>
+        /// #D9BE12FF
+        /// </summary>
+        public const string Yellow = "#D9BE12FF";
+        
+        /// <summary>
+        /// #00CC4AFF
+        /// </summary>
+        public const string Green  = "#00CC4AFF";
+        
+        /// <summary>
+        /// #15DEABFF
+        /// </summary>
+        public const string Teal   = "#15DEABFF";
+        
+        /// <summary>
+        /// #00EAFFFF
+        /// </summary>
+        public const string Cyan   = "#00EAFFFF";
+        
+        /// <summary>
+        /// #0069FFFF
+        /// </summary>
+        public const string Blue   = "#0069FFFF";
+        
+        /// <summary>
+        /// #B300FFFF
+        /// </summary>
+        public const string Purple = "#B300FFFF";
+        
+        /// <summary>
+        /// #FF00EAFF
+        /// </summary>
+        public const string Pink   = "#FF00EAFF";
+        
+        /// <summary>
+        /// #85034CFF
+        /// </summary>
+        public const string Violet = "#85034CFF";
+        
+        /// <summary>
+        /// #FFFFFFFF
+        /// </summary>
+        public const string White  = "#FFFFFFFF";
+        
+        /// <summary>
+        /// #101010FF
+        /// </summary>
+        public const string Black  = "#101010FF";
 
         /// <summary>
         /// Reference to this nodes Jungle Tree.
         /// </summary>
-        public JungleTree Tree
-        {
-            get => tree;
-            set
-            {
-                if (tree != null)
-                {
-                    if (tree == value) return;
-#if UNITY_EDITOR
-                    Debug.LogFormat(LogType.Warning, LogOption.NoStacktrace, tree,
-                        $"[{name}] You cannot set the Jungle Tree reference after it has already been set.");
-#endif
-                    return;
-                }
-                tree = value;
-            }
-        }
+        public JungleTree Tree => tree;
         [SerializeField] [HideInInspector] 
-        private JungleTree tree;
+        internal JungleTree tree;
         
         /// <summary>
         /// Array of the output ports on this node.
@@ -42,29 +85,24 @@ namespace Jungle
         public JunglePort[] OutputPorts => outputPorts;
         [SerializeField] [HideInInspector] 
         private JunglePort[] outputPorts = Array.Empty<JunglePort>();
-
+        
         /// <summary>
-        /// True if the node is actively being executed by the Jungle Tree.
+        /// True if this Jungle Node is actively being executed by the Jungle Tree.
         /// </summary>
         public bool IsRunning => Tree.ExecutionList.Contains(this);
 
         #endregion
         
         /// <summary>
-        /// This method is invoked everytime the node is called. This method will only run once per node call and always
-        /// runs before the "Execute" method. Should be used for initialization.
+        /// 
         /// </summary>
-        /// <param name="inputValue">The value sent from a parent node.</param>
-        public abstract void Initialize(in object inputValue);
-        
+        /// <param name="inputValue"></param>
+        public abstract void OnStart(in object inputValue);
+
         /// <summary>
-        /// This method is called every frame while this node is running. On every execution, return its run state using
-        /// true if finished, and false if still running. Port calls are used to send data to nodes connected to this
-        /// nodes output(s).
+        /// 
         /// </summary>
-        /// <param name="call">List of calls to send to connected nodes.</param>
-        /// <returns>True if the node is finished executing and false if not.</returns>
-        public abstract bool Execute(out PortCall[] call);
+        public abstract void OnUpdate();
 
         /// <summary>
         /// This method is called by the Jungle validator while generating a report. Override this method to call out
@@ -76,7 +114,7 @@ namespace Jungle
         {
             issues = null;
         }
-        
+ 
 #if UNITY_EDITOR
         /// <summary>
         /// Editor property cache for the Jungle editor.
@@ -93,8 +131,8 @@ namespace Jungle
         [SerializeField] [HideInInspector] 
         private NodeEditorProperties nodeEditorProperties;
         
-        private NodeAttribute NodeInfo 
-            => (NodeAttribute) GetType().GetCustomAttributes(typeof(NodeAttribute), true)[0];
+        private NodePropertiesAttribute NodePropertiesAttributeInfo 
+            => (NodePropertiesAttribute) GetType().GetCustomAttributes(typeof(NodePropertiesAttribute), true)[0];
         
         /// <summary>
         /// 
@@ -120,7 +158,7 @@ namespace Jungle
                 }
                 var repairedPortsList = GetOutputs().Select(info =>
                 {
-                    return new JunglePort(Array.Empty<JungleNode>(), info.PortType);
+                    return new JunglePort(Array.Empty<JungleNode>(), info.Type);
                 }).ToArray();
                 outputPorts = repairedPortsList;
             }
@@ -128,10 +166,10 @@ namespace Jungle
             var newPortsList = new List<JunglePort>();
             for (var i = 0; i < GetOutputs().Length; i++)
             {
-                var portType = GetOutputs()[i].PortType;
+                var portType = GetOutputs()[i].Type;
                 if (OutputPorts[i].PortType != portType)
                 {
-                    Debug.LogError($"[{name}] Port by name \"{GetOutputs()[i].PortName}\" was of type" +
+                    Debug.LogError($"[{name}] Port by name \"{GetOutputs()[i].Name}\" was of type" +
                                    $" {OutputPorts[i].PortType} but is now of type {portType}." +
                                    " All port connections have been lost to prevent type mismatch errors");
                 }
@@ -143,7 +181,7 @@ namespace Jungle
             outputPorts = newPortsList.ToArray();
             UnityEditor.EditorUtility.SetDirty(this);
         }
-
+ 
         /// <summary>
         /// 
         /// </summary>
@@ -169,57 +207,37 @@ namespace Jungle
 #endif
 
         /// <summary>
-        /// Returns the nodes title name.
+        /// Returns the Jungle Nodes title name.
         /// </summary>
         public string GetTitle()
         {
-#if UNITY_EDITOR
-            return NodeInfo.Title;
-#else
-            return "EDITOR ONLY";
-#endif
+            return NodePropertiesAttributeInfo.Title;
         }
-        
+
         /// <summary>
-        /// Returns a description of the nodes function. 
+        /// Returns a brief description of the Jungle Nodes function. 
         /// </summary>
         public string GetTooltip()
         {
-#if UNITY_EDITOR
-            return NodeInfo.Tooltip;
-#else
-            return "EDITOR ONLY";
-#endif
+            return NodePropertiesAttributeInfo.Tooltip;
         }
-        
+
         /// <summary>
-        /// Returns the nodes category.
+        /// Returns the Jungle Nodes category.
         /// </summary>
-        public string GetGroup()
+        public string GetCategory()
         {
-#if UNITY_EDITOR
-            return NodeInfo.Group;
-#else
-            return "EDITOR ONLY";
-#endif
+            return NodePropertiesAttributeInfo.Category;
         }
-        
+
         /// <summary>
-        /// Returns the nodes accent color.
+        /// Returns the Jungle Nodes accent color.
         /// </summary>
-        public UnityEngine.Color GetColor()
+        public Color GetColor()
         {
-#if UNITY_EDITOR
-            // Remove all stray hashtags from the hex code
-            var colorString = NodeInfo.Color.Replace("#", string.Empty);
-            if (ColorUtility.TryParseHtmlString($"#{colorString}", out var color))
-            { 
-                return color;
-            }
-            return UnityEngine.Color.clear;
-#else
-            return UnityEngine.Color.clear;
-#endif
+            return ColorUtility.TryParseHtmlString(NodePropertiesAttributeInfo.Color, out var color) 
+                ? color 
+                : Color.clear;
         }
         
         /// <summary>
@@ -233,35 +251,17 @@ namespace Jungle
             return Texture2D.whiteTexture;
 #endif
         }
-        
-        /// <summary>
-        /// Returns the input port name and value type.
-        /// </summary>
-        public PortInfo GetInput()
-        {
-#if UNITY_EDITOR
-            return NodeInfo.InputInfo;
-#else
-            return new PortInfo("EDITOR ONLY", typeof(Error));
-#endif
-        }
-        
-        /// <summary>
-        /// Returns all a list array of output ports names and value types.
-        /// </summary>
-        public PortInfo[] GetOutputs()
-        {
-#if UNITY_EDITOR
-            return NodeInfo.OutputInfo;
-#else
-            return new []
-            {
-                new PortInfo("EDITOR ONLY", typeof(Error))
-            };
-#endif
-        }
     }
-
+    
+    /// <summary>
+    /// Base Jungle Node interface.
+    /// </summary>
+    public interface IJungleNode
+    {
+        public void OnStart(in object inputValue);
+        public void OnUpdate();
+    }
+    
     /// <summary>
     /// Base port class. Used for both input and output ports
     /// </summary>
@@ -273,7 +273,7 @@ namespace Jungle
         /// </summary>
         [SerializeField] [HideInInspector]
         public JungleNode[] connections;
-
+        
         /// <summary>
         /// The value type that can be called at this port
         /// *Default type is "Nothing". Use type nothing to signify the port sends/receives no data
@@ -284,8 +284,8 @@ namespace Jungle
             {
                 if (string.IsNullOrEmpty(portType))
                 {
-                    portType = typeof(Error).AssemblyQualifiedName;
-                    return typeof(Error);
+                    portType = typeof(Unknown).AssemblyQualifiedName;
+                    return typeof(Unknown);
                 }
                 return Type.GetType(portType);
             }
@@ -302,17 +302,17 @@ namespace Jungle
     }
     
     /// <summary>
-    /// Container that stores the port ID and the value to send to the port
+    /// Container that stores the port ID and the value to send to the port.
     /// </summary>
     public struct PortCall
     {
         /// <summary>
-        /// Index of the port to send the value to 
+        /// Index of the port to send the value to.
         /// </summary>
         public byte PortIndex { get; private set; }
 
         /// <summary>
-        /// Value to send out of the requested port
+        /// Value to send out of the requested port.
         /// </summary>
         public object Value { get; private set; }
 
@@ -322,15 +322,15 @@ namespace Jungle
             Value = value;
         }
     }
-
+    
     /// <summary>
-    /// Jungle node declaration attribute
+    /// Jungle Nodes editor properties.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
-    public class NodeAttribute : Attribute
+    public class NodePropertiesAttribute : Attribute
     {
         /// <summary>
-        /// The name the node goes by.
+        /// The name of the Jungle Node.
         /// </summary>
         public string Title
         {
@@ -339,7 +339,7 @@ namespace Jungle
         } = "Untitled Node";
 
         /// <summary>
-        /// Tooltip displayed while hovering over the node.
+        /// A brief description of the Jungle Nodes function.
         /// </summary>
         public string Tooltip
         {
@@ -348,125 +348,54 @@ namespace Jungle
         } = string.Empty;
 
         /// <summary>
-        /// ...
+        /// Category path where this Jungle Node can be found in the Jungle Editor search window.
         /// </summary>
-        public string Group
+        public string Category
         {
             get;
             set;
         } = string.Empty;
 
         /// <summary>
-        /// The hex code color of the nodes accent.
+        /// The Jungle Nodes accent color inside the Jungle Editor.
+        /// *Hex Code*
         /// </summary>
         public string Color
         {
             get;
             set;
-        } = JungleNodeColors.Blue;
-        
-        /// <summary>
-        /// 
-        /// </summary>
-        public string InputPortName
-        {
-            get; 
-            set;
-        } = "Execute";
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public Type InputPortType
-        {
-            get; 
-            set;
-        } = typeof(None);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public string[] OutputPortNames
-        {
-            get;
-            set;
-        } = {"Next"};
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public Type[] OutputPortTypes
-        {
-            get; 
-            set;
-        } = {typeof(None)};
-
-        /// <summary>
-        /// The nodes input port
-        /// </summary>
-        public PortInfo InputInfo => new(InputPortName, InputPortType);
-
-        /// <summary>
-        /// List of the nodes output ports
-        /// </summary>
-        public PortInfo[] OutputInfo
-        {
-            get
-            {
-                // In the case the developer has set a number of output port names that does not equal the number of 
-                // output port types, and vice versa, pick the largest array and create default name/type to
-                // prevent errors
-                var outputPortCount = OutputPortNames.Length == OutputPortTypes.Length
-                    ? OutputPortNames.Length
-                    : OutputPortNames.Length > OutputPortTypes.Length 
-                        ? OutputPortNames.Length 
-                        : OutputPortTypes.Length;
-                
-                var infoList = new List<PortInfo>();
-                for (var i = 0; i < outputPortCount; i++)
-                {
-                    var portName = !(i > OutputPortNames.Length - 1)
-                        ? OutputPortNames[i]
-                        : "ERROR";
-                    var portType = !(i > OutputPortTypes.Length - 1)
-                        ? OutputPortTypes[i]
-                        : typeof(Error);
-                    infoList.Add(new PortInfo(portName, portType));
-                }
-                return infoList.ToArray();
-            }
-        }
+        } = JungleNode.Blue;
     }
     
     /// <summary>
-    /// Default Jungle node type.
+    /// Jungle Node port type that denotes a port where no data is accepted or released.
     /// </summary>
     public struct None { }
-    
-    /// <summary>
-    /// Error state for Jungle node ports.
-    /// </summary>
-    public struct Error { }
 
     /// <summary>
-    /// Contains info about the ports name and value type.
+    /// Jungle Node port type that denotes a port with an unknown type.
+    /// </summary>
+    public struct Unknown { }
+    
+    /// <summary>
+    /// Jungle Node port information container.
     /// </summary>
     public struct PortInfo
     {
         /// <summary>
-        /// 
+        /// Name of the port.
         /// </summary>
-        public string PortName { get; }
-            
+        public readonly string Name;
+
         /// <summary>
         /// 
         /// </summary>
-        public Type PortType { get; }
-
-        public PortInfo(string portName, Type portType)
+        public readonly Type Type;
+        
+        public PortInfo(string name, Type type)
         {
-            PortName = portName;
-            PortType = portType;
+            Name = name;
+            Type = type;
         }
     }
     
@@ -488,23 +417,4 @@ namespace Jungle
         public Vector2 position;
     }
 #endif
-    
-    /// <summary>
-    /// List of hex codes for Jungle Node accent color.
-    /// </summary>
-    public static class JungleNodeColors
-    {
-        public const string Red    = "#DC1313FF";
-        public const string Orange = "#FF8500FF";
-        public const string Yellow = "#D9BE12FF";
-        public const string Green  = "#00CC4AFF";
-        public const string Teal   = "#15DEABFF";
-        public const string Cyan   = "#00EAFFFF";
-        public const string Blue   = "#0069FFFF";
-        public const string Purple = "#B300FFFF";
-        public const string Pink   = "#FF00EAFF";
-        public const string Violet = "#85034CFF";
-        public const string White  = "#FFFFFFFF";
-        public const string Black  = "#101010FF";
-    }
 }

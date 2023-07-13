@@ -81,7 +81,7 @@ namespace Jungle.Editor
                         continue;
                     }
 
-                    var group = instance.GetGroup();
+                    var group = instance.GetCategory();
                     if (group.Contains(":HIDDEN"))
                     {
                         continue;
@@ -122,7 +122,7 @@ namespace Jungle.Editor
                     var instance = CreateInstance(jungleNodeType) as JungleNode;
                     if (instance == null) continue;
                     
-                    if (instance.GetInput().PortType == contextType)
+                    if (instance.GetInput().Type == contextType)
                     {
                         contextualJungleNodeTypes.Add(instance);
                     }

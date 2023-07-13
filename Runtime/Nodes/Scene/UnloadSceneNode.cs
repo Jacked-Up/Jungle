@@ -7,10 +7,10 @@ using UnityEditor;
 
 namespace Jungle.Nodes.Scene
 {
-    [Node(
+    [NodeProperties(
         Title = "Unload Scene",
-        Group = "Scene",
-        Color = JungleNodeColors.Orange,
+        Category = "Scene",
+        Color = Orange,
         InputPortName = "Unload",
         InputPortType = typeof(UnityEngine.SceneManagement.Scene),
         OutputPortNames = new []{ "Unloaded" },

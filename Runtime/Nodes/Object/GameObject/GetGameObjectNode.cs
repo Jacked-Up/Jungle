@@ -6,11 +6,11 @@ using UnityEditor;
 
 namespace Jungle.Nodes.Object.GameObject
 {
-    [Node(
+    [NodeProperties(
         Title = "Get Game Object",
         Tooltip = "Finds a game object in the scene by name or tag.",
-        Group = "Object",
-        Color = JungleNodeColors.Teal,
+        Category = "Object",
+        Color = Teal,
         InputPortName = "Find",
         OutputPortNames = new []{ "Found" },
         OutputPortTypes = new []{ typeof(UnityEngine.GameObject) }

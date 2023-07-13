@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace Jungle.Nodes.Time
 {
-    [Node(Title = "Wait For Frames", 
-        Group = "Time",
-        Color = JungleNodeColors.Purple, 
+    [NodeProperties(Title = "Wait For Frames", 
+        Category = "Time",
+        Color = Purple, 
         OutputPortNames = new []{"Elapsed"}
     )]
     public class WaitForFramesNode : JungleNode

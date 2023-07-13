@@ -82,8 +82,8 @@ namespace Jungle.Editor
                     report.NodeIssues.Add($"{jungleNode.name} does not have a Jungle Tree");
                 }
                 
-                var validNames = jungleNode.GetOutputs().Count(info => info.PortName is not "ERROR" or null);
-                var validTypes = jungleNode.GetOutputs().Count(info => info.PortType != typeof(Error));
+                var validNames = jungleNode.GetOutputs().Count(info => info.Name is not "ERROR" or null);
+                var validTypes = jungleNode.GetOutputs().Count(info => info.Type != typeof(Unknown));
 
                 if (validNames < validTypes)
                 {

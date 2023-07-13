@@ -1,35 +1,36 @@
 ﻿namespace Jungle.Nodes
 {
-    [Node(
+    [NodeProperties(
         Title = "Start", 
         Tooltip = "The first executed node.",
-        Group = "Internal", 
-        Color = JungleNodeColors.Green,
-        OutputPortNames = new []{ "" },
-        OutputPortTypes = new []{ typeof(None) }
+        Category = "Internal:HIDDEN",
+        Color = Green
     )]
-    public class StartNode : JungleNode
+    [EventNode(
+        OutputPortNames = new []{""},
+        OutputPortTypes = new []{typeof(None)}
+    )]
+    public class StartNode : EventNode
     {
-        public override void Initialize(in object inputValue)
+        public override void OnStart(in object inputValue)
         {
             
         }
-        
-        public override bool Execute(out PortCall[] call)
+
+        public override void OnUpdate()
         {
-            call = new[]
-            {
-                new PortCall(0, new None())
-            };
-            return true;
+            
         }
     }
-
+    
 #if UNITY_EDITOR
     [UnityEditor.CustomEditor(typeof(StartNode))]
     public class RootNodeEditor : UnityEditor.Editor
     {
-        public override void OnInspectorGUI() { }
+        public override void OnInspectorGUI()
+        {
+            // I just don't want anything to be drawn to the inspector
+        }
     }
 #endif
 }

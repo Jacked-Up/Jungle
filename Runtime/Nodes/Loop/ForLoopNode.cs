@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace Jungle.Nodes.Loop
 {
-    [Node(Title = "For Loop",
-        Group = "Loop",
-        Color = JungleNodeColors.Purple,
+    [NodeProperties(Title = "For Loop",
+        Category = "Loop",
+        Color = Purple,
         OutputPortNames = new []{"Invoke", "Done"}
     )]
     public class ForLoopNode : JungleNode

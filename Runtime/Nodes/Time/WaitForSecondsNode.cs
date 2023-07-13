@@ -6,9 +6,9 @@ using UnityEditor;
 
 namespace Jungle.Nodes.Time
 {
-    [Node(Title = "Wait For Seconds",
-        Group = "Time",
-        Color = JungleNodeColors.Purple,
+    [NodeProperties(Title = "Wait For Seconds",
+        Category = "Time",
+        Color = Purple,
         OutputPortNames = new []{"Elapsed"}
     )]
     public class WaitForSecondsNode : JungleNode

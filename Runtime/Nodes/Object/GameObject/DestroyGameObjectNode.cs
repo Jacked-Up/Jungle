@@ -2,10 +2,10 @@
 
 namespace Jungle.Nodes.Object.GameObject
 {
-    [Node(
+    [NodeProperties(
         Title = "Destroy Game Object",
-        Group = "Object",
-        Color = JungleNodeColors.Red,
+        Category = "Object",
+        Color = Red,
         InputPortName = "Destroy",
         InputPortType = typeof(UnityEngine.GameObject),
         OutputPortNames = new string[0],

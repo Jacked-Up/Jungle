@@ -5,10 +5,10 @@ using UnityEditor;
 
 namespace Jungle.Nodes.Editor
 {
-    [Node(
+    [NodeProperties(
         Title = "Debug Draw",
-        Group = "Editor", 
-        Color = JungleNodeColors.White,
+        Category = "Editor", 
+        Color = White,
         InputPortName = "Draw"
     )]
     public class DebugDrawNode : JungleNode

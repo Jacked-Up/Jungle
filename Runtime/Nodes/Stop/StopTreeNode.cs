@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace Jungle.Nodes.Stop
 {
-    [Node(Title = "Stop Tree(s)",
-        Group = "Stop",
-        Color = JungleNodeColors.Red,
+    [NodeProperties(Title = "Stop Tree(s)",
+        Category = "Stop",
+        Color = Red,
         OutputPortNames = new string[0]
     )]
     public class StopTreeNode : JungleNode

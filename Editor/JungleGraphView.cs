@@ -295,7 +295,7 @@ namespace Jungle.Editor
         {
             // If the port type is null, this means that the node has some kind of issue internally.
             // It is safest to just not allow any connections until the problem is fixed
-            if (selected.portType == typeof(Error))
+            if (selected.portType == typeof(Unknown))
             {
                 return new List<Port>();
             }

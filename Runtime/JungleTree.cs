@@ -33,7 +33,7 @@ namespace Jungle
             get;
             private set; 
         } = new();
-
+        
         /// <summary>
         /// The amount of time in seconds the Jungle Tree has been running.
         /// </summary>

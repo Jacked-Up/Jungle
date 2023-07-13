@@ -3,10 +3,10 @@ using UnityEngine;
 
 namespace Jungle.Nodes.Object.Camera
 {
-    [Node(
+    [NodeProperties(
         Title = "Get Main Camera",
-        Group = "Object/Camera",
-        Color = JungleNodeColors.Teal,
+        Category = "Object/Camera",
+        Color = Teal,
         InputPortName = "Get",
         InputPortType = typeof(None),
         OutputPortNames = new []{ "Found" },

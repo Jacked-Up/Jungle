@@ -84,14 +84,14 @@ namespace Jungle.Editor
                 Orientation.Horizontal,
                 Direction.Input,
                 Port.Capacity.Multi,
-                port.PortType
+                port.Type
             );
             
-            var portTypeName = port.PortType != typeof(Error)
-                ? port.PortType.Name
-                : nameof(Error).ToUpper();
+            var portTypeName = port.Type != typeof(Unknown)
+                ? port.Type.Name
+                : nameof(Unknown).ToUpper();
 
-            var portTitleName = JungleGUILayout.ShortenString(port.PortName, 30);
+            var portTitleName = JungleGUILayout.ShortenString(port.Name, 30);
             
             InputPortView.portName = $"<color={(EditorGUIUtility.isProSkin ? DARK_MODE_TEXT_HEX_CODE : LIGHT_MODE_TEXT_HEX_CODE)}>";
             InputPortView.portName += $"<b><size=10><i>({portTypeName})</i></size> {portTitleName}</b>";
@@ -111,14 +111,14 @@ namespace Jungle.Editor
                     Orientation.Horizontal, 
                     Direction.Output, 
                     Port.Capacity.Multi,
-                    port.PortType
+                    port.Type
                 );
 
-                var portTypeName = port.PortType != typeof(Error)
-                    ? port.PortType.Name
-                    : nameof(Error).ToUpper();
+                var portTypeName = port.Type != typeof(Unknown)
+                    ? port.Type.Name
+                    : nameof(Unknown).ToUpper();
                 
-                var portTitleName = JungleGUILayout.ShortenString(port.PortName, 30);
+                var portTitleName = JungleGUILayout.ShortenString(port.Name, 30);
                 
                 newPortView.portName = $"<color={(EditorGUIUtility.isProSkin ? DARK_MODE_TEXT_HEX_CODE : LIGHT_MODE_TEXT_HEX_CODE)}>";
                 newPortView.portName += $"<b>{portTitleName} <size=10><i>({portTypeName})</i></size></b>";

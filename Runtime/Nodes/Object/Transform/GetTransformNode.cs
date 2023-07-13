@@ -6,10 +6,10 @@ using UnityEditor;
 
 namespace Jungle.Nodes.Object.Transform
 {
-    [Node(
+    [NodeProperties(
         Title = "Get Transform",
-        Group = "Object/Transform",
-        Color = JungleNodeColors.Teal,
+        Category = "Object/Transform",
+        Color = Teal,
         InputPortName = "Find",
         InputPortType = typeof(UnityEngine.GameObject),
         OutputPortNames = new []{ "Found" },

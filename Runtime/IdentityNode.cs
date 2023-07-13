@@ -3,38 +3,70 @@
 namespace Jungle
 {
     /// <summary>
-    /// 
+    /// A Jungle Node type that accepts a value, called an identity, and returns that value when execution is complete.
     /// </summary>
-    public abstract class IdentityNode : JungleNode, IIdentityNode
+    [Serializable]
+    public abstract class IdentityNode : JungleNode
     {
         #region Variables
         
         /// <summary>
-        /// 
+        /// Reference to the identity.
         /// </summary>
         [NonSerialized]
         public object Identity;
-
+        
         #endregion
-        
+
         /// <summary>
         /// 
         /// </summary>
-        public abstract void OnStart();
-        
+        protected virtual void Call()
+        {
+            
+        }
+
         /// <summary>
         /// 
         /// </summary>
-        /// <returns></returns>
-        public abstract bool OnUpdate();
+        protected virtual void CallAndStop()
+        {
+            
+        }
     }
 
     /// <summary>
-    /// 
+    /// Identity node attribute. 
     /// </summary>
-    public interface IIdentityNode
+    [AttributeUsage(AttributeTargets.Class)]
+    public class IdentityNodeAttribute : Attribute
     {
-        public void OnStart();
-        public bool OnUpdate();
+        /// <summary>
+        /// 
+        /// </summary>
+        public string InputPortName
+        {
+            get; 
+            set;
+        } = "In";
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        public string OutputPortName
+        {
+            get; 
+            set;
+        } = "Out";
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public PortInfo InputInfo => new(InputPortName, typeof(None));
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        public PortInfo OutputInfo => new(OutputPortName, typeof(None));
     }
 }

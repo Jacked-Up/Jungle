@@ -5,10 +5,10 @@ using UnityEditor;
 
 namespace Jungle.Nodes.Application
 {
-    [Node(
+    [NodeProperties(
         Title = "Quit Application",
-        Group = "Application", 
-        Color = JungleNodeColors.Red,
+        Category = "Application", 
+        Color = Red,
         InputPortName = "Quit",
         OutputPortNames = new string[0],
         OutputPortTypes = new Type[0]

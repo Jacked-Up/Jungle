@@ -3,10 +3,10 @@ using UnityEngine;
 
 namespace Jungle.Nodes.Object.Rigidbody
 {
-    [Node(
+    [NodeProperties(
         Title = "Get Rigidbody",
-        Group = "Object/Physics",
-        Color = JungleNodeColors.Teal,
+        Category = "Object/Physics",
+        Color = Teal,
         InputPortName = "Find",
         InputPortType = typeof(UnityEngine.GameObject),
         OutputPortNames = new []{ "Found" },

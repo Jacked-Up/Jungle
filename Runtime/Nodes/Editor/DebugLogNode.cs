@@ -3,10 +3,10 @@ using UnityEngine;
 
 namespace Jungle.Nodes.Editor
 {
-    [Node(
+    [NodeProperties(
         Title = "Debug Log",
-        Group = "Editor", 
-        Color = JungleNodeColors.White
+        Category = "Editor", 
+        Color = White
     )]
     public class DebugLogNode : JungleNode
     {

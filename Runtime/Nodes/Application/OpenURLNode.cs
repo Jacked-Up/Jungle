@@ -5,10 +5,10 @@ using UnityEditor;
 
 namespace Jungle.Nodes.Application
 {
-    [Node(
+    [NodeProperties(
         Title = "Open URL",
-        Group = "Application", 
-        Color = JungleNodeColors.Violet,
+        Category = "Application", 
+        Color = Violet,
         InputPortName = "Open"
     )]
     public class OpenURLNode : JungleNode

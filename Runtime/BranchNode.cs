@@ -1,28 +1,29 @@
-﻿namespace Jungle
+﻿using System;
+
+namespace Jungle
 {
     /// <summary>
-    /// 
+    /// A Jungle Node type that accepts a value and can return anything, called a port call.
     /// </summary>
-    public abstract class BranchNode : JungleNode, IBranchNode
+    [Serializable]
+    public abstract class BranchNode : JungleNode
     {
         /// <summary>
         /// 
         /// </summary>
-        public abstract void OnStart(in object inputValue);
+        /// <param name="call"></param>
+        protected virtual void Call(PortCall[] call)
+        {
+            
+        }
         
         /// <summary>
         /// 
         /// </summary>
-        /// <returns></returns>
-        public abstract bool OnUpdate(out PortCall[] call);
-    }
-    
-    /// <summary>
-    /// 
-    /// </summary>
-    public interface IBranchNode
-    {
-        public void OnStart(in object inputValue);
-        public bool OnUpdate(out PortCall[] call);
+        /// <param name="call"></param>
+        protected virtual void CallAndStop(PortCall[] call)
+        {
+            
+        }
     }
 }
