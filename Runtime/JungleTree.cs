@@ -22,11 +22,20 @@ namespace Jungle
         /// </summary>
         [HideInInspector]
         public JungleNode[] nodes = Array.Empty<JungleNode>();
-        
+
         /// <summary>
-        /// List of all actively executing nodes.
+        /// List of all actively executing Jungle Nodes.
         /// </summary>
         internal List<JungleNode> ExecutionList
+        {
+            get;
+            private set; 
+        } = new();
+        
+        /// <summary>
+        /// List of all Jungle Nodes requesting to stop.
+        /// </summary>
+        internal List<JungleNode> StopList
         {
             get;
             private set; 
@@ -126,7 +135,7 @@ namespace Jungle
 #endif
         
         #endregion
-
+        
         /// <summary>
         /// Starts the execution of the Jungle Tree.
         /// </summary>
@@ -147,7 +156,7 @@ namespace Jungle
                     LogType.Error,
                     LogOption.NoStacktrace,
                     this,
-                    $"[{name}] Failed to start Jungle Tree because the editor is not in play-mode."
+                    $"[Jungle] Failed to start {name} because the editor is not in play-mode."
                 );
 #endif
                 result.Error = ErrorFlag.NotInPlayMode;
@@ -162,7 +171,7 @@ namespace Jungle
                     LogType.Warning,
                     LogOption.NoStacktrace, 
                     this,
-                    $"[{name}] Could not start Jungle Tree because it is already running."
+                    $"[Jungle] Could not start {name} because it is already running."
                 );
 #endif
                 result.Error = ErrorFlag.AlreadyRunning;
@@ -177,7 +186,7 @@ namespace Jungle
                     LogType.Error,
                     LogOption.NoStacktrace,
                     this,
-                    $"[{name}] Failed to start Jungle Tree because it has no nodes."
+                    $"[Jungle] Failed to start {name} because it has no nodes."
                 );
 #endif
                 result.Error = ErrorFlag.NoNodes;
@@ -185,16 +194,11 @@ namespace Jungle
             }
             
             _startPlayTime = Time.unscaledTime;
-            ExecutionList = new List<JungleNode>();
-            nodes.ToList().ForEach(node =>
+            ExecutionList = new List<JungleNode>(nodes.ToList().FindAll(node => node is EventNode));
+            foreach (var node in new List<JungleNode>(ExecutionList))
             {
-                if (node.GetType() != typeof(EventNode))
-                {
-                    return;
-                }
-                ExecutionList.Add(node);
-                node.OnStartInternal(new None());
-            });
+                node.OnStartInternal(null);
+            }
             State = StateFlag.Running;
             
             // Jungle Runtime singleton instance must exist to start
@@ -206,8 +210,7 @@ namespace Jungle
                     LogType.Error,
                     LogOption.NoStacktrace,
                     this,
-                    $"[{name}] Failed to start Jungle Tree because there wasn't a Jungle Runtime " +
-                    "instance in the scene."
+                    $"[Jungle] Failed to start {name} because there isn't a Jungle Runtime instance in the scene."
                 );
 #endif
                 result.Error = ErrorFlag.NoRuntimeSingletonInstance;
@@ -238,7 +241,7 @@ namespace Jungle
                     LogType.Warning,
                     LogOption.NoStacktrace, 
                     this,
-                    $"[{name}] Could not stop Jungle Tree because it is wasn't already running."
+                    $"[Jungle] Could not stop {name} because it wasn't already running."
                 );
 #endif
                 result.Error = ErrorFlag.IsNotRunning;
@@ -262,8 +265,7 @@ namespace Jungle
                     LogType.Error, 
                     LogOption.NoStacktrace, 
                     this,
-                    $"[{name}] Failed to stop Jungle Tree because there wasn't a Jungle Runtime " +
-                    "instance in the scene."
+                    $"[Jungle] Failed to stop {name} because there isn't a Jungle Runtime instance in the scene."
                 );
 #endif
                 result.Error = ErrorFlag.NoRuntimeSingletonInstance;
@@ -283,13 +285,21 @@ namespace Jungle
             {
                 return;
             }
+            if (StopList.Count != 0)
+            {
+                foreach (var node in StopList.Where(node => ExecutionList.Contains(node)))
+                {
+                    ExecutionList.Remove(node);
+                }
+                StopList.Clear();
+            }
             if (ExecutionList.Count == 0)
             {
                 Stop();
                 return;
             }
             PlayTime = Time.unscaledTime - _startPlayTime;
-            foreach (var node in ExecutionList)
+            foreach (var node in new List<JungleNode>(ExecutionList))
             {
                 try
                 {
@@ -303,25 +313,22 @@ namespace Jungle
             }
         }
         
-        internal void Call(JungleNode node, IEnumerable<PortCall> portCalls)
+        internal void Call(JungleNode node, PortCall[] portCalls)
         {
             foreach (var call in portCalls)
             {
+                if (node.OutputPorts.Length == 0)
+                {
+                    continue;
+                }
                 foreach (var connection in node.OutputPorts[call.PortIndex].connections)
                 {
-                    try
-                    {
-                        connection.OnStartInternal(call.Value);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                        throw;
-                    }
+                    connection.OnStartInternal(call.Value);
+                    ExecutionList.Add(connection);
                 }
             }
         }
-
+        
         /// <summary>
         /// 
         /// </summary>
@@ -331,20 +338,23 @@ namespace Jungle
         {
             foreach (var call in portCalls)
             {
+                if (node.OutputPorts.Length == 0)
+                {
+                    continue;
+                }
                 foreach (var connection in node.OutputPorts[call.PortIndex].connections)
                 {
-                    try
-                    {
-                        connection.OnStartInternal(call.Value);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                        throw;
-                    }
+                    connection.OnStartInternal(call.Value);
+                    ExecutionList.Add(connection);
                 }
             }
-            ExecutionList.Remove(node);
+            StopList ??= new List<JungleNode>();
+            StopList.Add(node);
+        }
+
+        private void HandleCalls(IEnumerable<PortCall> portCalls)
+        {
+            
         }
         
         /// <summary>

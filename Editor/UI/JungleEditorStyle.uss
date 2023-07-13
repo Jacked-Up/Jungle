@@ -19,3 +19,19 @@
 .light #graph-header {
     color: rgba(0, 0, 0, 0.31);
 }
+
+.dark #add-node-button {
+    color: rgba(255, 255, 255, 0.31);
+    border-left-color: rgba(255, 255, 255, 0.31);
+    border-right-color: rgba(255, 255, 255, 0.31);
+    border-top-color: rgba(255, 255, 255, 0.31);
+    border-bottom-color: rgba(255, 255, 255, 0.31);
+}
+
+.light #add-node-button {
+    color: rgba(0, 0, 0, 0.31);
+    border-left-color: rgba(0, 0, 0, 0.31);
+    border-right-color: rgba(0, 0, 0, 0.31);
+    border-top-color: rgba(0, 0, 0, 0.31);
+    border-bottom-color: rgba(0, 0, 0, 0.31);
+}

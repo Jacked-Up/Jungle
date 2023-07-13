@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -9,7 +8,7 @@ using UnityEditor;
 namespace Jungle
 {
     /// <summary>
-    /// 
+    /// System for handling Jungles runtime logic.
     /// </summary>
     [DisallowMultipleComponent] [AddComponentMenu("")]
     public class JungleRuntime : MonoBehaviour
@@ -30,18 +29,9 @@ namespace Jungle
         /// </summary>
         public List<JungleTree> RunningTrees
         {
-            get
-            {
-                var query = new List<JungleTree>();
-                foreach (var entry in _running)
-                {
-                    query.Add(entry.Tree);
-                }
-                return query;
-            }
-        }
-        
-        private List<TreeEntry> _running = new();
+            get;
+            private set;
+        } = new();
         
         #endregion
         
@@ -49,39 +39,30 @@ namespace Jungle
         {
             if (Singleton != null)
             {
-#if UNITY_EDITOR
-                Debug.LogError("[Jungle Runtime] A Jungle runtime was instantiated while another instance already existed.", gameObject);
-#endif
                 enabled = false;
                 return;
             }
             Singleton = this;
         }
-
-        private void OnEnable()
-        {
-            SceneManager.sceneUnloaded += SceneUnloadedCallback;
-        }
-
+        
         private void OnDisable()
         {
-            SceneManager.sceneUnloaded -= SceneUnloadedCallback;
-            foreach (var entry in new List<TreeEntry>(_running))
+            foreach (var tree in new List<JungleTree>(RunningTrees))
             {
-                StopTree(entry.Tree);
+                StopTree(tree);
             }
         }
-
+        
         private void Update()
         {
-            foreach (var entry in new List<TreeEntry>(_running))
+            foreach (var tree in new List<JungleTree>(RunningTrees))
             {
-                if (entry.Tree.State == JungleTree.StateFlag.Finished)
+                if (tree.State == JungleTree.StateFlag.Finished)
                 {
-                    StopTree(entry.Tree);
+                    StopTree(tree);
                     continue;
                 }
-                entry.Tree.Update();
+                tree.Update();
             }
         }
 
@@ -89,80 +70,23 @@ namespace Jungle
         /// 
         /// </summary>
         /// <param name="tree"></param>
-        /// <param name="linkedScene"></param>
-        public void StartTree(JungleTree tree, Scene? linkedScene = null)
+        internal void StartTree(JungleTree tree)
         {
-            var entry = new TreeEntry(tree, linkedScene);
-
-            _running ??= new List<TreeEntry>();
-            if (_running.Contains(entry))
-            {
-                return;
-            }
-            _running.Add(entry);
+            RunningTrees ??= new List<JungleTree>();
+            RunningTrees.Add(tree);
         }
         
         /// <summary>
         /// 
         /// </summary>
         /// <param name="tree"></param>
-        public void StopTree(JungleTree tree)
+        internal void StopTree(JungleTree tree)
         {
-            if (_running == null || _running.Count == 0)
-            {
-                return;
-            }
-            for (var i = 0; i < _running.Count; i++)
-            {
-                if (_running[i].Tree != tree)
-                {
-                    continue;
-                }
-                _running.RemoveAt(i);
-                tree.Stop();
-                break;
-            }
-        }
-        
-        private void SceneUnloadedCallback(Scene unloadedScene)
-        {
-            var query = new List<TreeEntry>(_running);
-            foreach (var entry in query)
-            {
-                if (entry.Link == null)
-                {
-                    continue;
-                }
-                if (entry.Link == unloadedScene)
-                {
-                    StopTree(entry.Tree);
-                }
-            }
+            RunningTrees ??= new List<JungleTree>();
+            RunningTrees.Remove(tree);
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public struct TreeEntry
-    {
-        /// <summary>
-        /// 
-        /// </summary>
-        public JungleTree Tree { get; private set; }
-        
-        /// <summary>
-        /// 
-        /// </summary>
-        public Scene? Link { get; private set; }
-
-        public TreeEntry(JungleTree tree, Scene? link = null)
-        {
-            Tree = tree;
-            Link = link;
-        }
-    }
-    
 #if UNITY_EDITOR
     [CustomEditor(typeof(JungleRuntime))]
     public class JungleRuntimeEditor : Editor

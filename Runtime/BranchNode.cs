@@ -90,20 +90,16 @@ namespace Jungle
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="call"></param>
-        protected virtual void Call(PortCall[] call)
-        {
-            
-        }
+        /// <param name="portCalls"></param>
+        protected virtual void Call(PortCall[] portCalls)
+            => Tree.Call(this, portCalls);
         
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="call"></param>
-        protected virtual void CallAndStop(PortCall[] call)
-        {
-            
-        }
+        /// <param name="portCalls"></param>
+        protected virtual void CallAndStop(PortCall[] portCalls)
+            => Tree.CallAndStop(this, portCalls);
         
         internal override void OnStartInternal(in object inputValue)
             => OnStart(inputValue);

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using UnityEngine;
 
 namespace Jungle
 {
@@ -54,17 +52,13 @@ namespace Jungle
         /// 
         /// </summary>
         protected virtual void Call()
-        {
-            
-        }
-
+            => Tree.Call(this, new[] {new PortCall(0, Identity)});
+        
         /// <summary>
         /// 
         /// </summary>
         protected virtual void CallAndStop()
-        {
-            
-        }
+            => Tree.CallAndStop(this, new[] {new PortCall(0, Identity)});
         
         internal override void OnStartInternal(in object inputValue)
             => OnStart();
@@ -96,15 +90,5 @@ namespace Jungle
             get; 
             set;
         } = "Next";
-        
-        /// <summary>
-        /// 
-        /// </summary>
-        public PortInfo InputInfo => new(InputPortName, typeof(None));
-        
-        /// <summary>
-        /// 
-        /// </summary>
-        public PortInfo OutputInfo => new(OutputPortName, typeof(None));
     }
 }
