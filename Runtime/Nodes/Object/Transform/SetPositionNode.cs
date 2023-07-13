@@ -8,14 +8,17 @@ namespace Jungle.Nodes.Object.Transform
 {
     [NodeProperties(
         Title = "Set Position",
+        Tooltip = "Sets a transforms position.",
         Category = "Object/Transform",
-        Color = Yellow,
+        Color = Yellow
+    )]
+    [BranchNode(
         InputPortName = "Set",
         InputPortType = typeof(UnityEngine.Transform),
         OutputPortNames = new []{ "Finished" },
         OutputPortTypes = new []{ typeof(UnityEngine.Transform) }
     )]
-    public class SetPositionNode : JungleNode
+    public class SetPositionNode : BranchNode
     {
         #region Variables
         
@@ -44,8 +47,8 @@ namespace Jungle.Nodes.Object.Transform
         private Vector3 _originalPosition;
         
         #endregion
-        
-        public override void Initialize(in object inputValue)
+
+        public override void OnStart(in object inputValue)
         {
             _transform = inputValue as UnityEngine.Transform;
             _originalPosition = space == Space.World 
@@ -53,22 +56,9 @@ namespace Jungle.Nodes.Object.Transform
                 : _transform.localPosition;
             Tree.AddRevertAction(RevertPosition);
         }
-
-        private void RevertPosition()
-        {
-            if (space == Space.World)
-            {
-                _transform.position = _originalPosition;
-            }
-            else if (space == Space.Local)
-            {
-                _transform.localPosition = _originalPosition;
-            }
-        }
         
-        public override bool Execute(out PortCall[] call)
-        {                
-            call = Array.Empty<PortCall>();
+        public override void OnUpdate()
+        {
             if (!overTime)
             {
                 if (space == Space.World)
@@ -79,11 +69,11 @@ namespace Jungle.Nodes.Object.Transform
                 {
                     _transform.localPosition = position;
                 }
-                call = new[]
+                CallAndStop(new[]
                 {
                     new PortCall(0, _transform)
-                };
-                return true;
+                });
+                return;
             }
             
             var distance = Vector3.Distance(space == Space.World 
@@ -92,11 +82,11 @@ namespace Jungle.Nodes.Object.Transform
                 , position);
             if (distance < 0.01f)
             {
-                call = new[]
+                CallAndStop(new[]
                 {
                     new PortCall(0, _transform)
-                };
-                return true;
+                });
+                return;
             }
 
             var deltaTime = scaledTime
@@ -135,9 +125,20 @@ namespace Jungle.Nodes.Object.Transform
                     }
                     break;
             }
-            return false;
         }
 
+        private void RevertPosition()
+        {
+            if (space == Space.World)
+            {
+                _transform.position = _originalPosition;
+            }
+            else if (space == Space.Local)
+            {
+                _transform.localPosition = _originalPosition;
+            }
+        }
+        
         private void OnValidate()
         {
             if (rate < 0.01f)

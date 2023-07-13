@@ -31,7 +31,7 @@ namespace Jungle
             get;
             private set; 
         } = new();
-
+        
         /// <summary>
         /// The amount of time in seconds the Jungle Tree has been running.
         /// </summary>
@@ -193,7 +193,7 @@ namespace Jungle
                     return;
                 }
                 ExecutionList.Add(node);
-                node.OnStart(new None());
+                node.OnStartInternal(new None());
             });
             State = StateFlag.Running;
             
@@ -293,7 +293,7 @@ namespace Jungle
             {
                 try
                 {
-                    node.OnUpdate();
+                    node.OnUpdateInternal();
                 }
                 catch (Exception e)
                 {
@@ -303,11 +303,6 @@ namespace Jungle
             }
         }
         
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="node"></param>
-        /// <param name="portCalls"></param>
         internal void Call(JungleNode node, IEnumerable<PortCall> portCalls)
         {
             foreach (var call in portCalls)
@@ -316,7 +311,7 @@ namespace Jungle
                 {
                     try
                     {
-                        connection.OnStart(call.Value);
+                        connection.OnStartInternal(call.Value);
                     }
                     catch (Exception e)
                     {
@@ -326,7 +321,7 @@ namespace Jungle
                 }
             }
         }
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -340,7 +335,7 @@ namespace Jungle
                 {
                     try
                     {
-                        connection.OnStart(call.Value);
+                        connection.OnStartInternal(call.Value);
                     }
                     catch (Exception e)
                     {

@@ -3,12 +3,17 @@ using UnityEngine;
 
 namespace Jungle.Nodes.Time
 {
-    [NodeProperties(Title = "Wait For Frames", 
+    [NodeProperties(
+        Title = "Wait For Frames", 
+        Tooltip = "Waits for the specified amount of frames.",
         Category = "Time",
-        Color = Purple, 
-        OutputPortNames = new []{"Elapsed"}
+        Color = Orange
     )]
-    public class WaitForFramesNode : JungleNode
+    [IdentityNode(
+        InputPortName = "Begin",
+        OutputPortName = "Elapsed"
+    )]
+    public class WaitForFramesNode : IdentityNode
     {
         #region Variables
 
@@ -16,25 +21,23 @@ namespace Jungle.Nodes.Time
         private int frames = 100;
 
         [NonSerialized]
-        private int _frameIndex;
+        private int _elapsedFrames;
 
         #endregion
-
-        public override void Initialize(in object inputValue)
+        
+        public override void OnStart()
         {
-            _frameIndex = 0;
+            _elapsedFrames = 0;
         }
 
-        public override bool Execute(out PortCall[] call)
+        public override void OnUpdate()
         {
-            _frameIndex++;
-            if (_frameIndex < frames)
+            _elapsedFrames++;
+            if (_elapsedFrames < frames)
             {
-                call = Array.Empty<PortCall>();
-                return false;
+                return;
             }
-            call = new[] {new PortCall(0, true)};
-            return true;
+            CallAndStop();
         }
         
         private void OnValidate()

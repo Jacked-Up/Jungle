@@ -12,11 +12,11 @@
     )]
     public class StartNode : EventNode
     {
-        public override void OnStart(in object inputValue)
+        public override void OnStart()
         {
-            
+            CallAndStop(new []{new PortCall(0, new None())});
         }
-
+        
         public override void OnUpdate()
         {
             

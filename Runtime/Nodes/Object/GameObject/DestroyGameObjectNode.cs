@@ -4,31 +4,31 @@ namespace Jungle.Nodes.Object.GameObject
 {
     [NodeProperties(
         Title = "Destroy Game Object",
+        Tooltip = "Destroys the game object.",
         Category = "Object",
-        Color = Red,
+        Color = Red
+    )]
+    [BranchNode(
         InputPortName = "Destroy",
         InputPortType = typeof(UnityEngine.GameObject),
         OutputPortNames = new string[0],
         OutputPortTypes = new Type[0]
     )]
-    public class DestroyGameObjectNode : JungleNode
+    public class DestroyGameObjectNode : BranchNode
     {
-        #region Variables
-
-        private UnityEngine.GameObject gameObject;
-
-        #endregion
-        
-        public override void Initialize(in object inputValue)
+        public override void OnStart(in object inputValue)
         {
-            gameObject = inputValue as UnityEngine.GameObject;
+            var gameObject = inputValue as UnityEngine.GameObject;
+            if (gameObject != null)
+            {
+                Destroy(gameObject);
+            }
+            CallAndStop(Array.Empty<PortCall>());
         }
-
-        public override bool Execute(out PortCall[] call)
+        
+        public override void OnUpdate()
         {
-            Destroy(gameObject);
-            call = Array.Empty<PortCall>();
-            return true;
+            
         }
     }
 }

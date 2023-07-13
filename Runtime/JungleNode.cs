@@ -8,7 +8,7 @@ namespace Jungle
     /// Base node class inherited by all Jungle nodes.
     /// </summary>
     [Serializable] [NodeProperties]
-    public abstract class JungleNode : ScriptableObject, IJungleNode
+    public abstract class JungleNode : ScriptableObject
     {
         #region Variables
         
@@ -82,9 +82,9 @@ namespace Jungle
         /// <summary>
         /// Array of the output ports on this node.
         /// </summary>
-        public JunglePort[] OutputPorts => outputPorts;
+        public Port[] OutputPorts => outputPorts;
         [SerializeField] [HideInInspector] 
-        private JunglePort[] outputPorts = Array.Empty<JunglePort>();
+        private Port[] outputPorts = Array.Empty<Port>();
         
         /// <summary>
         /// True if this Jungle Node is actively being executed by the Jungle Tree.
@@ -97,13 +97,19 @@ namespace Jungle
         /// 
         /// </summary>
         /// <param name="inputValue"></param>
-        public abstract void OnStart(in object inputValue);
-
+        internal virtual void OnStartInternal(in object inputValue)
+        {
+            
+        }
+        
         /// <summary>
         /// 
         /// </summary>
-        public abstract void OnUpdate();
-
+        internal virtual void OnUpdateInternal()
+        {
+            
+        }
+        
         /// <summary>
         /// This method is called by the Jungle validator while generating a report. Override this method to call out
         /// issues in your nodes.
@@ -256,21 +262,12 @@ namespace Jungle
 #endif
         }
     }
-    
-    /// <summary>
-    /// Base Jungle Node interface.
-    /// </summary>
-    public interface IJungleNode
-    {
-        public void OnStart(in object inputValue);
-        public void OnUpdate();
-    }
-    
+
     /// <summary>
     /// Base port class. Used for both input and output ports
     /// </summary>
     [Serializable]
-    public struct JunglePort
+    public struct Port
     {
         /// <summary>
         /// List of the nodes that are connected to this port
@@ -297,7 +294,7 @@ namespace Jungle
         [SerializeField] [HideInInspector] 
         private string portType;
 
-        public JunglePort(JungleNode[] connections, Type portType)
+        public Port(JungleNode[] connections, Type portType)
         {
             connections ??= Array.Empty<JungleNode>();
             this.connections = connections;

@@ -5,7 +5,7 @@ namespace Jungle
     /// <summary>
     /// A Jungle Node type that accepts a value, called an identity, and returns that value when execution is complete.
     /// </summary>
-    [Serializable]
+    [Serializable] [IdentityNode]
     public abstract class IdentityNode : JungleNode
     {
         #region Variables
@@ -14,10 +14,26 @@ namespace Jungle
         /// Reference to the identity.
         /// </summary>
         [NonSerialized]
-        public object Identity;
+        internal object Identity;
         
         #endregion
-
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        public abstract void OnStart();
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        public abstract void OnUpdate();
+        
+        internal override void OnStartInternal(in object inputValue)
+            => OnStart();
+        
+        internal override void OnUpdateInternal()
+            => OnUpdate();
+        
         /// <summary>
         /// 
         /// </summary>

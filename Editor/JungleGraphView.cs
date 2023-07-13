@@ -291,13 +291,13 @@ namespace Jungle.Editor
             return graphViewChange;
         }
         
-        public override List<Port> GetCompatiblePorts(Port selected, NodeAdapter _)
+        public override List<UnityEditor.Experimental.GraphView.Port> GetCompatiblePorts(UnityEditor.Experimental.GraphView.Port selected, NodeAdapter _)
         {
             // If the port type is null, this means that the node has some kind of issue internally.
             // It is safest to just not allow any connections until the problem is fixed
             if (selected.portType == typeof(Unknown))
             {
-                return new List<Port>();
+                return new List<UnityEditor.Experimental.GraphView.Port>();
             }
             // Otherwise the compatible port must not be the same connection direction and the same
             // connection type

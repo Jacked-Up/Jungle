@@ -10,12 +10,15 @@ namespace Jungle.Nodes.Object.GameObject
         Title = "Get Game Object",
         Tooltip = "Finds a game object in the scene by name or tag.",
         Category = "Object",
-        Color = Teal,
-        InputPortName = "Find",
-        OutputPortNames = new []{ "Found" },
-        OutputPortTypes = new []{ typeof(UnityEngine.GameObject) }
+        Color = Teal
     )]
-    public class GetGameObjectNode : JungleNode
+    [BranchNode(
+        InputPortName = "Find",
+        InputPortType = typeof(None),
+        OutputPortNames = new []{"Found"},
+        OutputPortTypes = new []{typeof(UnityEngine.GameObject)}
+    )]
+    public class GetGameObjectNode : BranchNode
     {
         #region Variables
 
@@ -41,8 +44,8 @@ namespace Jungle.Nodes.Object.GameObject
         }
         
         #endregion
-        
-        public override void Initialize(in object inputValue)
+
+        public override void OnStart(in object inputValue)
         {
             if (cacheGameObject && _gameObject != null)
             {
@@ -85,19 +88,15 @@ namespace Jungle.Nodes.Object.GameObject
                 }
 #endif
             }
+            CallAndStop(new[]
+            {
+                new PortCall(0, _gameObject)
+            });
         }
 
-        public override bool Execute(out PortCall[] call)
+        public override void OnUpdate()
         {
-            call = Array.Empty<PortCall>();
-            if (_gameObject != null)
-            {
-                call = new[]
-                {
-                    new PortCall(0, _gameObject)
-                };
-            }
-            return true;
+            
         }
     }
     

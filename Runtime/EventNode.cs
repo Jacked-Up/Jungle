@@ -13,6 +13,22 @@ namespace Jungle
         /// <summary>
         /// 
         /// </summary>
+        public abstract void OnStart();
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        public abstract void OnUpdate();
+        
+        internal override void OnStartInternal(in object inputValue)
+            => OnStart();
+        
+        internal override void OnUpdateInternal()
+            => OnUpdate();
+        
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="call"></param>
         protected virtual void Call(PortCall[] call)
         {

@@ -29,7 +29,7 @@ namespace Jungle.Nodes.Editor
 
         #endregion
 
-        public override void OnStart(in object inputValue)
+        public override void OnStart()
         {
 #if UNITY_EDITOR
             var completeMessage = $"[{Tree.name}] {message}";

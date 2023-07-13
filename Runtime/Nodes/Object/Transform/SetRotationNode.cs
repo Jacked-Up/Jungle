@@ -8,14 +8,17 @@ namespace Jungle.Nodes.Object.Transform
 {
     [NodeProperties(
         Title = "Set Rotation",
+        Tooltip = "Sets a transforms rotation. (Euler)",
         Category = "Object/Transform",
-        Color = Yellow,
+        Color = Yellow
+    )]
+    [BranchNode(
         InputPortName = "Set",
         InputPortType = typeof(UnityEngine.Transform),
         OutputPortNames = new []{ "Finished" },
         OutputPortTypes = new []{ typeof(UnityEngine.Transform) }
     )]
-    public class SetRotationNode : JungleNode
+    public class SetRotationNode : BranchNode
     {
         #region Variables
         
@@ -41,15 +44,14 @@ namespace Jungle.Nodes.Object.Transform
         private UnityEngine.Transform _transform;
 
         #endregion
-        
-        public override void Initialize(in object inputValue)
+
+        public override void OnStart(in object inputValue)
         {
             _transform = inputValue as UnityEngine.Transform;
         }
 
-        public override bool Execute(out PortCall[] call)
-        {                
-            call = Array.Empty<PortCall>();
+        public override void OnUpdate()
+        {
             if (!overTime)
             {
                 if (space == Space.World)
@@ -60,11 +62,11 @@ namespace Jungle.Nodes.Object.Transform
                 {
                     _transform.localEulerAngles = rotation;
                 }
-                call = new[]
+                CallAndStop(new[]
                 {
                     new PortCall(0, _transform)
-                };
-                return true;
+                });
+                return;
             }
             
             var distance = Vector3.Distance(space == Space.World 
@@ -73,11 +75,11 @@ namespace Jungle.Nodes.Object.Transform
                 , rotation);
             if (distance < 0.01f)
             {
-                call = new[]
+                CallAndStop(new[]
                 {
                     new PortCall(0, _transform)
-                };
-                return true;
+                });
+                return;
             }
 
             var deltaTime = scaledTime
@@ -116,9 +118,8 @@ namespace Jungle.Nodes.Object.Transform
                     }
                     break;
             }
-            return false;
         }
-        
+
         private void OnValidate()
         {
             if (rate < 0.01f)

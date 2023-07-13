@@ -6,12 +6,17 @@ using UnityEditor;
 
 namespace Jungle.Nodes.Time
 {
-    [NodeProperties(Title = "Wait For Seconds",
+    [NodeProperties(
+        Title = "Wait For Seconds",
+        Tooltip = "Waits for the specified amount of seconds.",
         Category = "Time",
-        Color = Purple,
-        OutputPortNames = new []{"Elapsed"}
+        Color = Orange
     )]
-    public class WaitForSecondsNode : JungleNode
+    [IdentityNode(
+        InputPortName = "Begin",
+        OutputPortName = "Elapsed"
+    )]
+    public class WaitForSecondsNode : IdentityNode
     {
         #region Variables
 
@@ -26,28 +31,25 @@ namespace Jungle.Nodes.Time
 
         #endregion
 
-        public override void Initialize(in object inputValue)
+        public override void OnStart()
         {
             _startTime = scaledTime
                 ? UnityEngine.Time.time
                 : UnityEngine.Time.unscaledTime;
         }
-
-        public override bool Execute(out PortCall[] call)
+        
+        public override void OnUpdate()
         {
             var currentTime = scaledTime
                 ? UnityEngine.Time.time
                 : UnityEngine.Time.unscaledTime;
-
-            if (currentTime - _startTime >= duration)
+            if (currentTime - _startTime < duration)
             {
-                call = new[] {new PortCall(0, true)};
-                return true;
+                return;
             }
-            call = Array.Empty<PortCall>();
-            return false;
+            CallAndStop();
         }
-        
+
         private void OnValidate()
         {
             duration = Mathf.Clamp(duration, 0.001f, Mathf.Infinity);

@@ -8,14 +8,17 @@ namespace Jungle.Nodes.Object.Transform
 {
     [NodeProperties(
         Title = "Get Transform",
+        Tooltip = "Gets a references to a game objects transform.",
         Category = "Object/Transform",
-        Color = Teal,
+        Color = Teal
+    )]
+    [BranchNode(
         InputPortName = "Find",
         InputPortType = typeof(UnityEngine.GameObject),
         OutputPortNames = new []{ "Found" },
         OutputPortTypes = new []{ typeof(UnityEngine.Transform) }
     )]
-    public class GetTransformNode : JungleNode
+    public class GetTransformNode : BranchNode
     {
         #region Variables
 
@@ -26,8 +29,8 @@ namespace Jungle.Nodes.Object.Transform
         private UnityEngine.Transform _transform;
         
         #endregion
-        
-        public override void Initialize(in object inputValue)
+
+        public override void OnStart(in object inputValue)
         {
             var gameObject = inputValue as UnityEngine.GameObject;
             if (gameObject == null)
@@ -39,15 +42,16 @@ namespace Jungle.Nodes.Object.Transform
                 return;
             }
             _transform = gameObject.transform;
-        }
-
-        public override bool Execute(out PortCall[] call)
-        {
-            call = new[]
+            
+            CallAndStop(new[]
             {
                 new PortCall(0, _transform)
-            };
-            return true;
+            });
+        }
+
+        public override void OnUpdate()
+        {
+            
         }
     }
     

@@ -23,7 +23,7 @@ namespace Jungle.Nodes.Application
 
         #endregion
 
-        public override void OnStart(in object inputValue)
+        public override void OnStart()
         {
             if (!string.IsNullOrEmpty(urlToOpen))
             {

@@ -18,9 +18,9 @@ namespace Jungle.Editor
         
         public JungleNode Node;
 
-        public Port InputPortView { get; private set; }
+        public UnityEditor.Experimental.GraphView.Port InputPortView { get; private set; }
         
-        public List<Port> OutputPortViews { get; private set; }
+        public List<UnityEditor.Experimental.GraphView.Port> OutputPortViews { get; private set; }
 
         public event SelectionCallback OnNodeSelected;
         public event SelectionCallback OnNodeUnselected;
@@ -77,13 +77,14 @@ namespace Jungle.Editor
 
         private void HandleInputPortViews()
         {
-            var port = Node.GetInput();
+            var port = new PortInfo("Temp", typeof(None));
+            //var port = Node.GetInput();
             
             InputPortView = InstantiatePort
             (
                 Orientation.Horizontal,
                 Direction.Input,
-                Port.Capacity.Multi,
+                UnityEditor.Experimental.GraphView.Port.Capacity.Multi,
                 port.Type
             );
             
@@ -103,14 +104,14 @@ namespace Jungle.Editor
         
         private void HandleOutputPortViews()
         {
-            OutputPortViews = new List<Port>();
-            foreach (var port in Node.GetOutputs())
+            OutputPortViews = new List<UnityEditor.Experimental.GraphView.Port>();
+            foreach (var port in new [] {new PortInfo("Temp", typeof(None))})// Node.GetOutputs())
             {
                 var newPortView = InstantiatePort
                 (
                     Orientation.Horizontal, 
                     Direction.Output, 
-                    Port.Capacity.Multi,
+                    UnityEditor.Experimental.GraphView.Port.Capacity.Multi,
                     port.Type
                 );
 
@@ -194,10 +195,10 @@ namespace Jungle.Editor
             Node.NodeEditorProperties = nodeProperties;
         }
         
-        public override Port InstantiatePort(
+        public override UnityEditor.Experimental.GraphView.Port InstantiatePort(
             Orientation orientation,
             Direction direction,
-            Port.Capacity capacity,
+            UnityEditor.Experimental.GraphView.Port.Capacity capacity,
             Type type)
         {
             return JunglePortView.Create<Edge>(orientation, direction, capacity, type);

@@ -7,7 +7,7 @@ using UnityEngine.UIElements;
 
 namespace Jungle.Editor
 {
-    public class JunglePortView : Port
+    public class JunglePortView : UnityEditor.Experimental.GraphView.Port
     {
         private class JungleEdgeConnectorListener : IEdgeConnectorListener
         { 

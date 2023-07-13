@@ -16,7 +16,7 @@ namespace Jungle.Nodes.Application
     )]
     public class QuitApplicationNode : IdentityNode
     {
-        public override void OnStart(in object inputValue)
+        public override void OnStart()
         {
             if (!UnityEngine.Application.isEditor)
             {

@@ -8,14 +8,17 @@ namespace Jungle.Nodes.Object.Transform
 {
     [NodeProperties(
         Title = "Set Scale",
+        Tooltip = "Sets a transforms scale.",
         Category = "Object/Transform",
-        Color = Yellow,
+        Color = Yellow
+    )]
+    [BranchNode(
         InputPortName = "Set",
         InputPortType = typeof(UnityEngine.Transform),
         OutputPortNames = new []{ "Finished" },
         OutputPortTypes = new []{ typeof(UnityEngine.Transform) }
     )]
-    public class SetScaleNode : JungleNode
+    public class SetScaleNode : BranchNode
     {
         #region Variables
         
@@ -38,33 +41,32 @@ namespace Jungle.Nodes.Object.Transform
         private UnityEngine.Transform _transform;
 
         #endregion
-        
-        public override void Initialize(in object inputValue)
+
+        public override void OnStart(in object inputValue)
         {
             _transform = inputValue as UnityEngine.Transform;
         }
 
-        public override bool Execute(out PortCall[] call)
-        {                
-            call = Array.Empty<PortCall>();
+        public override void OnUpdate()
+        {
             if (!overTime)
             {
                 _transform.localScale = scale;
-                call = new[]
+                CallAndStop(new[]
                 {
                     new PortCall(0, _transform)
-                };
-                return true;
+                });
+                return;
             }
             
             var distance = Vector3.Distance(_transform.localScale, scale);
             if (distance < 0.01f)
             {
-                call = new[]
+                CallAndStop(new[]
                 {
                     new PortCall(0, _transform)
-                };
-                return true;
+                });
+                return;
             }
 
             var deltaTime = scaledTime
@@ -82,9 +84,8 @@ namespace Jungle.Nodes.Object.Transform
                     _transform.localScale = Vector3.MoveTowards(_transform.localScale, scale, deltaTime * rate);
                     break;
             }
-            return false;
         }
-        
+
         private void OnValidate()
         {
             if (rate < 0.01f)
