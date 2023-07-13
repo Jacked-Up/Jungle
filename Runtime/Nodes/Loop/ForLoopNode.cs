@@ -8,7 +8,7 @@ namespace Jungle.Nodes.Loop
         Color = Purple,
         OutputPortNames = new []{"Invoke", "Done"}
     )]
-    public class ForLoopNode : JungleNode
+    public class ForLoopNode : BranchNode
     {
         #region Variables
 

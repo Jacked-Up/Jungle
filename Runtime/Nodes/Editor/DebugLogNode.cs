@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Jungle.Nodes.Editor
 {
@@ -8,7 +7,10 @@ namespace Jungle.Nodes.Editor
         Category = "Editor", 
         Color = White
     )]
-    public class DebugLogNode : JungleNode
+    [IdentityNode(
+        InputPortName = "Write"
+    )]
+    public class DebugLogNode : IdentityNode
     {
         #region Variables
 
@@ -27,12 +29,7 @@ namespace Jungle.Nodes.Editor
 
         #endregion
 
-        public override void Initialize(in object inputValue)
-        {
-            
-        }
-
-        public override bool Execute(out PortCall[] call)
+        public override void OnStart(in object inputValue)
         {
 #if UNITY_EDITOR
             var completeMessage = $"[{Tree.name}] {message}";
@@ -49,11 +46,12 @@ namespace Jungle.Nodes.Editor
                     break;
             }
 #endif
-            call = new[]
-            {
-                new PortCall(0, true)
-            };
-            return true;
+            CallAndStop();
+        }
+
+        public override void OnUpdate()
+        {
+            
         }
     }
 }

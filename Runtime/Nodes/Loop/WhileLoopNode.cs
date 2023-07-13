@@ -9,7 +9,7 @@ namespace Jungle.Nodes.Loop
         Color = Purple,
         OutputPortNames = new []{"Invoke", "Done"}
     )]
-    public class WhileLoopNode : JungleNode
+    public class WhileLoopNode : BranchNode
     {
         #region Variables
 

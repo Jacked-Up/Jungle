@@ -8,10 +8,13 @@ namespace Jungle.Nodes.Application
     [NodeProperties(
         Title = "Open URL",
         Category = "Application", 
-        Color = Violet,
-        InputPortName = "Open"
+        Color = Violet
     )]
-    public class OpenURLNode : JungleNode
+    [IdentityNode(
+        InputPortName = "Open",
+        OutputPortName = "Next"
+    )]
+    public class OpenURLNode : IdentityNode
     {
         #region Variables
 
@@ -19,23 +22,19 @@ namespace Jungle.Nodes.Application
         private string urlToOpen = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
 
         #endregion
-        
-        public override void Initialize(in object inputValue)
-        {
-            
-        }
 
-        public override bool Execute(out PortCall[] call)
+        public override void OnStart(in object inputValue)
         {
             if (!string.IsNullOrEmpty(urlToOpen))
             {
                 UnityEngine.Application.OpenURL(urlToOpen);
             }
-            call = new[]
-            {
-                new PortCall(0, true)
-            };
-            return true;
+            CallAndStop();
+        }
+        
+        public override void OnUpdate()
+        {
+            
         }
     }
     

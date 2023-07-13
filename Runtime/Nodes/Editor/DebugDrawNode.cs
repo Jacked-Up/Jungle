@@ -8,10 +8,12 @@ namespace Jungle.Nodes.Editor
     [NodeProperties(
         Title = "Debug Draw",
         Category = "Editor", 
-        Color = White,
+        Color = White
+    )]
+    [IdentityNode(
         InputPortName = "Draw"
     )]
-    public class DebugDrawNode : JungleNode
+    public class DebugDrawNode : IdentityNode
     {
         #region Variables
 
@@ -19,7 +21,7 @@ namespace Jungle.Nodes.Editor
         private float duration = 1f;
         
         [SerializeField] 
-        private UnityEngine.Color color = UnityEngine.Color.red;
+        private Color color = Color.red;
         
         [SerializeField] 
         private Type type = Type.Line;
@@ -41,12 +43,7 @@ namespace Jungle.Nodes.Editor
 
         #endregion
         
-        public override void Initialize(in object inputValue)
-        {
-            
-        }
-
-        public override bool Execute(out PortCall[] call)
+        public override void OnStart(in object inputValue)
         {
 #if UNITY_EDITOR
             switch (type)
@@ -59,13 +56,14 @@ namespace Jungle.Nodes.Editor
                     break;
             }
 #endif
-            call = new[]
-            {
-                new PortCall(0, true)
-            };
-            return true;
+            CallAndStop();
         }
 
+        public override void OnUpdate()
+        {
+            
+        }
+        
         private void OnValidate()
         {
             if (duration < 0.01f)

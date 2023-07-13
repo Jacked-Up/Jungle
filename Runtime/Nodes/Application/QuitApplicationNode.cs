@@ -1,5 +1,4 @@
-﻿using System;
-#if UNITY_EDITOR
+﻿#if UNITY_EDITOR
 using UnityEditor;
 #endif
 
@@ -7,26 +6,17 @@ namespace Jungle.Nodes.Application
 {
     [NodeProperties(
         Title = "Quit Application",
+        Tooltip = "Quits the application.",
         Category = "Application", 
-        Color = Red,
-        InputPortName = "Quit",
-        OutputPortNames = new string[0],
-        OutputPortTypes = new Type[0]
+        Color = Red
     )]
-    public class QuitApplicationNode : JungleNode
+    [IdentityNode(
+        InputPortName = "Quit",
+        OutputPortName = ""
+    )]
+    public class QuitApplicationNode : IdentityNode
     {
-        #region Variables
-
-        
-
-        #endregion
-        
-        public override void Initialize(in object inputValue)
-        {
-            
-        }
-
-        public override bool Execute(out PortCall[] call)
+        public override void OnStart(in object inputValue)
         {
             if (!UnityEngine.Application.isEditor)
             {
@@ -38,11 +28,12 @@ namespace Jungle.Nodes.Application
                 EditorApplication.ExitPlaymode();
 #endif
             }
-            call = new[]
-            {
-                new PortCall(0, true)
-            };
-            return true;
+            CallAndStop();
+        }
+
+        public override void OnUpdate()
+        {
+            
         }
     }
     
@@ -50,12 +41,6 @@ namespace Jungle.Nodes.Application
     [CustomEditor(typeof(QuitApplicationNode))]
     public class QuitApplicationNodeEditor : UnityEditor.Editor
     {
-        #region Variables
-
-        
-
-        #endregion
-
         public override void OnInspectorGUI()
         {
             

@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Jungle.Nodes;
 using UnityEngine;
-using UnityEngine.Serialization;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -14,7 +12,7 @@ namespace Jungle
     /// Jungle sequencer node tree class.
     /// </summary>
     [Serializable]
-    [CreateAssetMenu(fileName = "My Jungle Tree 0", menuName = "Jungle Tree", order = 81)]
+    [CreateAssetMenu(fileName = "Jungle Tree 0", menuName = "Jungle Tree", order = 81)]
     public class JungleTree : ScriptableObject
     {
         #region Variables
@@ -28,12 +26,12 @@ namespace Jungle
         /// <summary>
         /// List of all actively executing nodes.
         /// </summary>
-        public List<JungleNode> ExecutionList
+        internal List<JungleNode> ExecutionList
         {
             get;
             private set; 
         } = new();
-        
+
         /// <summary>
         /// The amount of time in seconds the Jungle Tree has been running.
         /// </summary>
@@ -187,14 +185,18 @@ namespace Jungle
             }
             
             _startPlayTime = Time.unscaledTime;
-            ExecutionList = new List<JungleNode>
+            ExecutionList = new List<JungleNode>();
+            nodes.ToList().ForEach(node =>
             {
-                // Find the index of the start node and add to execution list
-                nodes[nodes.ToList().IndexOf(nodes.First(node => node is StartNode))]
-            };
-            ExecutionList[0].Initialize(new None());
+                if (node.GetType() != typeof(EventNode))
+                {
+                    return;
+                }
+                ExecutionList.Add(node);
+                node.OnStart(new None());
+            });
             State = StateFlag.Running;
-
+            
             // Jungle Runtime singleton instance must exist to start
             if (JungleRuntime.Singleton == null)
             {
@@ -275,47 +277,79 @@ namespace Jungle
         /// <summary>
         /// Performs execution for all executing nodes for this frame. 
         /// </summary>
-        public void Update()
+        internal void Update()
         {
             if (State == StateFlag.Finished)
             {
                 return;
             }
+            if (ExecutionList.Count == 0)
+            {
+                Stop();
+                return;
+            }
             PlayTime = Time.unscaledTime - _startPlayTime;
-            
-            var query = new List<JungleNode>(ExecutionList);
             foreach (var node in ExecutionList)
             {
-                var finished = node.Execute(out var portCalls);
-                foreach (var call in portCalls)
+                try
                 {
-                    if (call.PortIndex > node.OutputPorts.Length - 1)
-                    {
-#if UNITY_EDITOR
-                        if (node.OutputPorts.Length != 0)
-                        {
-                            Debug.LogError($"[{name}] {node.name} attempted to call an output port that is " +
-                                           "out of the index range.");
-                        }
-#endif
-                        continue;
-                    }
-                    foreach (var connection in node.OutputPorts[call.PortIndex].connections)
-                    {
-                        connection.Initialize(call.Value);
-                        query.Add(connection);
-                    }
+                    node.OnUpdate();
                 }
-                // Remove from query if the node is finished executing
-                if (finished)
+                catch (Exception e)
                 {
-                    query.Remove(node);
+                    Console.WriteLine(e);
+                    throw;
                 }
             }
-            // Populate executing nodes with new query ONLY if it has changed
-            // I believe this prevents the list from redundantly reallocating new memory. I could be wrong
-            if (!ExecutionList.Equals(query)) ExecutionList = query;
-            if (ExecutionList.Count == 0) Stop();
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="portCalls"></param>
+        internal void Call(JungleNode node, IEnumerable<PortCall> portCalls)
+        {
+            foreach (var call in portCalls)
+            {
+                foreach (var connection in node.OutputPorts[call.PortIndex].connections)
+                {
+                    try
+                    {
+                        connection.OnStart(call.Value);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                        throw;
+                    }
+                }
+            }
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="portCalls"></param>
+        internal void CallAndStop(JungleNode node, PortCall[] portCalls)
+        {
+            foreach (var call in portCalls)
+            {
+                foreach (var connection in node.OutputPorts[call.PortIndex].connections)
+                {
+                    try
+                    {
+                        connection.OnStart(call.Value);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                        throw;
+                    }
+                }
+            }
+            ExecutionList.Remove(node);
         }
         
         /// <summary>
@@ -325,7 +359,7 @@ namespace Jungle
         public void AddRevertAction(Action action)
         {
             _revertActions ??= new ActionsList();
-            _revertActions.AddAction(action);
+            _revertActions?.AddAction(action);
         }
         
         /// <summary>
@@ -362,7 +396,7 @@ namespace Jungle
             node.name = $"{nodeType.Name}_{i.ToString()}";
             
             // Build node and populate graph view properties
-            node.Tree = this;
+            node.tree = this;
             node.NodeEditorProperties = new NodeEditorProperties
             {
                 guid = GUID.Generate().ToString(),
@@ -413,7 +447,7 @@ namespace Jungle
             node.name = $"{original.GetType().Name}_{i.ToString()}";
             
             // Build node and populate graph view properties
-            node.Tree = this;
+            node.tree = this;
             node.NodeEditorProperties = new NodeEditorProperties
             {
                 guid = GUID.Generate().ToString(),

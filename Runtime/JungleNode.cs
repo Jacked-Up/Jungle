@@ -131,7 +131,7 @@ namespace Jungle
         [SerializeField] [HideInInspector] 
         private NodeEditorProperties nodeEditorProperties;
         
-        private NodePropertiesAttribute NodePropertiesAttributeInfo 
+        private NodePropertiesAttribute NodePropertiesAttributeInfo
             => (NodePropertiesAttribute) GetType().GetCustomAttributes(typeof(NodePropertiesAttribute), true)[0];
         
         /// <summary>
@@ -141,6 +141,7 @@ namespace Jungle
         /// <param name="portIndex"></param>
         public void MakeConnection(JungleNode node, byte portIndex)
         {
+            /*
             if (node.Tree != Tree)
             {
                 // You cannot connect nodes from different trees
@@ -180,6 +181,7 @@ namespace Jungle
             }
             outputPorts = newPortsList.ToArray();
             UnityEditor.EditorUtility.SetDirty(this);
+            */
         }
  
         /// <summary>
@@ -189,6 +191,7 @@ namespace Jungle
         /// <param name="portIndex"></param>
         public void RemoveConnection(JungleNode node, byte portIndex)
         {
+            /*
             if (OutputPorts.Length != GetOutputs().Length)
             {
                 return;
@@ -203,6 +206,7 @@ namespace Jungle
             outputPortsQuery[portIndex] = new JunglePort(connections.ToArray(), outputPort.PortType);
             outputPorts = outputPortsQuery.ToArray();
             UnityEditor.EditorUtility.SetDirty(this);
+            */
         }
 #endif
 
