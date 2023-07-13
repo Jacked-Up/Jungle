@@ -10,6 +10,70 @@ namespace Jungle
     [Serializable] [EventNode]
     public abstract class EventNode : JungleNode
     {
+        #region Variables
+
+        private EventNodeAttribute EventNodeInfo
+            => (EventNodeAttribute)GetType().GetCustomAttributes(typeof(EventNodeAttribute), true)[0];
+
+        public override PortInfo GetInput()
+        {
+            return new PortInfo();
+        }
+        
+        public override PortInfo[] GetOutputs()
+        {
+            var portNames = EventNodeInfo.OutputPortNames ??= new []{"Next"};
+            var portTypes = EventNodeInfo.OutputPortTypes ??= new []{typeof(None)};
+            var query = new List<PortInfo>();
+            
+            if (portNames.Length != portTypes.Length)
+            {
+                // More names declared than types
+                if (portNames.Length > portTypes.Length)
+                {
+#if UNITY_EDITOR
+                    Debug.LogFormat(LogType.Warning, LogOption.NoStacktrace, this,
+                        $"[Jungle] {GetTitle()} has more output port names declared than output port types.");
+#endif
+                    for (var i = 0; i < portNames.Length; i++)
+                    {
+                        var portName = portNames[i];
+                        var portType = portTypes.Length - 1 > i
+                            ? portTypes[i]
+                            : typeof(Unknown);
+                        query.Add(new PortInfo(portName, portType));
+                    }
+                }
+                // More types declared than names
+                else
+                {
+#if UNITY_EDITOR
+                    Debug.LogFormat(LogType.Warning, LogOption.NoStacktrace, this,
+                        $"[Jungle] {GetTitle()} has more output port types declared than output port names.");
+#endif
+                    for (var i = 0; i < portTypes.Length; i++)
+                    {
+                        var portName = portNames.Length - 1 > i
+                            ? portNames[i]
+                            : "Unnamed Port";
+                        var portType = portTypes[i];
+                        query.Add(new PortInfo(portName, portType));
+                    }
+                }
+                return query.ToArray();
+            }
+            
+            for (var i = 0; i < portNames.Length; i++)
+            {
+                var portName = portNames[i];
+                var portType = portTypes[i];
+                query.Add(new PortInfo(portName, portType));
+            }
+            return query.ToArray();
+        }
+
+        #endregion
+        
         /// <summary>
         /// 
         /// </summary>
@@ -19,13 +83,7 @@ namespace Jungle
         /// 
         /// </summary>
         public abstract void OnUpdate();
-        
-        internal override void OnStartInternal(in object inputValue)
-            => OnStart();
-        
-        internal override void OnUpdateInternal()
-            => OnUpdate();
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -41,8 +99,14 @@ namespace Jungle
         /// <param name="call"></param>
         protected virtual void CallAndStop(PortCall[] call)
         {
-            Call(call);
+            
         }
+        
+        internal override void OnStartInternal(in object inputValue)
+            => OnStart();
+        
+        internal override void OnUpdateInternal()
+            => OnUpdate();
     }
 
     /// <summary>

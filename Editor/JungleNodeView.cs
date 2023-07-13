@@ -77,8 +77,7 @@ namespace Jungle.Editor
 
         private void HandleInputPortViews()
         {
-            var port = new PortInfo("Temp", typeof(None));
-            //var port = Node.GetInput();
+            var port = Node.GetInput();
             
             InputPortView = InstantiatePort
             (
@@ -105,7 +104,7 @@ namespace Jungle.Editor
         private void HandleOutputPortViews()
         {
             OutputPortViews = new List<UnityEditor.Experimental.GraphView.Port>();
-            foreach (var port in new [] {new PortInfo("Temp", typeof(None))})// Node.GetOutputs())
+            foreach (var port in Node.GetOutputs())
             {
                 var newPortView = InstantiatePort
                 (

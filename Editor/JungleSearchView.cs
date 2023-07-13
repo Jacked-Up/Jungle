@@ -122,12 +122,10 @@ namespace Jungle.Editor
                     var instance = CreateInstance(jungleNodeType) as JungleNode;
                     if (instance == null) continue;
                     
-                    /*
                     if (instance.GetInput().Type == contextType)
                     {
                         contextualJungleNodeTypes.Add(instance);
                     }
-                    */
                 }
                 
                 contextualJungleNodeTypes.ForEach(node =>

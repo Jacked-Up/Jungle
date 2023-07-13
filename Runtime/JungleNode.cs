@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEditor.PackageManager;
 using UnityEngine;
 
 namespace Jungle
@@ -90,25 +91,22 @@ namespace Jungle
         /// True if this Jungle Node is actively being executed by the Jungle Tree.
         /// </summary>
         public bool IsRunning => Tree.ExecutionList.Contains(this);
-
+        
+        private NodePropertiesAttribute NodePropertiesInfo
+            => (NodePropertiesAttribute) GetType().GetCustomAttributes(typeof(NodePropertiesAttribute), true)[0];
+        
         #endregion
         
         /// <summary>
         /// 
         /// </summary>
         /// <param name="inputValue"></param>
-        internal virtual void OnStartInternal(in object inputValue)
-        {
-            
-        }
+        internal virtual void OnStartInternal(in object inputValue) { }
         
         /// <summary>
         /// 
         /// </summary>
-        internal virtual void OnUpdateInternal()
-        {
-            
-        }
+        internal virtual void OnUpdateInternal() { }
         
         /// <summary>
         /// This method is called by the Jungle validator while generating a report. Override this method to call out
@@ -136,9 +134,6 @@ namespace Jungle
         }
         [SerializeField] [HideInInspector] 
         private NodeEditorProperties nodeEditorProperties;
-        
-        private NodePropertiesAttribute NodePropertiesAttributeInfo
-            => (NodePropertiesAttribute) GetType().GetCustomAttributes(typeof(NodePropertiesAttribute), true)[0];
         
         /// <summary>
         /// 
@@ -221,7 +216,7 @@ namespace Jungle
         /// </summary>
         public string GetTitle()
         {
-            return NodePropertiesAttributeInfo.Title;
+            return NodePropertiesInfo.Title;
         }
 
         /// <summary>
@@ -229,7 +224,7 @@ namespace Jungle
         /// </summary>
         public string GetTooltip()
         {
-            return NodePropertiesAttributeInfo.Tooltip;
+            return NodePropertiesInfo.Tooltip;
         }
 
         /// <summary>
@@ -237,7 +232,7 @@ namespace Jungle
         /// </summary>
         public string GetCategory()
         {
-            return NodePropertiesAttributeInfo.Category;
+            return NodePropertiesInfo.Category;
         }
 
         /// <summary>
@@ -245,7 +240,7 @@ namespace Jungle
         /// </summary>
         public Color GetColor()
         {
-            return ColorUtility.TryParseHtmlString(NodePropertiesAttributeInfo.Color, out var color) 
+            return ColorUtility.TryParseHtmlString(NodePropertiesInfo.Color, out var color) 
                 ? color 
                 : Color.clear;
         }
@@ -261,8 +256,29 @@ namespace Jungle
             return Texture2D.whiteTexture;
 #endif
         }
+        
+        /// <summary>
+        /// Input port information container.
+        /// </summary>
+        /// <returns>This Jungle Nodes input port information.</returns>
+        public virtual PortInfo GetInput()
+        {
+            return new PortInfo("ERROR", typeof(Error));
+        }
+        
+        /// <summary>
+        /// Output port information container.
+        /// </summary>
+        /// <returns>This Jungle Nodes output port information.</returns>
+        public virtual PortInfo[] GetOutputs()
+        {
+            return new[]
+            {
+                new PortInfo("ERROR", typeof(Error))
+            };
+        }
     }
-
+    
     /// <summary>
     /// Base port class. Used for both input and output ports
     /// </summary>

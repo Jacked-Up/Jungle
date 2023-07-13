@@ -10,6 +10,72 @@ namespace Jungle
     [Serializable] [BranchNode]
     public abstract class BranchNode : JungleNode
     {
+        #region Variables
+
+        private BranchNodeAttribute BranchNodeInfo
+            => (BranchNodeAttribute)GetType().GetCustomAttributes(typeof(NodePropertiesAttribute), true)[0];
+
+        public override PortInfo GetInput()
+        {
+            var portName = BranchNodeInfo.InputPortName ??= "Execute";
+            var portType = BranchNodeInfo.InputPortType ??= typeof(None);
+            return new PortInfo(portName, portType);
+        }
+        
+        public override PortInfo[] GetOutputs()
+        {
+            var portNames = BranchNodeInfo.OutputPortNames ??= new []{"Next"};
+            var portTypes = BranchNodeInfo.OutputPortTypes ??= new []{typeof(None)};
+            var query = new List<PortInfo>();
+            
+            if (portNames.Length != portTypes.Length)
+            {
+                // More names declared than types
+                if (portNames.Length > portTypes.Length)
+                {
+#if UNITY_EDITOR
+                    Debug.LogFormat(LogType.Warning, LogOption.NoStacktrace, this,
+                        $"[Jungle] {GetTitle()} has more output port names declared than output port types.");
+#endif
+                    for (var i = 0; i < portNames.Length; i++)
+                    {
+                        var portName = portNames[i];
+                        var portType = portTypes.Length - 1 > i
+                            ? portTypes[i]
+                            : typeof(Unknown);
+                        query.Add(new PortInfo(portName, portType));
+                    }
+                }
+                // More types declared than names
+                else
+                {
+#if UNITY_EDITOR
+                    Debug.LogFormat(LogType.Warning, LogOption.NoStacktrace, this,
+                        $"[Jungle] {GetTitle()} has more output port types declared than output port names.");
+#endif
+                    for (var i = 0; i < portTypes.Length; i++)
+                    {
+                        var portName = portNames.Length - 1 > i
+                            ? portNames[i]
+                            : "Unnamed Port";
+                        var portType = portTypes[i];
+                        query.Add(new PortInfo(portName, portType));
+                    }
+                }
+                return query.ToArray();
+            }
+            
+            for (var i = 0; i < portNames.Length; i++)
+            {
+                var portName = portNames[i];
+                var portType = portTypes[i];
+                query.Add(new PortInfo(portName, portType));
+            }
+            return query.ToArray();
+        }
+        
+        #endregion
+        
         /// <summary>
         /// 
         /// </summary>
@@ -20,13 +86,7 @@ namespace Jungle
         /// 
         /// </summary>
         public abstract void OnUpdate();
-        
-        internal override void OnStartInternal(in object inputValue)
-            => OnStart(inputValue);
-        
-        internal override void OnUpdateInternal()
-            => OnUpdate();
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -44,6 +104,12 @@ namespace Jungle
         {
             
         }
+        
+        internal override void OnStartInternal(in object inputValue)
+            => OnStart(inputValue);
+        
+        internal override void OnUpdateInternal()
+            => OnUpdate();
     }
     
     /// <summary>
@@ -87,58 +153,5 @@ namespace Jungle
             get;
             set;
         } = {typeof(None)};
-        
-        /// <summary>
-        /// Creates data container with information about all this event nodes output ports.
-        /// </summary>
-        public PortInfo[] GetOutputPortInfo()
-        {
-            var query = new List<PortInfo>();
-            
-            if (OutputPortNames.Length != OutputPortTypes.Length)
-            {
-                // More names declared than types
-                if (OutputPortNames.Length > OutputPortTypes.Length)
-                {
-#if UNITY_EDITOR
-                    Debug.LogFormat(LogType.Warning, LogOption.NoStacktrace, null,
-                        "[Jungle] An event node has more output port names declared than output port types.");
-#endif
-                    for (var i = 0; i < OutputPortNames.Length; i++)
-                    {
-                        var name = OutputPortNames[i];
-                        var type = OutputPortTypes.Length - 1 > i
-                            ? OutputPortTypes[i]
-                            : typeof(Unknown);
-                        query.Add(new PortInfo(name, type));
-                    }
-                }
-                // More types declared than names
-                else
-                {
-#if UNITY_EDITOR
-                    Debug.LogFormat(LogType.Warning, LogOption.NoStacktrace, null,
-                        "[Jungle] An event node has more output port types declared than output port names.");
-#endif
-                    for (var i = 0; i < OutputPortTypes.Length; i++)
-                    {
-                        var name = OutputPortNames.Length - 1 > i
-                            ? OutputPortNames[i]
-                            : "Unnamed Port";
-                        var type = OutputPortTypes[i];
-                        query.Add(new PortInfo(name, type));
-                    }
-                }
-                return query.ToArray();
-            }
-            
-            for (var i = 0; i < OutputPortNames.Length; i++)
-            {
-                var name = OutputPortNames[i];
-                var type = OutputPortTypes[i];
-                query.Add(new PortInfo(name, type));
-            }
-            return query.ToArray();
-        }
     }
 }

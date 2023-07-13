@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace Jungle
 {
@@ -16,6 +18,26 @@ namespace Jungle
         [NonSerialized]
         internal object Identity;
         
+        private IdentityNodeAttribute IdentityNodeInfo
+            => (IdentityNodeAttribute)GetType().GetCustomAttributes(typeof(IdentityNodeAttribute), true)[0];
+        
+        public override PortInfo GetInput()
+        {
+            var portName = IdentityNodeInfo.InputPortName ??= "Execute";
+            var portType = typeof(None);
+            return new PortInfo(portName, portType);
+        }
+        
+        public override PortInfo[] GetOutputs()
+        {
+            var portName = IdentityNodeInfo.OutputPortName ??= "Next";
+            var portType = typeof(None);
+            return new[]
+            {
+                new PortInfo(portName, portType)
+            };
+        }
+        
         #endregion
         
         /// <summary>
@@ -27,13 +49,7 @@ namespace Jungle
         /// 
         /// </summary>
         public abstract void OnUpdate();
-        
-        internal override void OnStartInternal(in object inputValue)
-            => OnStart();
-        
-        internal override void OnUpdateInternal()
-            => OnUpdate();
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -49,6 +65,12 @@ namespace Jungle
         {
             
         }
+        
+        internal override void OnStartInternal(in object inputValue)
+            => OnStart();
+        
+        internal override void OnUpdateInternal()
+            => OnUpdate();
     }
 
     /// <summary>
@@ -64,7 +86,7 @@ namespace Jungle
         {
             get; 
             set;
-        } = "In";
+        } = "Execute";
         
         /// <summary>
         /// 
@@ -73,8 +95,8 @@ namespace Jungle
         {
             get; 
             set;
-        } = "Out";
-
+        } = "Next";
+        
         /// <summary>
         /// 
         /// </summary>
